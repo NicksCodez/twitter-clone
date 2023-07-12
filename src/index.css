@@ -1,0 +1,110 @@
+:root {
+  /* background colors */
+  --clr-bg-base: rgb(255, 255, 255);
+  --clr-bg-secondary: rgb(247, 249, 249);
+  --clr-bg-search: rgb(239, 243, 244);
+  --clr-bg-hover-primary: rgba(15, 20, 25, 0.1);
+  --clr-bg-hover-secondary: rgba(0, 0, 0, 0.03);
+  --clr-bg-hover-like: rgba(249, 24, 128, 0.1);
+  --clr-bg-hover-reply: rgba(29, 155, 240, 0.1);
+  --clr-bg-hover-retweet: rgba(0, 186, 124, 0.1);
+  --clr-bg-blue: rgb(29, 155, 240);
+  --clr-bg-follow: rgb(239, 243, 244);
+
+  /* font colors */
+  --clr-font-primary: rgb(15, 20, 25);
+  --clr-font-secondary: rgb(83, 100, 113);
+  --clr-font-on-blue-bg: rgb(255, 255, 255);
+  --clr-font-follow: rgb(255, 255, 255);
+
+  /* border colors */
+  --clr-border-primary: rgb(239, 243, 244);
+
+  /* font sizes */
+  --fs-base: 15px;
+  --fs-mili: 13px;
+  --fs-h2: 20px;
+
+  /* line heights */
+  --lh-base: 20px;
+  --lh-mili: 16px;
+  --lh-h2: 24px;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    /* background colors */
+    --clr-bg-base: rgb(0, 0, 0);
+    --clr-bg-secondary: rgb(22, 24, 28);
+    --clr-bg-search: rgb(32, 35, 39);
+    --clr-bg-hover-primary: rgba(231, 233, 234, 0.1);
+    --clr-bg-hover-secondary: rgba(255, 255, 255, 0.03);
+    --clr-bg-follow: rgb(15, 20, 25);
+
+    /* font colors */
+    --clr-font-primary: rgb(231, 233, 234);
+    --clr-font-secondary: rgb(113, 118, 123);
+    --clr-font-follow: rgb(15, 20, 25);
+
+    /* border colors */
+    --clr-border-primary: rgb(47, 51, 54);
+  }
+}
+
+@font-face {
+  font-family: 'Twitter Chirp';
+  src: url('./assets/fonts/Chirp-Regular.80fda27a.woff2');
+  font-weight: normal;
+}
+
+@font-face {
+  font-family: 'Twitter Chirp';
+  src: url('./assets/fonts/Chirp-Medium.f8e2739a.woff2');
+  font-weight: 500;
+}
+
+@font-face {
+  font-family: 'Twitter Chirp';
+  src: url('./assets/fonts/Chirp-Bold.ebb56aba.woff2');
+  font-weight: 700;
+}
+
+html,
+body {
+  position: relative;
+  height: 100%;
+  scrollbar-color: rgb(62, 65, 68) rgb(22, 24, 28);
+  margin: 0px;
+  padding: 0px;
+  background-color: var(--clr-bg-base);
+  color: var(--clr-font-primary);
+  font-size: var(--fs-base);
+  line-height: var(--lh-base);
+  font-family: 'Twitter Chirp', -apple-system, BlinkMacSystemFont, 'Segoe UI',
+    Roboto, Velvetica, Arial, sans-serif;
+  line-height: var(--lh-base);
+}
+
+.u-round {
+  border-radius: 9999px;
+}
+
+button,
+span {
+  margin: 0;
+  padding: 0;
+  background-color: inherit;
+  border: 0px solid black;
+  font-size: inherit;
+  font-family: inherit;
+  font-weight: inherit;
+  color: inherit;
+  line-height: inherit;
+}
+
+a {
+  text-decoration: none;
+  color: inherit;
+  padding: 0;
+  margin: 0;
+}

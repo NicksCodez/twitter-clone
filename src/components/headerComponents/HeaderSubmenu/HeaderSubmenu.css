@@ -1,0 +1,33 @@
+.header-submenu {
+  width: 100%;
+}
+
+.header-submenu > div {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px;
+}
+
+.header-submenu svg {
+  height: 18.75px;
+  transition: transform 100ms, fill 100ms;
+}
+
+.header-submenu span {
+  font-size: var(--fs-base);
+  line-height: var(--lh-base);
+  font-weight: 700;
+}
+
+.header-submenu svg.active {
+  transform: rotate(-180deg);
+  fill: var(--clr-bg-blue);
+  transition: transform 100ms, fill 100ms;
+}
+
+.header-submenu svg,
+.header-submenu span,
+.header-submenu div {
+  pointer-events: none;
+}

@@ -16,7 +16,11 @@ const MobileHomeHeader = () => {
   return (
     <div className="home-header">
       <div>
-        <button type="button" className="image-wrapper">
+        <button
+          type="button"
+          className="image-wrapper"
+          onClick={clickHandlerAccount}
+        >
           <img src={DefaultProfile} alt="profile" className="u-round" />
         </button>
         <button type="button" className="svg-wrapper">
@@ -37,7 +41,7 @@ const MobileHomeHeader = () => {
       </div>
       <div className="second-row">
         <div className="active button-wrapper">
-          <button type="button" onClick={clickHandler}>
+          <button type="button" onClick={clickHandlerCategory}>
             <div>
               <span>For you</span>
               <div className="blue-underscore u-round" />
@@ -45,7 +49,7 @@ const MobileHomeHeader = () => {
           </button>
         </div>
         <div className="button-wrapper">
-          <button type="button" onClick={clickHandler}>
+          <button type="button" onClick={clickHandlerCategory}>
             <div>
               <span>Following</span>
               <div className="blue-underscore u-round" />
@@ -57,7 +61,13 @@ const MobileHomeHeader = () => {
   );
 };
 
-const clickHandler = (event) => {
+const clickHandlerAccount = (event) => {
+  event.stopPropagation();
+  const accountInfo = document.getElementById('account-info');
+  accountInfo.classList.add('active');
+};
+
+const clickHandlerCategory = (event) => {
   event.stopPropagation();
   const homeHeader = document.getElementsByClassName('home-header');
   // final design will probably have 2 elements with class 'home-header', one for mobile and one for desktop

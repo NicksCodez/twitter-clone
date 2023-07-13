@@ -1,0 +1,80 @@
+#account {
+  overflow-y: scroll;
+  overscroll-behavior-x: contain;
+  overscroll-behavior-y: contain;
+  max-height: calc(100% - 53px);
+}
+
+#account > a {
+  display: flex;
+  flex-direction: column;
+}
+
+#account .padded-wrapper {
+  padding: 16px;
+}
+
+#account .account-picture {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+#account .account-picture img {
+  width: 40px;
+}
+
+#account .account-picture svg {
+  width: 18px;
+  padding: 5px;
+  border: 1px solid var(--clr-border-primary);
+}
+
+#account .primary {
+  font-weight: 700;
+}
+
+#account .secondary {
+  color: var(--clr-font-secondary);
+}
+
+#account .account-name {
+  display: flex;
+  flex-direction: column;
+  margin-top: 8px;
+}
+
+#account .account-name .primary {
+  font-size: 17px;
+}
+
+#account .account-stats {
+  display: flex;
+  margin-top: 12px;
+  gap: 20px;
+}
+
+#account .account-stats .primary,
+#account .account-stats .secondary {
+  font-size: 14px;
+  line-height: var(--lh-mili);
+}
+
+#account .account-stats .primary {
+  margin-right: 3px;
+}
+
+#account .separator-wrapper {
+  display: flex;
+  flex-direction: column;
+}
+
+#account .separator {
+  display: flex;
+  margin-top: 2px;
+  margin-bottom: 2px;
+  background-color: var(--clr-bg-secondary);
+  height: 1px;
+  width: 89%;
+  align-self: center;
+}

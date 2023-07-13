@@ -26,6 +26,7 @@
       2,
       { "namedComponents": "arrow-function" }
     ],
+    "react/prop-types": "off",
     "no-use-before-define": "off"
   }
 }

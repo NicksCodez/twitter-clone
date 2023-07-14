@@ -1,67 +1,69 @@
-.header-element a {
+.sidebar-element a {
   display: flex;
   align-items: center;
   padding: 16px;
 }
 
-.header-element > a > div {
+.sidebar-element > a > div {
   display: flex;
   justify-content: center;
   align-items: center;
   position: relative;
 }
 
-.header-element svg {
+.sidebar-element svg {
   height: 24px;
   margin-right: 24px;
 }
-.header-element svg:nth-child(2) {
+.sidebar-element svg:nth-child(2) {
   position: absolute;
   top: 0px;
   left: 0px;
 }
 
-.header-element span {
+.sidebar-element span {
   font-size: var(--fs-h2);
   line-height: var(--lh-h2);
   font-weight: 700;
 }
-.header-element a {
+.sidebar-element a {
   display: flex;
   align-items: center;
   padding: 16px;
 }
 
-.header-element svg {
+.sidebar-element svg {
   height: 24px;
   margin-right: 24px;
 }
 
-.header-element span {
+.sidebar-element span {
   font-size: var(--fs-h2);
   line-height: var(--lh-h2);
   font-weight: 700;
 }
 
-.header-element.mini {
+/* css for submenu items */
+
+.sidebar-element.mini {
   display: none;
 }
 
-.header-element.mini.active {
+.sidebar-element.mini.active {
   display: visible;
 }
 
-.header-element.mini a {
+.sidebar-element.mini a {
   padding: 12px;
 }
 
-.header-element.mini svg {
+.sidebar-element.mini svg {
   height: 18.75px;
   width: 18.75px;
   margin-right: 12px;
 }
 
-.header-element.mini span {
+.sidebar-element.mini span {
   font-size: var(--fs-base);
   line-height: var(--lh-base);
   font-weight: normal;

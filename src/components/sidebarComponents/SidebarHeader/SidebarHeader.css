@@ -1,0 +1,25 @@
+#sidebar .heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 16px;
+  height: 53px;
+}
+
+#sidebar .heading h2 {
+  font-size: 17px;
+  line-height: 20px;
+  padding: 2px 0;
+  margin: 0;
+}
+
+#sidebar .heading button {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+#sidebar .heading svg {
+  width: 20px;
+  height: 20px;
+}

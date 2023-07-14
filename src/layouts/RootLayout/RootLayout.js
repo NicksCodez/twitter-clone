@@ -7,11 +7,11 @@ import { Outlet } from 'react-router-dom';
 import './RootLayout.css';
 
 // components
-import MobileHeader from '../../components/MobileHeader/MobileHeader';
+import Footer from '../../components/Footer/Footer';
 
 const RootLayout = () => (
   <div id="rootLayout">
-    <MobileHeader />
+    <Footer />
     <main>
       <Outlet />
     </main>

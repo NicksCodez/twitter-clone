@@ -6,7 +6,7 @@
   border-bottom: 1px solid var(--clr-border-primary);
   z-index: 2;
   backdrop-filter: blur(12px);
-  background-color: rgba(255, 255, 255, 0.8);
+  background-color: var(--clr-bg-home-header);
   transition: top cubic-bezier(0, 0, 0, 1) 350ms;
   color: var(--clr-font-secondary);
   font-weight: 500;
@@ -52,6 +52,12 @@
   width: 100%;
   display: flex;
   justify-content: center;
+}
+
+.home-header button {
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 .home-header button > div {

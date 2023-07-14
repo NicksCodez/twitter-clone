@@ -2,12 +2,12 @@ import React from 'react';
 import { NavLink } from 'react-router-dom';
 
 // css
-import './MobileHeader.css';
+import './Footer.css';
 
 // utils
 import svgs from '../../utils/svgs';
 
-const MobileHeader = () => (
+const Footer = () => (
   <header>
     <nav>
       <NavLink to="/home" aria-label="home" role="link">
@@ -38,4 +38,4 @@ const MobileHeader = () => (
   </header>
 );
 
-export default MobileHeader;
+export default Footer;

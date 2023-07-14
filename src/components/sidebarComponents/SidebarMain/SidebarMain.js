@@ -2,19 +2,19 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 
 // css
-import './Account.css';
+import './SidebarMain.css';
 
 // pictures
-import DefaultProfile from '../../assets/images/default_profile.png';
+import DefaultProfile from '../../../assets/images/default_profile.png';
 
 // components
-import HeaderSubmenu from '../headerComponents/HeaderSubmenu/HeaderSubmenu';
-import HeaderElement from '../headerComponents/HeaderElement/HeaderElement';
+import SidebarSubmenu from '../SidebarSubmenu/SidebarSubmenu';
+import SidebarElement from '../SidebarElement/SidebarElement';
 
 // utils
-import svgs from '../../utils/svgs';
+import svgs from '../../../utils/svgs';
 
-const Account = () => (
+const SidebarMain = () => (
   <div id="account" aria-label="account">
     <Link to="/skeedmask">
       <div className="padded-wrapper">
@@ -42,15 +42,15 @@ const Account = () => (
         </div>
       </div>
     </Link>
-    <HeaderElement svg={svgs.profile} name="Profile" link="profile" />
-    <HeaderElement
+    <SidebarElement svg={svgs.profile} name="Profile" link="profile" />
+    <SidebarElement
       svg={svgs.blue}
       name="Twitter Blue"
       link="not-implemented"
       svgColor="var(--clr-bg-blue)"
     />
-    <HeaderElement svg={svgs.lists} name="Lists" link="not-implemented" />
-    <HeaderElement
+    <SidebarElement svg={svgs.lists} name="Lists" link="not-implemented" />
+    <SidebarElement
       svg={svgs.bookmarks}
       name="Bookmarks"
       link="not-implemented"
@@ -58,59 +58,59 @@ const Account = () => (
     <div className="separator-wrapper">
       <div className="separator" />
     </div>
-    <HeaderSubmenu name="Creator Studio" />
-    <HeaderElement
+    <SidebarSubmenu name="Creator Studio" />
+    <SidebarElement
       svg={svgs.analytics}
       name="Analytics"
       link="not-implemented"
       cls="mini"
       subCls="creator"
     />
-    <HeaderSubmenu name="Professional Tools" />
-    <HeaderElement
+    <SidebarSubmenu name="Professional Tools" />
+    <SidebarElement
       svg={svgs.professionals}
       name="Twitter for Professionals"
       link="not-implemented"
       cls="mini"
       subCls="professional"
     />
-    <HeaderElement
+    <SidebarElement
       svg={svgs.ads}
       name="Twitter Ads"
       link="not-implemented"
       cls="mini"
       subCls="professional"
     />
-    <HeaderElement
+    <SidebarElement
       svg={svgs.monetization}
       name="Monetization"
       link="not-implemented"
       cls="mini"
       subCls="professional"
     />
-    <HeaderSubmenu name="Settings and Support" />
-    <HeaderElement
+    <SidebarSubmenu name="Settings and Support" />
+    <SidebarElement
       svg={svgs.settings}
       name="Settings and privacy"
       link="not-implemented"
       cls="mini"
       subCls="settings"
     />
-    <HeaderElement
+    <SidebarElement
       svg={svgs.help}
       name="Help Center"
       link="not-implemented"
       cls="mini"
       subCls="settings"
     />
-    <HeaderElement
+    <SidebarElement
       svg={svgs.data}
       name="Data saver"
       link="not-implemented"
       cls="mini"
       subCls="settings"
     />
-    <HeaderElement
+    <SidebarElement
       svg={svgs.display}
       name="Display"
       link="not-implemented"
@@ -119,14 +119,14 @@ const Account = () => (
       secondSvg={svgs.displayBrush}
       secondSvgColor="var(--clr-bg-blue)"
     />
-    <HeaderElement
+    <SidebarElement
       svg={svgs.keyboard}
       name="Keyboard shortcuts"
       link="not-implemented"
       cls="mini"
       subCls="settings"
     />
-    <HeaderElement
+    <SidebarElement
       svg={svgs.logOut}
       name="Log out"
       link="not-implemented"
@@ -136,4 +136,4 @@ const Account = () => (
   </div>
 );
 
-export default Account;
+export default SidebarMain;

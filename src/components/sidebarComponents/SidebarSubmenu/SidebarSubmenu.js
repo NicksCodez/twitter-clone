@@ -3,13 +3,13 @@
 import React from 'react';
 
 // css
-import './HeaderSubmenu.css';
+import './SidebarSubmenu.css';
 
 // utils
 import svgs from '../../../utils/svgs';
 
-const HeaderSubmenu = ({ name }) => (
-  <button type="button" className="header-submenu" onClick={clickHandler}>
+const SidebarSubmenu = ({ name }) => (
+  <button type="button" className="sidebar-submenu" onClick={clickHandler}>
     <div>
       <span>{name}</span>
       <svg viewBox="0 0 24 24">
@@ -42,7 +42,7 @@ const clickHandler = (event) => {
 
   // get the submenu items to make visible
   const items = document
-    .getElementById('account-info')
+    .getElementById('sidebar')
     .getElementsByClassName(`${type}-submenu-item`);
 
   // make submenu items visible or 'none' and change submenu caret class
@@ -60,4 +60,4 @@ const clickHandler = (event) => {
   }
 };
 
-export default HeaderSubmenu;
+export default SidebarSubmenu;

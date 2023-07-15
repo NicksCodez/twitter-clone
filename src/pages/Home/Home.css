@@ -1,3 +1,15 @@
 #home {
   word-wrap: break-word;
+  position: fixed;
+  top: 0;
+  left: 0;
+  bottom: 54.5px;
+  width: 100%;
+  transition: top cubic-bezier(0, 0, 0, 1) 350ms;
+  overflow-y: scroll;
 }
+
+/* #home.scrolled {
+  top: -50px;
+  transition: top cubic-bezier(0, 0, 0, 1) 350ms;
+} */

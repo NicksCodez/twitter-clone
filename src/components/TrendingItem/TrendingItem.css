@@ -1,0 +1,28 @@
+.trending-item {
+  padding: 12px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.trending-item .primary {
+  font-weight: 700;
+}
+
+.trending-item .secondary {
+  font-size: var(--fs-mili);
+  line-height: var(--lh-mili);
+  color: var(--clr-font-secondary);
+}
+
+.trending-item svg {
+  display: block;
+  width: 18.75px;
+  height: 18.75px;
+}
+
+.trending-item div {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}

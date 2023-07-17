@@ -75,6 +75,12 @@
   font-weight: 700;
 }
 
+@font-face {
+  font-family: 'Twitter Chirp';
+  src: url('./assets/fonts/Chirp-Heavy.f44ae4ea.woff2');
+  font-weight: 800;
+}
+
 html,
 body {
   position: relative;
@@ -109,6 +115,7 @@ span {
 }
 
 a {
+  display: block;
   text-decoration: none;
   color: inherit;
   padding: 0;
@@ -121,5 +128,6 @@ h2 {
 }
 
 svg {
+  display: block;
   fill: currentColor;
 }

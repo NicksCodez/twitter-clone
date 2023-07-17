@@ -3,6 +3,9 @@ import React from 'react';
 // pictures
 import DefaultProfile from '../../../assets/images/default_profile.png';
 
+// utils
+import { clickHandlerAccount } from '../../../utils/functions';
+
 const FirstRow = () => (
   <div>
     <button
@@ -29,11 +32,5 @@ const FirstRow = () => (
     <div className="fake" />
   </div>
 );
-
-const clickHandlerAccount = (event) => {
-  event.stopPropagation();
-  const accountInfo = document.getElementById('sidebar');
-  accountInfo.classList.add('active');
-};
 
 export default FirstRow;

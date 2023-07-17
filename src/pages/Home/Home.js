@@ -1,5 +1,5 @@
 // react
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 
 // css
 import './Home.css';
@@ -10,22 +10,40 @@ import Sidebar from '../../components/Sidebar/Sidebar';
 import HomeHeader from '../../components/HomeHeader/HomeHeader';
 import TweetContainer from '../../components/TweetContainer/TweetContainer';
 
+// utils
+import { resizeHandler } from '../../utils/functions';
+
 const Home = () => {
   const scrollTop = useRef(0);
+  const [width, setWidth] = useState(window.innerWidth);
   const time = useRef(Date.now());
-  useEffect(() => {
-    const home = document.getElementById('home');
-    home.addEventListener('scroll', () => {
-      scrollHandler(scrollTop, time);
-    });
 
-    // return () => home.removeEventListener('scroll', scrollHandler);
+  useEffect(() => {
+    // home event listeners
+    const home = document.getElementById('home');
+    const scrollHandlerFunc = () => {
+      scrollHandler(scrollTop, time);
+    };
+    home.addEventListener('scroll', scrollHandlerFunc);
+
+    // window event listeners
+    const resizeFunc = () => {
+      resizeHandler(setWidth);
+    };
+    window.addEventListener('resize', resizeFunc);
+
+    // remove event listeners
+    return () => {
+      window.removeEventListener('resize', resizeFunc);
+      home.removeEventListener('scroll', scrollHandlerFunc);
+    };
   }, []);
+
   return (
     <div id="home">
       <HomeHeader />
       <TweetContainer />
-      <FeatherButton />
+      {width < 500 ? <FeatherButton /> : null}
       <Sidebar />
     </div>
   );

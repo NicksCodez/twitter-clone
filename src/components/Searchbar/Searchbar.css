@@ -1,0 +1,100 @@
+#searchbar {
+  background-color: var(--clr-bg-search);
+  border-radius: 9999px;
+  display: flex;
+  flex-grow: 1;
+  border: 1px solid var(--clr-bg-base);
+}
+
+#searchbar:has(#search:focus) {
+  border: 1px solid var(--clr-bg-blue);
+}
+
+#searchbar:has(#search:focus) .svg-search {
+  color: var(--clr-bg-blue);
+}
+
+#searchbar form {
+  display: flex;
+  flex-grow: 1;
+}
+
+#searchbar label {
+  display: flex;
+  align-items: center;
+  flex-grow: 1;
+}
+
+#search {
+  display: flex;
+  flex-shrink: 1;
+  flex-shrink: 1;
+  padding: 4px 12px;
+  width: 100%;
+  border: none;
+  font-size: inherit;
+  line-height: inherit;
+  color: inherit;
+  background-color: inherit;
+}
+
+#search:focus {
+  outline: none;
+}
+
+#searchbar svg {
+  display: block;
+}
+
+#searchbar .svg-search-wrapper {
+  color: var(--clr-font-secondary);
+  margin-left: 12px;
+}
+
+#searchbar .svg-search {
+  width: 32px;
+  height: 18.75px;
+}
+
+#searchbar .svg-close {
+  width: 10px;
+  height: 10px;
+}
+
+#searchbar .btn-close-wrapper {
+  margin-right: 12px;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+#searchbar .btn-close-wrapper.active {
+  margin-right: 12px;
+  visibility: visible;
+  pointer-events: inherit;
+}
+
+#searchbar .btn-close-wrapper > button {
+  padding: 6px;
+  background-color: var(--clr-bg-blue);
+  color: var(--clr-bg-base);
+}
+
+#search-results {
+  position: absolute;
+  top: 53px;
+  left: 50%;
+  width: 100%;
+  transform: translateX(-50%);
+  background-color: var(--clr-bg-base);
+  height: 100%;
+  display: none;
+  z-index: 3;
+}
+
+#search-results.active {
+  display: flex;
+  flex-direction: column;
+  justify-content: stretch;
+  align-items: center;
+  height: calc(100vh - 53px);
+}

@@ -1,4 +1,4 @@
-.feather-button {
+#feather-button {
   position: fixed;
   right: 20px;
   bottom: 74.5px;
@@ -10,13 +10,13 @@
   align-items: center;
 }
 
-.feather-button a {
+#feather-button a {
   display: flex;
   justify-content: center;
   align-items: center;
 }
 
-.feather-button svg {
+#feather-button svg {
   fill: rgb(255, 255, 255);
   width: 24px;
   height: 24px;

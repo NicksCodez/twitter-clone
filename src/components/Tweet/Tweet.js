@@ -12,7 +12,7 @@ import svgs from '../../utils/svgs';
 
 const Tweet = () => (
   <div className="tweet">
-    <button type="button">
+    <div className="tweet-wrapper" onClick={console.log('')}>
       <div className="tweet-profile-picture">
         <div className="profile-picture-wrapper u-round">
           <Link to="/profile">
@@ -89,7 +89,7 @@ const Tweet = () => (
           </div>
         </div>
       </div>
-    </button>
+    </div>
   </div>
 );
 

@@ -2,13 +2,14 @@
   padding: 16px;
 }
 
-/* to keep height of items inside divs, buttons or a tags */
-.tweet div,
-.tweet button,
-.tweet a {
+.tweet-wrapper {
   display: flex;
-  justify-content: center;
-  align-items: center;
+  align-items: stretch;
+}
+
+img,
+svg {
+  display: block;
 }
 
 .tweet img,
@@ -27,6 +28,7 @@
 }
 
 .tweet > button {
+  display: flex;
   justify-content: stretch;
   width: 100%;
 }
@@ -48,10 +50,12 @@
 }
 
 .tweet .tweet-row {
+  display: flex;
   justify-content: space-between;
 }
 
 .tweet .profile-details {
+  display: flex;
   gap: 4px;
   align-items: baseline;
   margin-bottom: 2px;
@@ -64,6 +68,7 @@
 }
 
 .tweet .tweet-row.tweet-actions {
+  display: flex;
   margin-top: 12px;
   color: var(--clr-font-secondary);
   font-size: var(--fs-mili);
@@ -73,9 +78,11 @@
 }
 
 .tweet .tweet-action > button {
+  display: flex;
   justify-content: flex-start;
 }
 .tweet .tweet-action > button > span {
+  display: flex;
   padding-left: 4px;
   min-height: 20px;
   display: flex;

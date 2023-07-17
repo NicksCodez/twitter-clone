@@ -1,0 +1,6 @@
+#trends h2 {
+  font-size: var(--fs-h2);
+  line-height: var(--lh-h2);
+  font-weight: 800;
+  padding: 12px 16px;
+}

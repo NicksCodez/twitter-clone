@@ -15,6 +15,7 @@
   --clr-bg-following: rgb(239, 243, 244);
   --clr-bg-follow: rgb(15, 20, 25);
   --clr-border-follow-hover: rgb(253, 201, 206);
+  --clr-bg-profile-header-pic: rgb(207, 217, 222);
 
   /* font colors */
   --clr-font-primary: rgb(15, 20, 25);
@@ -51,6 +52,7 @@
     --clr-border-follow-hover: rgb(103, 7, 15);
     --clr-bg-home-header: rgba(0, 0, 0, 0.65);
     --clr-bg-sidebar-blur: rgba(91, 112, 131, 0.4);
+    --clr-bg-profile-header-pic: rgb(51, 54, 57);
 
     /* font colors */
     --clr-font-primary: rgb(231, 233, 234);

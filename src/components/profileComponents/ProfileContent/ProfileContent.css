@@ -1,0 +1,178 @@
+#profile-page-header-image {
+  min-height: 119.33px;
+  max-height: 119.33px;
+  background-color: var(--clr-bg-profile-header-pic);
+}
+
+#profile-page-buttons {
+  position: relative;
+  display: flex;
+  justify-content: flex-end;
+  padding: 12px 0px 0px;
+  margin-bottom: 16px;
+  gap: 8px;
+  font-weight: 700;
+}
+
+#profile-page-buttons svg {
+  width: 20px;
+  height: 20px;
+}
+
+#profile-page-buttons button {
+  border: 1px solid var(--clr-bg-profile-header-pic);
+  min-height: 36px;
+  padding: 0px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+#profile-page-buttons button.svg-wrapper {
+  min-height: 34px;
+  min-width: 34px;
+  padding: 0px;
+}
+
+#profile-page-buttons .profile-picture-wrapper {
+  position: absolute;
+  box-shadow: rgba(0, 0, 0, 0.3) 0px 0px 2px inset;
+  top: 0px;
+  left: 42.75px;
+  transform: translateX(-50%) translateY(-50%);
+  border: 2px solid var(--clr-bg-base);
+}
+
+#profile-page-buttons .hidden {
+  display: none;
+}
+
+#profile-page-content .wrapper-padded {
+  padding: 0px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  justify-content: stretch;
+}
+
+#profile-page-name {
+  font-size: var(--fs-h2);
+  line-height: var(--lh-h2);
+  font-weight: 800;
+}
+
+#profile-page-tag {
+  color: var(--clr-font-secondary);
+}
+
+#profile-page-links {
+  line-height: 12px;
+  color: var(--clr-font-secondary);
+}
+
+#profile-page-links svg {
+  width: 18.75px;
+  height: 18.75px;
+}
+
+#profile-page-links > div {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+#profile-page-links > div:nth-child(2) > a {
+  color: var(--clr-bg-blue);
+}
+
+#profile-page-follower-details,
+#profile-page-follower-details > a {
+  display: flex;
+  font-size: 14px;
+  line-height: var(--lh-mili);
+  margin-right: 20px;
+}
+
+#profile-page-follower-details .primary {
+  font-weight: 700;
+  margin-right: 4px;
+}
+
+#profile-page-follower-details .secondary {
+  color: var(--clr-font-secondary);
+}
+
+#profile-page-common-followers {
+  display: flex;
+}
+
+#profile-page-common-followers > div:first-child {
+  position: relative;
+  display: flex;
+}
+
+#profile-page-common-followers img {
+  width: 18px;
+  height: 18px;
+  position: relative;
+}
+
+#profile-page-common-followers img {
+  margin-left: -12px;
+  border: 1px solid var(--clr-bg-base);
+}
+
+#profile-page-common-followers img:first-child {
+  margin-left: 0px;
+  z-index: 3;
+}
+
+#profile-page-common-followers img:nth-child(2) {
+  z-index: 2;
+}
+
+#profile-page-common-followers img:last-child {
+  z-index: 1;
+}
+
+#profile-page-common-followers > div:last-child {
+  margin-left: 12px;
+  color: var(--clr-font-secondary);
+  font-size: var(--fs-mili);
+  line-height: var(--lh-mili);
+}
+
+#profile-page-tweet-filters {
+  display: flex;
+  justify-content: space-between;
+  font-weight: 500;
+  color: var(--clr-font-secondary);
+}
+
+#profile-page-tweet-filters button {
+  position: relative;
+  height: max-content;
+}
+
+#profile-page-tweet-filters span {
+  display: block;
+  padding: 16px 0px;
+}
+
+#profile-page-tweet-filters .underline {
+  position: absolute;
+  height: 4px;
+  min-width: 56px;
+  bottom: 0px;
+  background-color: var(--clr-bg-blue);
+  display: none;
+}
+
+#profile-page-tweet-filters button.active {
+  font-weight: 700;
+  color: var(--clr-font-primary);
+}
+
+#profile-page-tweet-filters button.active .underline {
+  display: block;
+}

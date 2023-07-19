@@ -3,6 +3,10 @@
   align-items: center;
   height: 53px;
   padding: 0px 16px;
+  position: sticky;
+  top: 0px;
+  background-color: var(--clr-bg-base);
+  z-index: 3;
 }
 
 #profile-page-header svg {

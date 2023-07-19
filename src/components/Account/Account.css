@@ -1,0 +1,97 @@
+.account {
+  padding: 16px;
+}
+
+.account-wrapper {
+  display: flex;
+  align-items: stretch;
+}
+
+img,
+svg {
+  display: block;
+}
+
+.account img,
+.account button {
+  border-radius: inherit;
+  width: inherit;
+  height: inherit;
+}
+
+.account svg {
+  min-width: 18.75px;
+  min-height: 18.75px;
+  max-width: 18.75px;
+  max-height: 18.75px;
+}
+
+.account > button {
+  display: flex;
+  justify-content: stretch;
+  width: 100%;
+}
+
+.account .account-profile-picture {
+  margin-right: 12px;
+}
+
+.account .account-profile-picture-wrapper {
+  width: 40px;
+  height: 40px;
+}
+
+.account .account-content {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  flex-grow: 1;
+}
+
+.account .account-details-wrapper {
+  display: flex;
+  justify-content: space-between;
+}
+
+.account .account-details {
+  display: flex;
+  flex-direction: column;
+  align-items: baseline;
+  margin-bottom: 2px;
+  color: var(--clr-font-secondary);
+}
+
+.account .account-name {
+  font-weight: 700;
+  color: var(--clr-font-primary);
+}
+
+.account .follow-button-wrapper {
+  display: flex;
+  align-items: center;
+}
+
+.account .follow-button {
+  padding: 0px 16px;
+  border: 1px solid black;
+  height: 32px;
+  color: var(--clr-font-follow);
+  background-color: var(--clr-bg-follow);
+  font-weight: 700;
+}
+
+.account .follow-button.following {
+  color: var(--clr-font-following);
+  background-color: var(--clr-bg-following);
+}
+
+.account .follow-button.following.hovered {
+  color: rgb(244, 33, 46);
+  background-color: rgba(244, 33, 46, 0.1);
+  transition: background-color 20ms;
+  border-color: var(--clr-border-follow-hover);
+}
+
+.account .account-description {
+  padding-top: 4px;
+}

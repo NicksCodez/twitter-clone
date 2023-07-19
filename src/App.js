@@ -15,13 +15,19 @@ import RootLayout from './layouts/RootLayout/RootLayout';
 import NotFound from './pages/NotFound/NotFound';
 import Home from './pages/Home/Home';
 import Explore from './pages/Explore/Explore';
+import ComposeTweet from './pages/ComposeTweet/ComposeTweet';
+import Profile from './pages/Profile/Profile';
 
 const router = createBrowserRouter(
   createRoutesFromElements(
-    <Route path="/" element={<RootLayout />} errorElement={<NotFound />}>
-      <Route index element={<Navigate to="/home" replace />} />
-      <Route path="/home" element={<Home />} />
-      <Route path="/explore" element={<Explore />} />
+    <Route errorElement={<NotFound />}>
+      <Route path="/" element={<RootLayout />}>
+        <Route index element={<Navigate to="/home" replace />} />
+        <Route path="/home" element={<Home />} />
+        <Route path="/explore" element={<Explore />} />
+        <Route path="/profile" element={<Profile />} />
+      </Route>
+      <Route path="/compose/tweet" element={<ComposeTweet />} />
     </Route>
   )
 );

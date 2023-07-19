@@ -4,7 +4,10 @@
   display: flex;
   align-items: center;
   padding: 0px 16px;
-  height: 53px;
+  min-height: 53px;
+  max-height: 53px;
+  backdrop-filter: blur(12px);
+  background-color: var(--clr-bg-home-header);
 }
 
 #explore-header svg {

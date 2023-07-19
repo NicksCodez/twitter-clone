@@ -36,6 +36,9 @@ const Explore = () => {
       <Sidebar />
       {width < 500 ? <FeatherButton /> : null}
       <Trends />
+      <div className="separator-wrapper">
+        <div className="separator" />
+      </div>
       <People />
     </div>
   );

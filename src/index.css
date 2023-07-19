@@ -9,15 +9,18 @@
   --clr-bg-hover-like: rgba(249, 24, 128, 0.1);
   --clr-bg-hover-reply: rgba(29, 155, 240, 0.1);
   --clr-bg-hover-retweet: rgba(0, 186, 124, 0.1);
-  --clr-bg-home-header: rgba(255, 255, 255, 0.8);
+  --clr-bg-home-header: rgba(255, 255, 255, 0.85);
   --clr-bg-sidebar-blur: rgba(0, 0, 0, 0.4);
   --clr-bg-blue: rgb(29, 155, 240);
-  --clr-bg-follow: rgb(239, 243, 244);
+  --clr-bg-following: rgb(239, 243, 244);
+  --clr-bg-follow: rgb(15, 20, 25);
+  --clr-border-follow-hover: rgb(253, 201, 206);
 
   /* font colors */
   --clr-font-primary: rgb(15, 20, 25);
   --clr-font-secondary: rgb(83, 100, 113);
   --clr-font-on-blue-bg: rgb(255, 255, 255);
+  --clr-font-following: rgb(15, 20, 25);
   --clr-font-follow: rgb(255, 255, 255);
 
   /* border colors */
@@ -43,7 +46,9 @@
     --clr-bg-search: rgb(32, 35, 39);
     --clr-bg-hover-primary: rgba(231, 233, 234, 0.1);
     --clr-bg-hover-secondary: rgba(255, 255, 255, 0.03);
-    --clr-bg-follow: rgb(15, 20, 25);
+    --clr-bg-following: rgb(15, 20, 25);
+    --clr-bg-follow: rgb(239, 243, 244);
+    --clr-border-follow-hover: rgb(103, 7, 15);
     --clr-bg-home-header: rgba(0, 0, 0, 0.65);
     --clr-bg-sidebar-blur: rgba(91, 112, 131, 0.4);
 
@@ -51,6 +56,7 @@
     --clr-font-primary: rgb(231, 233, 234);
     --clr-font-secondary: rgb(113, 118, 123);
     --clr-font-follow: rgb(15, 20, 25);
+    --clr-font-following: rgb(255, 255, 255);
 
     /* border colors */
     --clr-border-primary: rgb(47, 51, 54);

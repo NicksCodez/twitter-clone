@@ -18,9 +18,6 @@ const Trends = () => (
     <Link to="/trends" className="show-more">
       <span>Show more</span>
     </Link>
-    <div className="separator-wrapper">
-      <div className="separator" />
-    </div>
   </div>
 );
 

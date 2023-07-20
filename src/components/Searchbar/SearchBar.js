@@ -14,6 +14,29 @@ const Searchbar = () => {
     console.log({ searchQuery });
   }, [searchQuery]);
 
+  // testing because going previous page => next page -> previous page in browser creates error
+  // useEffect(() => {
+  //   console.log('searchbar mounted');
+  //   // search input event listeners
+  //   const searchInput = document.getElementById('search');
+
+  //   const changeHandlerInputFunction = () => changeHandlerInput(setSearchQuery);
+
+  //   try {
+  //     searchInput.addEventListener('focus', focusHandler);
+  //     searchInput.addEventListener('blur', focusOutHandler);
+  //     searchInput.addEventListener('input', changeHandlerInputFunction);
+  //   } catch (error) {
+  //     console.log(error);
+  //   }
+
+  //   return () => {
+  //     searchInput.removeEventListener('focus', focusHandler);
+  //     searchInput.removeEventListener('blur', focusOutHandler);
+  //     searchInput.removeEventListener('input', changeHandlerInputFunction);
+  //   };
+  // }, []);
+
   return (
     <div id="searchbar">
       <Form>

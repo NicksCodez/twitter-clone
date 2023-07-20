@@ -1,0 +1,8 @@
+{
+  "projects": {
+    "default": "twitter-clone-6ebd5",
+    "staging": "twitter-clone-6ebd5"
+  },
+  "targets": {},
+  "etags": {}
+}

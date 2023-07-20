@@ -1,11 +1,15 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Form, Link } from 'react-router-dom';
+import { Form, Link, redirect } from 'react-router-dom';
 
 // css
 import './SignUp.css';
 
 // utils
+import { createUserWithEmailAndPassword } from 'firebase/auth';
 import svgs from '../../utils/svgs';
+
+// firebase
+import { auth } from '../../firebase';
 
 const SignUp = () => {
   // keep track of first update, do not want some useEffect hooks to run on first update
@@ -83,7 +87,7 @@ const SignUp = () => {
         <div className="filler" />
       </div>
       <div id="signup-content">
-        <Form>
+        <Form method="post" action="/i/flow/signup">
           <h2>Join Twitter today</h2>
           <label htmlFor="nameInput">
             <div className="input-placeholder">
@@ -94,6 +98,7 @@ const SignUp = () => {
                 required
                 type="text"
                 id="nameInput"
+                name="name"
                 onInput={() =>
                   inputChangeHandler(
                     setNameInput,
@@ -120,6 +125,7 @@ const SignUp = () => {
                 required
                 type="text"
                 id="tagInput"
+                name="tag"
                 onInput={() =>
                   inputChangeHandler(
                     setTagInput,
@@ -146,6 +152,7 @@ const SignUp = () => {
                 required
                 type="email"
                 id="emailInput"
+                name="email"
                 onInput={() =>
                   inputChangeHandler(
                     setEmailInput,
@@ -172,6 +179,7 @@ const SignUp = () => {
                 required
                 type="password"
                 id="passwordInput"
+                name="password"
                 onInput={() =>
                   inputChangeHandler(
                     setPasswordInput,
@@ -198,6 +206,7 @@ const SignUp = () => {
                 required
                 type="password"
                 id="passwordConfirmInput"
+                name="confirmPassword"
                 onInput={() =>
                   inputChangeHandler(
                     setPasswordConfirmInput,
@@ -232,6 +241,29 @@ const SignUp = () => {
       </div>
     </div>
   );
+};
+
+// form action
+export const signUpFormAction = async ({ request }) => {
+  const data = await request.formData();
+
+  const name = data.get('name');
+  const tag = data.get('tag');
+  const email = data.get('email');
+  const password = data.get('password');
+
+  await createUserWithEmailAndPassword(auth, email, password)
+    .then((userCredential) => {
+      const { user } = userCredential;
+      console.log(user);
+    })
+    .catch((error) => {
+      const errorCode = error.code;
+      const errorMessage = error.message;
+      console.log(errorCode, errorMessage);
+    });
+
+  return redirect('/home');
 };
 
 // input change handlers

@@ -18,6 +18,7 @@ import Explore from './pages/Explore/Explore';
 import ComposeTweet from './pages/ComposeTweet/ComposeTweet';
 import Profile from './pages/Profile/Profile';
 import Login from './pages/Login/Login';
+import SignUp from './pages/SignUp/SignUp';
 
 const router = createBrowserRouter(
   createRoutesFromElements(
@@ -30,6 +31,7 @@ const router = createBrowserRouter(
       </Route>
       <Route path="/compose/tweet" element={<ComposeTweet />} />
       <Route path="/i/flow/login" element={<Login />} />
+      <Route path="/i/flow/signup" element={<SignUp />} />
     </Route>
   )
 );

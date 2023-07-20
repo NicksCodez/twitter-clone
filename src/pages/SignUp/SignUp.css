@@ -1,8 +1,11 @@
-#login {
+#signup {
   padding: 0px 16px;
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
 }
 
-#login-header {
+#signup-header {
   display: flex;
   min-height: 53px;
   max-height: 53px;
@@ -10,55 +13,63 @@
   justify-content: space-between;
 }
 
-#login-header svg {
+#signup-header svg {
   width: 20px;
 }
 
-#login-header > div:nth-child(2) svg {
+#signup-header > div:nth-child(2) svg {
   min-width: 32px;
 }
 
-#login-header .filler {
+#signup-header .filler {
   min-width: 20px;
 }
 
-#login-content {
+#signup-content {
   display: flex;
   flex-direction: column;
   padding: 0px 16px;
-  margin-top: 45px;
+  justify-content: center;
+  flex-grow: 1;
 }
 
-#login-content label {
+#signup-content h2 {
+  margin-bottom: 38px;
+  font-weight: 800;
+  font-size: 25px;
+  line-height: 30px;
+}
+
+#signup-content label {
   border: 1px solid var(--clr-bg-profile-header-pic);
   display: flex;
   margin-top: 12px;
   border-radius: 4px;
 }
 
-#login-content label.active {
+#signup-content label.active {
   border-color: var(--clr-bg-blue);
   box-shadow: var(--clr-bg-blue) 0px 0px 0px 1px;
 }
 
-#login-content input {
+#signup-content input {
   color: inherit;
   border: none;
   font-size: 17px;
   background-color: inherit;
 }
 
-#login-content input:focus {
+#signup-content input:focus {
   outline: none;
 }
 
-#login-content .input-wrapper {
+#signup-content .input-wrapper {
   position: relative;
   margin-top: 16px;
   padding: 12px 8px 8px;
 }
 
-#login-content .input-placeholder {
+#signup-content .input-placeholder {
   color: var(--clr-font-secondary);
   padding: 16px 8px 0px;
   line-height: 24px;
@@ -70,7 +81,7 @@
     padding-top 150ms cubic-bezier(0.4, 0, 0.2, 1) 0s;
 }
 
-#login-content .input-placeholder.active {
+#signup-content .input-placeholder.active {
   color: var(--clr-bg-blue);
   padding: 8px;
   line-height: 16px;
@@ -81,19 +92,54 @@
     padding-top 150ms cubic-bezier(0.4, 0, 0.2, 1) 0s;
 }
 
-#login-content .input-placeholder.active.no-color {
+#signup-content .input-placeholder.active.no-color {
   color: var(--clr-font-secondary);
 }
 
-#login-no-account {
+#signup-existing-account {
   display: flex;
   margin-top: 40px;
 }
 
-#login-no-account span {
+#signup-existing-account span {
   display: flex;
 }
 
-#login-no-account a {
+#signup-existing-account a {
   color: var(--clr-bg-blue);
+}
+
+#signup-content .error {
+  color: rgb(244, 33, 46);
+  font-size: 12px;
+  line-height: 15px;
+  padding: 2px 8px 0px;
+  display: none;
+}
+
+#signup-content .error.active {
+  display: block;
+}
+
+#signup-content .button-wrapper {
+  width: 100%;
+  margin-top: 32px;
+}
+
+#signup-content .button-wrapper > button {
+  width: 100%;
+  height: 47px;
+  text-align: center;
+  background-color: var(--clr-bg-follow);
+  color: var(--clr-font-follow);
+  font-weight: 700;
+  opacity: 0.5;
+  pointer-events: none;
+  transition: opacity 300ms cubic-bezier(0.4, 0, 0.2, 1) 0s;
+}
+
+#signup-content .button-wrapper > button.active {
+  opacity: 1;
+  pointer-events: all;
+  transition: opacity 300ms cubic-bezier(0.4, 0, 0.2, 1) 0s;
 }

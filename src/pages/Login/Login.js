@@ -61,7 +61,7 @@ const Login = () => {
             </div>
           </label>
         </Form>
-        <div id="login-forgot-account">
+        <div id="login-no-account">
           <span>
             Don&#39;t have an account?&#160;
             <Link to="/i/flow/signup">Sign up</Link>

@@ -52,6 +52,12 @@
   box-shadow: var(--clr-bg-blue) 0px 0px 0px 1px;
 }
 
+#signup-content label.error {
+  border-color: rgb(244, 33, 46);
+  box-shadow: rgb(244, 33, 46) 0px 0px 0px 1px;
+  display: flex;
+}
+
 #signup-content input {
   color: inherit;
   border: none;

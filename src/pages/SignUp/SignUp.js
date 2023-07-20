@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Form, Link } from 'react-router-dom';
 
 // css
@@ -8,6 +8,8 @@ import './SignUp.css';
 import svgs from '../../utils/svgs';
 
 const SignUp = () => {
+  // keep track of first update, do not want some useEffect hooks to run on first update
+  const firstUpdate = useRef(0);
   // store input values in state for client side validation
   const [nameInput, setNameInput] = useState('');
   const [tagInput, setTagInput] = useState('');
@@ -32,6 +34,38 @@ const SignUp = () => {
       submitButton.classList.add('active');
     }
   }, [inputsState]);
+
+  useEffect(() => {
+    // when password is changed, automatically check confirm password
+    // only if it is not first update, in order to start with blank styles
+    if (firstUpdate.current < 2) {
+      firstUpdate.current += 1;
+    } else {
+      inputChangeHandler(
+        setPasswordConfirmInput,
+        setInputsState,
+        'passwordConfirmInput',
+        'confirmPassword',
+        validatePasswordConfirm
+      );
+    }
+  }, [passwordInput]);
+
+  useEffect(() => {
+    // when confirm password is changed, automatically check password
+    // only if it is not first update, in order to start with blank styles
+    if (firstUpdate.current < 2) {
+      firstUpdate.current += 1;
+    } else {
+      inputChangeHandler(
+        setPasswordInput,
+        setInputsState,
+        'passwordInput',
+        'password',
+        validatePassword
+      );
+    }
+  }, [passwordConfirmInput]);
 
   return (
     <div id="signup">
@@ -60,7 +94,15 @@ const SignUp = () => {
                 required
                 type="text"
                 id="nameInput"
-                onInput={() => nameChangeHandler(setNameInput, setInputsState)}
+                onInput={() =>
+                  inputChangeHandler(
+                    setNameInput,
+                    setInputsState,
+                    'nameInput',
+                    'name',
+                    validateName
+                  )
+                }
                 onFocus={(event) => focusHandlerInput(event)}
                 onBlur={(event) => focusOutHandlerInput(event, nameInput)}
               />
@@ -78,7 +120,15 @@ const SignUp = () => {
                 required
                 type="text"
                 id="tagInput"
-                onInput={() => tagChangeHandler(setTagInput, setInputsState)}
+                onInput={() =>
+                  inputChangeHandler(
+                    setTagInput,
+                    setInputsState,
+                    'tagInput',
+                    'tag',
+                    validateTag
+                  )
+                }
                 onFocus={(event) => focusHandlerInput(event)}
                 onBlur={(event) => focusOutHandlerInput(event, tagInput)}
               />
@@ -97,7 +147,13 @@ const SignUp = () => {
                 type="email"
                 id="emailInput"
                 onInput={() =>
-                  emailChangeHandler(setEmailInput, setInputsState)
+                  inputChangeHandler(
+                    setEmailInput,
+                    setInputsState,
+                    'emailInput',
+                    'email',
+                    validateEmail
+                  )
                 }
                 onFocus={(event) => focusHandlerInput(event)}
                 onBlur={(event) => focusOutHandlerInput(event, emailInput)}
@@ -117,7 +173,13 @@ const SignUp = () => {
                 type="password"
                 id="passwordInput"
                 onInput={() =>
-                  passwordChangeHandler(setPasswordInput, setInputsState)
+                  inputChangeHandler(
+                    setPasswordInput,
+                    setInputsState,
+                    'passwordInput',
+                    'password',
+                    validatePassword
+                  )
                 }
                 onFocus={(event) => focusHandlerInput(event)}
                 onBlur={(event) => focusOutHandlerInput(event, passwordInput)}
@@ -137,9 +199,12 @@ const SignUp = () => {
                 type="password"
                 id="passwordConfirmInput"
                 onInput={() =>
-                  passwordConfirmChangeHandler(
+                  inputChangeHandler(
                     setPasswordConfirmInput,
-                    setInputsState
+                    setInputsState,
+                    'passwordConfirmInput',
+                    'confirmPassword',
+                    validatePasswordConfirm
                   )
                 }
                 onFocus={(event) => focusHandlerInput(event)}
@@ -170,127 +235,37 @@ const SignUp = () => {
 };
 
 // input change handlers
-
-const nameChangeHandler = (setNameInput, setInputsState) => {
-  // set state
-  const nameInput = document.getElementById('nameInput');
-  setNameInput(nameInput.value);
-
-  // let user know if input is valid, if not tell him what is wrong
-  const errorDiv = nameInput.closest('label').nextElementSibling;
-  const validation = validateName(nameInput.value);
-  if (validation === '') {
-    setInputsState((prevState) => ({
-      ...prevState,
-      name: true,
-    }));
-    errorDiv.classList.remove('active');
-  } else {
-    setInputsState((prevState) => ({
-      ...prevState,
-      name: false,
-    }));
-    errorDiv.firstChild.textContent = validation;
-    errorDiv.classList.add('active');
-  }
-};
-
-const tagChangeHandler = (setTagInput, setInputsState) => {
-  // set state
-  const tagInput = document.getElementById('tagInput');
-  setTagInput(tagInput.value);
-
-  // let user know if input is valid, if not tell him what is wrong
-  const errorDiv = tagInput.closest('label').nextElementSibling;
-  const validation = validateTag(tagInput.value);
-  if (validation === '') {
-    setInputsState((prevState) => ({
-      ...prevState,
-      tag: true,
-    }));
-    errorDiv.classList.remove('active');
-  } else {
-    setInputsState((prevState) => ({
-      ...prevState,
-      tag: false,
-    }));
-    errorDiv.firstChild.textContent = validation;
-    errorDiv.classList.add('active');
-  }
-};
-
-const emailChangeHandler = (setEmailInput, setInputsState) => {
-  // set state
-  const emailInput = document.getElementById('emailInput');
-  setEmailInput(emailInput.value);
-
-  // let user know if input is valid, if not tell him what is wrong
-  const errorDiv = emailInput.closest('label').nextElementSibling;
-  const validation = validateEmail(emailInput.value);
-  if (validation === '') {
-    setInputsState((prevState) => ({
-      ...prevState,
-      email: true,
-    }));
-    errorDiv.classList.remove('active');
-  } else {
-    setInputsState((prevState) => ({
-      ...prevState,
-      email: false,
-    }));
-    errorDiv.firstChild.textContent = validation;
-    errorDiv.classList.add('active');
-  }
-};
-
-const passwordChangeHandler = (setPasswordInput, setInputsState) => {
-  // set state
-  const passwordInput = document.getElementById('passwordInput');
-  setPasswordInput(passwordInput.value);
-
-  // let user know if input is valid, if not tell him what is wrong
-  const errorDiv = passwordInput.closest('label').nextElementSibling;
-  const validation = validatePassword(passwordInput.value);
-  if (validation === '') {
-    setInputsState((prevState) => ({
-      ...prevState,
-      password: true,
-    }));
-    errorDiv.classList.remove('active');
-  } else {
-    setInputsState((prevState) => ({
-      ...prevState,
-      password: false,
-    }));
-    errorDiv.firstChild.textContent = validation;
-    errorDiv.classList.add('active');
-  }
-};
-
-const passwordConfirmChangeHandler = (
-  setPasswordConfirmInput,
-  setInputsState
+const inputChangeHandler = (
+  setInput,
+  setInputsState,
+  inputID,
+  inputState,
+  validateFunction
 ) => {
   // set state
-  const passwordConfirmInput = document.getElementById('passwordConfirmInput');
-  setPasswordConfirmInput(passwordConfirmInput.value);
+  const input = document.getElementById(inputID);
+  setInput(input.value);
 
   // let user know if input is valid, if not tell him what is wrong
-  const errorDiv = passwordConfirmInput.closest('label').nextElementSibling;
-  const validation = validatePasswordConfirm(passwordConfirmInput.value);
+  const label = input.closest('label');
+  const errorDiv = label.nextElementSibling;
+
+  const validation = validateFunction(input.value);
   if (validation === '') {
     setInputsState((prevState) => ({
       ...prevState,
-      confirmPassword: true,
+      [inputState]: true,
     }));
     errorDiv.classList.remove('active');
+    label.classList.remove('error');
   } else {
     setInputsState((prevState) => ({
       ...prevState,
-      confirmPassword: false,
+      [inputState]: false,
     }));
     errorDiv.firstChild.textContent = validation;
     errorDiv.classList.add('active');
+    label.classList.add('error');
   }
 };
 
@@ -340,11 +315,13 @@ const validateEmail = (name) => {
 };
 
 const validatePassword = (name) => {
+  const passwordConfirmInput = document.getElementById('passwordConfirmInput');
   if (name === '') return 'Password cannot be empty';
   const regex =
     /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&#^\-_])[A-Za-z\d@$!%*?&#^\-_]{8,30}$/;
   if (!regex.test(name))
     return 'Password must be between 8 and 30 characters and contain at least one lowercase letter, one uppercase letter, one number and one special character';
+  if (name !== passwordConfirmInput.value) return 'Passwords must be the same';
   return '';
 };
 

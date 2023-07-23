@@ -10,13 +10,23 @@ import DefaultProfile from '../../assets/images/default_profile.png';
 // utils
 import svgs from '../../utils/svgs';
 
-const Tweet = () => (
+const Tweet = ({
+  img,
+  name,
+  tag,
+  createdAt,
+  text,
+  replies,
+  retweets,
+  likes,
+  bookmarks,
+}) => (
   <div className="tweet">
     <div className="tweet-wrapper" onClick={console.log('')}>
       <div className="tweet-profile-picture">
         <div className="profile-picture-wrapper u-round">
           <Link to="/profile">
-            <img src={DefaultProfile} alt="profile" />
+            <img src={img} alt="profile" />
           </Link>
         </div>
       </div>
@@ -24,16 +34,16 @@ const Tweet = () => (
         <div className="tweet-row">
           <div className="profile-details">
             <div className="profile-name">
-              <span>Anon</span>
+              <span>{name}</span>
             </div>
             <div className="profile-tag">
-              <span>@Anon</span>
+              <span>@{tag}</span>
             </div>
             <div className="separator">
               <span>·</span>
             </div>
             <div className="date-posted">
-              <span>2h</span>
+              <span>{createdAt}</span>
             </div>
           </div>
           <button type="button">
@@ -44,7 +54,7 @@ const Tweet = () => (
         </div>
         <div className="tweet-row">
           <div className="tweet-text">
-            <span>I am hereby tweeting</span>
+            <span>{text}</span>
           </div>
         </div>
         <div className="tweet-row tweet-actions">
@@ -53,7 +63,7 @@ const Tweet = () => (
               <svg viewBox="0 0 24 24">
                 <path d={svgs.comment} />
               </svg>
-              <span>1,622</span>
+              <span>{replies}</span>
             </button>
           </div>
           <div className="tweet-action">
@@ -61,7 +71,7 @@ const Tweet = () => (
               <svg viewBox="0 0 24 24">
                 <path d={svgs.retweet} />
               </svg>
-              <span>3,055</span>
+              <span>{retweets}</span>
             </button>
           </div>
           <div className="tweet-action">
@@ -69,7 +79,7 @@ const Tweet = () => (
               <svg viewBox="0 0 24 24">
                 <path d={svgs.like} />
               </svg>
-              <span>29.5k</span>
+              <span>{likes}</span>
             </button>
           </div>
           <div className="tweet-action">
@@ -77,7 +87,7 @@ const Tweet = () => (
               <svg viewBox="0 0 24 24">
                 <path d={svgs.statistics} />
               </svg>
-              <span>1M</span>
+              <span>{bookmarks}</span>
             </button>
           </div>
           <div className="tweet-action">

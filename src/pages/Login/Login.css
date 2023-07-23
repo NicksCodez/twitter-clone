@@ -97,3 +97,17 @@
 #login-no-account a {
   color: var(--clr-bg-blue);
 }
+
+#login-content .button-wrapper {
+  width: 100%;
+  margin-top: 32px;
+}
+
+#login-content .button-wrapper > button {
+  width: 100%;
+  height: 47px;
+  text-align: center;
+  background-color: var(--clr-bg-follow);
+  color: var(--clr-font-follow);
+  font-weight: 700;
+}

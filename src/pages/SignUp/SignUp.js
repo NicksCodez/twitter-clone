@@ -5,7 +5,10 @@ import { Form, Link, redirect } from 'react-router-dom';
 import './SignUp.css';
 
 // utils
-import { createUserWithEmailAndPassword } from 'firebase/auth';
+import {
+  createUserWithEmailAndPassword,
+  sendEmailVerification,
+} from 'firebase/auth';
 import svgs from '../../utils/svgs';
 
 // firebase
@@ -252,18 +255,31 @@ export const signUpFormAction = async ({ request }) => {
   const email = data.get('email');
   const password = data.get('password');
 
-  await createUserWithEmailAndPassword(auth, email, password)
-    .then((userCredential) => {
-      const { user } = userCredential;
-      console.log(user);
-    })
-    .catch((error) => {
-      const errorCode = error.code;
-      const errorMessage = error.message;
-      console.log(errorCode, errorMessage);
-    });
+  const newUserCredential = await createUserWithEmailAndPassword(
+    auth,
+    email,
+    password
+  );
+  console.log(newUserCredential);
+  try {
+    await sendEmailVerification(newUserCredential.user);
+  } catch (error) {
+    console.error(error);
+  }
 
-  return redirect('/home');
+  // await createUserWithEmailAndPassword(auth, email, password)
+  //   .then((userCredential) => {
+  //     const { user } = userCredential;
+  //     console.log(user);
+  //     sendEmailVerification(user).then(() => console.log('sent'));
+  //   })
+  //   .catch((error) => {
+  //     const errorCode = error.code;
+  //     const errorMessage = error.message;
+  //     console.log(errorCode, errorMessage);
+  //   });
+
+  return redirect('/i/flow/login');
 };
 
 // input change handlers

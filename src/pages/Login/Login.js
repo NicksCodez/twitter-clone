@@ -1,5 +1,9 @@
 import React, { useState } from 'react';
-import { Form, Link } from 'react-router-dom';
+import { Form, Link, redirect } from 'react-router-dom';
+
+// firebase
+import { signInWithEmailAndPassword } from 'firebase/auth';
+import { auth } from '../../firebase';
 
 // css
 import './Login.css';
@@ -27,7 +31,7 @@ const Login = () => {
         <div className="filler" />
       </div>
       <div id="login-content">
-        <Form>
+        <Form method="post" action="/i/flow/login">
           <h2>Sign in to Twitter</h2>
           <label htmlFor="emailInput">
             <div className="input-placeholder">
@@ -38,6 +42,7 @@ const Login = () => {
                 required
                 type="email"
                 id="emailInput"
+                name="email"
                 onInput={() => emailChangeHandler(setEmailInput)}
                 onFocus={(event) => focusHandlerInput(event)}
                 onBlur={(event) => focusOutHandlerInput(event, emailInput)}
@@ -53,6 +58,7 @@ const Login = () => {
                 required
                 type="password"
                 id="passwordInput"
+                name="password"
                 onInput={() => passwordChangeHandler(setPasswordInput)}
                 onFocus={(event) => focusHandlerInput(event)}
                 onBlur={(event) => focusOutHandlerInput(event, passwordInput)}
@@ -60,6 +66,11 @@ const Login = () => {
               />
             </div>
           </label>
+          <div className="button-wrapper">
+            <button type="submit" className="u-round" id="submit-form-button">
+              Sign up
+            </button>
+          </div>
         </Form>
         <div id="login-no-account">
           <span>
@@ -70,6 +81,21 @@ const Login = () => {
       </div>
     </div>
   );
+};
+
+// action
+export const loginFormAction = async ({ request }) => {
+  const data = await request.formData();
+  const email = data.get('email');
+  const password = data.get('password');
+
+  const userCredential = await signInWithEmailAndPassword(
+    auth,
+    email,
+    password
+  );
+
+  return redirect('/home');
 };
 
 const emailChangeHandler = (setEmailInput) => {

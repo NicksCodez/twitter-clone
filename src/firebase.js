@@ -1,6 +1,9 @@
 // firebase imports
-import { getAuth } from 'firebase/auth';
+
+import { connectAuthEmulator, getAuth } from 'firebase/auth';
 import { initializeApp } from 'firebase/app';
+import { connectFirestoreEmulator, getFirestore } from 'firebase/firestore';
+import { getStorage, connectStorageEmulator } from 'firebase/storage';
 
 const firebaseConfig = {
   apiKey: 'AIzaSyA5dlgjWZrLUudTHEPSVHIRZMR7eKmkmyM',
@@ -13,5 +16,17 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 
+export const firestore = getFirestore(app);
 export const auth = getAuth(app);
+export const storage = getStorage(app);
+
+// eslint-disable-next-line no-restricted-globals
+if (location.hostname === 'localhost') {
+  connectAuthEmulator(auth, 'http://localhost:9099', {
+    disableWarnings: true,
+  });
+  connectFirestoreEmulator(firestore, 'localhost', 8080);
+  connectStorageEmulator(storage, 'localhost', 9199);
+}
+
 export default app;

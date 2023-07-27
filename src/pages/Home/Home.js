@@ -10,46 +10,49 @@ import Sidebar from '../../components/Sidebar/Sidebar';
 import HomeHeader from '../../components/HomeHeader/HomeHeader';
 import TweetContainer from '../../components/TweetContainer/TweetContainer';
 
-// utils
-import { resizeHandler } from '../../utils/functions';
+// context providers
+import { useAppContext } from '../../contextProvider/ContextProvider';
 
 const Home = () => {
-  const scrollTop = useRef(0);
-  const [width, setWidth] = useState(window.innerWidth);
+  const { homeScroll, setHomeScroll, viewportWidth } = useAppContext();
+  const [isLoading, setLoading] = useState(true);
   const time = useRef(Date.now());
 
   useEffect(() => {
     // home event listeners
     const home = document.getElementById('home');
     const scrollHandlerFunc = () => {
-      scrollHandler(scrollTop, time);
+      scrollHandler(homeScroll, setHomeScroll, time);
     };
     home.addEventListener('scroll', scrollHandlerFunc);
 
-    // window event listeners
-    const resizeFunc = () => {
-      resizeHandler(setWidth);
-    };
-    window.addEventListener('resize', resizeFunc);
-
     // remove event listeners
     return () => {
-      window.removeEventListener('resize', resizeFunc);
       home.removeEventListener('scroll', scrollHandlerFunc);
     };
   }, []);
 
+  useEffect(() => {
+    const home = document.getElementById('home');
+    home.scrollTo({
+      top: homeScroll,
+      behavior: 'auto',
+    });
+  }, [isLoading]);
+
   return (
     <div id="home">
       <HomeHeader />
-      <TweetContainer />
-      {width < 500 ? <FeatherButton /> : null}
+      <div className="padded">
+        <TweetContainer setLoading={setLoading} />
+      </div>
+      {viewportWidth < 500 ? <FeatherButton /> : null}
       <Sidebar />
     </div>
   );
 };
 
-const scrollHandler = (lastScrollTop, time) => {
+const scrollHandler = (lastScrollTop, setScrollTop, time) => {
   // apply class to second row of home header to create scroll animation
   // throttle so it doesn't a lot of times on scroll
 
@@ -72,7 +75,7 @@ const scrollHandler = (lastScrollTop, time) => {
 
     // sometimes scroll can be negative on mobile, mitigate it
     // eslint-disable-next-line no-param-reassign
-    lastScrollTop.current = st <= 0 ? 0 : st;
+    setScrollTop(st <= 0 ? 0 : st);
 
     // reset time
     // eslint-disable-next-line no-param-reassign

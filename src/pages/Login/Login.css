@@ -2,19 +2,17 @@
   padding: 0px 16px;
 }
 
-#login-header {
-  display: flex;
-  min-height: 53px;
-  max-height: 53px;
-  align-items: center;
-  justify-content: space-between;
-}
-
 #login-header svg {
   width: 20px;
 }
 
-#login-header > div:nth-child(2) svg {
+#login-header .middle {
+  display: flex;
+  flex-grow: 1;
+  justify-content: center;
+}
+
+#login-header .middle svg {
   min-width: 32px;
 }
 

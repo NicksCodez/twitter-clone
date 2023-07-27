@@ -8,6 +8,9 @@ import { auth } from '../../firebase';
 // css
 import './Login.css';
 
+// components
+import PageHeader from '../../components/PageHeader/PageHeader';
+
 // utils
 import svgs from '../../utils/svgs';
 
@@ -15,20 +18,35 @@ const Login = () => {
   const [emailInput, setEmailInput] = useState('');
   const [passwordInput, setPasswordInput] = useState('');
 
+  // build left element
+  const leftElement = (
+    <div>
+      <svg viewBox="0 0 24 24">
+        <path d={svgs.x} />
+      </svg>
+    </div>
+  );
+
+  // build middle element
+  const middleElement = (
+    <div>
+      <svg viewBox="0 0 24 24">
+        <path d={svgs.bird} />
+      </svg>
+    </div>
+  );
+
+  // build right element
+  const rightElement = <div className="filler" />;
+
   return (
     <div id="login">
       <div id="login-header">
-        <div>
-          <svg viewBox="0 0 24 24">
-            <path d={svgs.x} />
-          </svg>
-        </div>
-        <div>
-          <svg viewBox="0 0 24 24">
-            <path d={svgs.bird} />
-          </svg>
-        </div>
-        <div className="filler" />
+        <PageHeader
+          leftElements={[leftElement]}
+          middleElements={[middleElement]}
+          rightElements={[rightElement]}
+        />
       </div>
       <div id="login-content">
         <Form method="post" action="/i/flow/login">

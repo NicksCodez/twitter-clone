@@ -5,19 +5,17 @@
   height: 100vh;
 }
 
-#signup-header {
-  display: flex;
-  min-height: 53px;
-  max-height: 53px;
-  align-items: center;
-  justify-content: space-between;
-}
-
 #signup-header svg {
   width: 20px;
 }
 
-#signup-header > div:nth-child(2) svg {
+#signup-header .middle {
+  display: flex;
+  flex-grow: 1;
+  justify-content: center;
+}
+
+#signup-header .middle svg {
   min-width: 32px;
 }
 

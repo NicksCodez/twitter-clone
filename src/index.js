@@ -6,9 +6,14 @@ import App from './App';
 import './index.css';
 import './utils/svgs.css';
 
+// context provider
+import { AppContextProvider } from './contextProvider/ContextProvider';
+
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
   <React.StrictMode>
-    <App />
+    <AppContextProvider>
+      <App />
+    </AppContextProvider>
   </React.StrictMode>
 );

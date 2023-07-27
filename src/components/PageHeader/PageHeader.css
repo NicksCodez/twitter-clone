@@ -1,0 +1,15 @@
+.page-header {
+  display: flex;
+  align-items: center;
+  min-height: 53px;
+  padding: 0px 16px;
+  position: sticky;
+  top: 0px;
+  backdrop-filter: blur(12px);
+  background-color: var(--clr-bg-home-header);
+}
+
+.page-header .left,
+.page-header .right {
+  min-width: 53px;
+}

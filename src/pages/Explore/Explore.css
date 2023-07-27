@@ -20,3 +20,43 @@
   width: 100%;
   align-self: center;
 }
+
+#explore-header svg {
+  width: 20px;
+  height: 20px;
+}
+
+#explore-header img,
+#explore-header svg {
+  display: block;
+}
+
+#explore-header-back,
+#explore-header-profile-picture,
+#explore-header-settings {
+  display: flex;
+  min-width: 56px;
+}
+
+#explore-header-back {
+  display: none;
+}
+
+#explore-header-profile-picture {
+  justify-content: flex-start;
+}
+
+#explore-header-profile-picture img {
+  width: 32px;
+  height: 32px;
+}
+
+#explore-header .middle-element {
+  display: flex;
+  min-width: 0;
+  flex-grow: 1;
+}
+
+#explore-header-settings {
+  justify-content: flex-end;
+}

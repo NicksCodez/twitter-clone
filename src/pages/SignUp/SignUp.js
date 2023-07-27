@@ -13,6 +13,7 @@ import svgs from '../../utils/svgs';
 
 // firebase
 import { auth } from '../../firebase';
+import PageHeader from '../../components/PageHeader/PageHeader';
 
 const SignUp = () => {
   // keep track of first update, do not want some useEffect hooks to run on first update
@@ -74,19 +75,35 @@ const SignUp = () => {
     }
   }, [passwordConfirmInput]);
 
+  // build left element
+  const leftElement = (
+    <div>
+      <svg viewBox="0 0 24 24">
+        <path d={svgs.x} />
+      </svg>
+    </div>
+  );
+
+  // build middle element
+  const middleElement = (
+    <div>
+      <svg viewBox="0 0 24 24">
+        <path d={svgs.bird} />
+      </svg>
+    </div>
+  );
+
+  // build right element
+  const rightElement = <div className="filler" />;
+
   return (
     <div id="signup">
       <div id="signup-header">
-        <div>
-          <svg viewBox="0 0 24 24">
-            <path d={svgs.x} />
-          </svg>
-        </div>
-        <div>
-          <svg viewBox="0 0 24 24">
-            <path d={svgs.bird} />
-          </svg>
-        </div>
+        <PageHeader
+          leftElements={[leftElement]}
+          middleElements={[middleElement]}
+          rightElements={[rightElement]}
+        />
         <div className="filler" />
       </div>
       <div id="signup-content">

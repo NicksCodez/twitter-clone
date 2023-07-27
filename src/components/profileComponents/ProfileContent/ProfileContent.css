@@ -38,9 +38,14 @@
   position: absolute;
   box-shadow: rgba(0, 0, 0, 0.3) 0px 0px 2px inset;
   top: 0px;
-  left: 42.75px;
+  left: 58.75px;
   transform: translateX(-50%) translateY(-50%);
   border: 2px solid var(--clr-bg-base);
+}
+
+#profile-page-buttons .profile-picture-wrapper > a > img {
+  width: 77.5px;
+  height: 77.5px;
 }
 
 #profile-page-buttons .hidden {

@@ -1,5 +1,5 @@
 // react
-import React from 'react';
+import React, { useEffect } from 'react';
 import {
   createBrowserRouter,
   createRoutesFromElements,
@@ -20,30 +20,58 @@ import Profile from './pages/Profile/Profile';
 import Login, { loginFormAction } from './pages/Login/Login';
 import SignUp, { signUpFormAction } from './pages/SignUp/SignUp';
 
-const router = createBrowserRouter(
-  createRoutesFromElements(
-    <Route errorElement={<NotFound />}>
-      <Route path="/" element={<RootLayout />}>
-        <Route index element={<Navigate to="/home" replace />} />
-        <Route path="/home" element={<Home />} />
-        <Route path="/explore" element={<Explore />} />
-        <Route path="/profile" element={<Profile />} />
-      </Route>
-      <Route path="/compose/tweet" element={<ComposeTweet />} />
-      <Route
-        path="/i/flow/login"
-        element={<Login />}
-        action={loginFormAction}
-      />
-      <Route
-        path="/i/flow/signup"
-        element={<SignUp />}
-        action={signUpFormAction}
-      />
-    </Route>
-  )
-);
+// context providers
+import { useAppContext } from './contextProvider/ContextProvider';
 
-const App = () => <RouterProvider router={router} />;
+// utils
+import { resizeHandler } from './utils/functions';
+
+const App = () => {
+  const { viewportWidth, setViewportWidth } = useAppContext();
+
+  useEffect(() => {
+    // window event listeners
+    const resizeFunc = () => {
+      resizeHandler(setViewportWidth);
+    };
+    window.addEventListener('resize', resizeFunc);
+
+    // remove event listeners
+    return () => {
+      window.removeEventListener('resize', resizeFunc);
+    };
+  }, []);
+
+  const router = createBrowserRouter(
+    createRoutesFromElements(
+      <Route errorElement={<NotFound />}>
+        <Route path="/" element={<RootLayout />}>
+          <Route index element={<Navigate to="/home" replace />} />
+          <Route path="/home" element={<Home />} />
+          <Route path="/explore" element={<Explore />} />
+          <Route path="/profile" element={<Profile />} />
+          {viewportWidth >= 500 ? (
+            <Route path="/compose/tweet" element={<ComposeTweet />} />
+          ) : null}
+        </Route>
+        {viewportWidth < 500 ? (
+          <Route path="/compose/tweet" element={<ComposeTweet />} />
+        ) : null}
+        <Route
+          path="/i/flow/login"
+          element={<Login />}
+          action={loginFormAction}
+        />
+        <Route
+          path="/i/flow/signup"
+          element={<SignUp />}
+          action={signUpFormAction}
+        />
+      </Route>
+    )
+  );
+
+  return <RouterProvider router={router} />;
+};
 
 export default App;

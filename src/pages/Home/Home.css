@@ -8,3 +8,7 @@
   transition: top cubic-bezier(0, 0, 0, 1) 350ms;
   overflow-y: scroll;
 }
+
+#home .padded {
+  padding: 0px 16px;
+}

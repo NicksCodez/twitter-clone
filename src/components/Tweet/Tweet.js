@@ -4,9 +4,6 @@ import { Link } from 'react-router-dom';
 // css
 import './Tweet.css';
 
-// images
-import DefaultProfile from '../../assets/images/default_profile.png';
-
 // utils
 import svgs from '../../utils/svgs';
 
@@ -20,14 +17,19 @@ const Tweet = ({
   retweets,
   likes,
   bookmarks,
+  idProp,
 }) => (
-  <div className="tweet">
-    <div className="tweet-wrapper" onClick={console.log('')}>
+  <div className="tweet" id={idProp}>
+    <div className="tweet-top-separator" />
+    <div className="tweet-wrapper">
       <div className="tweet-profile-picture">
         <div className="profile-picture-wrapper u-round">
           <Link to="/profile">
             <img src={img} alt="profile" />
           </Link>
+        </div>
+        <div className="gray-line">
+          <Link to="/status/123" />
         </div>
       </div>
       <div className="tweet-content">

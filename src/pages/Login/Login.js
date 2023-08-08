@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Form, Link, redirect } from 'react-router-dom';
+import { Form, Link, redirect, useNavigate } from 'react-router-dom';
 
 // firebase
 import { signInWithEmailAndPassword } from 'firebase/auth';
@@ -15,15 +15,18 @@ import PageHeader from '../../components/PageHeader/PageHeader';
 import svgs from '../../utils/svgs';
 
 const Login = () => {
+  const navigate = useNavigate();
   const [emailInput, setEmailInput] = useState('');
   const [passwordInput, setPasswordInput] = useState('');
 
   // build left element
   const leftElement = (
     <div>
-      <svg viewBox="0 0 24 24">
-        <path d={svgs.x} />
-      </svg>
+      <button type="button" onClick={() => navigate('/home')}>
+        <svg viewBox="0 0 24 24">
+          <path d={svgs.x} />
+        </svg>
+      </button>
     </div>
   );
 

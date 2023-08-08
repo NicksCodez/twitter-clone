@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Form, Link, redirect } from 'react-router-dom';
+import { Form, Link, redirect, useNavigate } from 'react-router-dom';
 
 // css
 import './SignUp.css';
@@ -16,6 +16,7 @@ import { auth } from '../../firebase';
 import PageHeader from '../../components/PageHeader/PageHeader';
 
 const SignUp = () => {
+  const navigate = useNavigate();
   // keep track of first update, do not want some useEffect hooks to run on first update
   const firstUpdate = useRef(0);
   // store input values in state for client side validation
@@ -78,9 +79,11 @@ const SignUp = () => {
   // build left element
   const leftElement = (
     <div>
-      <svg viewBox="0 0 24 24">
-        <path d={svgs.x} />
-      </svg>
+      <button type='button' onClick={() => navigate('/home')}>
+        <svg viewBox="0 0 24 24">
+          <path d={svgs.x} />
+        </svg>
+      </button>
     </div>
   );
 

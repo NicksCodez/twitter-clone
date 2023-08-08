@@ -8,7 +8,7 @@ import './Tweet.css';
 import svgs from '../../utils/svgs';
 
 const Tweet = ({
-  img,
+  profileImg,
   name,
   tag,
   createdAt,
@@ -18,6 +18,7 @@ const Tweet = ({
   likes,
   bookmarks,
   idProp,
+  tweetImg,
 }) => (
   <div className="tweet" id={idProp}>
     <div className="tweet-top-separator" />
@@ -25,7 +26,7 @@ const Tweet = ({
       <div className="tweet-profile-picture">
         <div className="profile-picture-wrapper u-round">
           <Link to="/profile">
-            <img src={img} alt="profile" />
+            <img src={profileImg} alt="profile" />
           </Link>
         </div>
         <div className="gray-line">
@@ -55,8 +56,15 @@ const Tweet = ({
           </button>
         </div>
         <div className="tweet-row">
-          <div className="tweet-text">
-            <span>{text}</span>
+          <div className="flex-column">
+            <div className="tweet-text">
+              <span>{text}</span>
+            </div>
+            {tweetImg ? (
+              <div className="tweet-image-wrapper">
+                <img src={tweetImg} alt="tweet" />
+              </div>
+            ) : null}
           </div>
         </div>
         <div className="tweet-row tweet-actions">

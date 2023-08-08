@@ -1,0 +1,54 @@
+.new-tweet-actions {
+  position: relative;
+  padding: 12px;
+  display: flex;
+  align-items: center;
+  min-height: 31px;
+}
+
+.new-tweet-actions > div {
+  display: flex;
+  align-items: center;
+}
+
+.circular-progress {
+  position: relative;
+  height: 30px;
+  width: 30px;
+  border-radius: 9999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color ease 1s;
+}
+
+.circular-progress::before {
+  content: '';
+  position: absolute;
+  height: 26px;
+  width: 26px;
+  border-radius: 9999px;
+  background-color: var(--clr-bg-base);
+}
+
+.circular-progress-characters-left {
+  position: relative;
+  font-size: var(--fs-mili);
+  line-height: 10.4px;
+  font-weight: 400;
+}
+
+.new-tweet-add button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.new-tweet-add svg {
+  color: var(--clr-bg-blue);
+  height: 16px;
+  width: 16px;
+  padding: 3px;
+  border: 1px solid rgb(185, 202, 211);
+  border-radius: 9999px;
+}

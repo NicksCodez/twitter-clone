@@ -109,3 +109,16 @@ svg {
   justify-content: center;
   align-items: center;
 }
+
+.tweet .flex-column {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+}
+
+.tweet .flex-column img {
+  width: 100%;
+  border-radius: 20px;
+  margin-top: 4px;
+}

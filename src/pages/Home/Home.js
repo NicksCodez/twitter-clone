@@ -19,6 +19,19 @@ const Home = () => {
   const time = useRef(Date.now());
 
   useEffect(() => {
+    // // home event listeners
+    // const home = document.getElementById('home');
+    // const scrollHandlerFunc = () => {
+    //   scrollHandler(homeScroll, setHomeScroll, time);
+    // };
+    // home.addEventListener('scroll', scrollHandlerFunc);
+    // // remove event listeners
+    // return () => {
+    //   home.removeEventListener('scroll', scrollHandlerFunc);
+    // };
+  }, []);
+
+  useEffect(() => {
     // home event listeners
     const home = document.getElementById('home');
     const scrollHandlerFunc = () => {
@@ -30,7 +43,7 @@ const Home = () => {
     return () => {
       home.removeEventListener('scroll', scrollHandlerFunc);
     };
-  }, []);
+  }, [homeScroll]);
 
   useEffect(() => {
     const home = document.getElementById('home');
@@ -60,13 +73,14 @@ const scrollHandler = (lastScrollTop, setScrollTop, time) => {
     const home = document.getElementById('home');
     const homeHeader = document.getElementsByClassName('home-header');
     const st = home.scrollTop;
-    if (st > lastScrollTop.current) {
+    console.log({ st }, { lastScrollTop });
+    if (st > lastScrollTop) {
       // scroll down, so remove 'scrolled' class to hide first row
       // final design will probably have 2 elements with class 'home-header', one for mobile and one for desktop
       Array.from(homeHeader).forEach((element) => {
         element.classList.add('scrolled');
       });
-    } else if (st < lastScrollTop.current) {
+    } else if (st < lastScrollTop) {
       // scroll up, so add 'scrolled' class to show first row
       Array.from(homeHeader).forEach((element) => {
         element.classList.remove('scrolled');

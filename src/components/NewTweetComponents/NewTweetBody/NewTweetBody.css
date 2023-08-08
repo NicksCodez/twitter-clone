@@ -1,0 +1,66 @@
+.new-tweet-body {
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+  flex-shrink: 1;
+}
+
+.new-tweet-body img {
+  width: 100%;
+  border-radius: 10px;
+  margin: auto;
+}
+
+.new-tweet-textarea {
+  width: 100%;
+  min-height: 3.8em;
+  max-height: 100%;
+  white-space: pre-wrap;
+  word-break: break-word;
+  font-size: var(--fs-h2);
+  line-height: var(--lh-h2);
+  max-height: calc(100vh - 114px);
+  overflow-y: scroll;
+  outline: none;
+  color: var(--clr-font-secondary);
+}
+
+.new-tweet-textarea.active {
+  color: var(--clr-font-primary);
+}
+
+.new-tweet-textarea a,
+.new-tweet-textarea span,
+.new-tweet-textarea p {
+  display: inline;
+}
+
+.new-tweet-textarea .blue-text {
+  color: var(--clr-bg-blue);
+}
+
+.new-tweet-textarea .red-background {
+  background-color: rgb(251, 159, 168);
+}
+
+.new-tweet-img-wrp > div {
+  position: relative;
+}
+
+.new-tweet-img-wrp button {
+  position: absolute;
+  right: 10px;
+  top: 10px;
+  color: rgb(231, 233, 234);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 5px;
+  background-color: rgba(15, 20, 25, 0.75);
+  border-radius: 9999px;
+}
+
+.new-tweet-img-wrp svg {
+  width: 20px;
+  height: 20px;
+}

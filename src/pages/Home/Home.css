@@ -12,3 +12,7 @@
 #home .padded {
   padding: 0px 16px;
 }
+
+#home .page-header {
+  position: relative;
+}

@@ -11,6 +11,7 @@ import {
   doc,
   orderBy,
   startAfter,
+  onSnapshot,
 } from 'firebase/firestore';
 import { firestore } from '../../firebase';
 
@@ -34,6 +35,7 @@ const TweetContainer = ({ setLoading = () => true }) => {
     //   deleteDuplicateTweets();
     // }
     // populateFirestoreWithTweets(200);
+
     if (homeTweets.length === 0) {
       tweetsLoader(setHomeTweets, lastVisibleTweetRef);
     }
@@ -70,7 +72,7 @@ const TweetContainer = ({ setLoading = () => true }) => {
       {homeTweets.map((tweet) => (
         <Tweet
           key={tweet.tweetId}
-          img={tweet.userProfilePicture}
+          profileImg={tweet.userProfilePicture}
           name={tweet.userName}
           tag={tweet.userId}
           createdAt={formatTimeAgo(tweet.createdAt)}
@@ -80,6 +82,7 @@ const TweetContainer = ({ setLoading = () => true }) => {
           retweets={tweet.retweetsCount}
           bookmarks={tweet.bookmarksCount}
           idProp={`tweet-${tweet.tweetId}`}
+          tweetImg={tweet.imageLink}
         />
       ))}
     </div>
@@ -129,6 +132,7 @@ const tweetsLoader = async (setHomeTweets, lastVisibleTweetRef) => {
       );
     }
     const querySnapshot = await getDocs(queryRef);
+    console.log({ querySnapshot });
 
     const fetchedTweets = await Promise.all(
       querySnapshot.docs.map(async (document) => {

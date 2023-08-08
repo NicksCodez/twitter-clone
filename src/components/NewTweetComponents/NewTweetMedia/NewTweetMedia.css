@@ -1,0 +1,22 @@
+.new-tweet-media {
+  position: relative;
+  padding: 12px;
+  display: flex;
+  align-items: center;
+  min-height: 31px;
+}
+
+.new-tweet-media svg {
+  color: var(--clr-bg-blue);
+  height: 20px;
+  width: 20px;
+  margin-right: 12px;
+}
+
+.new-tweet-media input {
+  display: none;
+}
+
+.new-tweet-media label {
+  display: flex;
+}

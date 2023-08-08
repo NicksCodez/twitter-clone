@@ -1,5 +1,61 @@
-#compose-tweet {
-  position: fixed;
-  top: 50%;
-  left: 50%;
+#compose-tweet .left button {
+  height: 100%;
+  display: flex;
+  align-items: center;
+}
+
+#compose-tweet .left svg {
+  width: 20px;
+}
+
+#compose-tweet .middle {
+  display: flex;
+  flex-grow: 1;
+}
+
+#compose-tweet .right button {
+  background-color: var(--clr-bg-blue);
+  color: rgb(255, 255, 255);
+  font-weight: 700;
+  border: 1px solid var(--clr-bg-blue);
+  padding: 0px 16px;
+  height: 32px;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+}
+
+#compose-tweet .right button:disabled {
+  opacity: 0.5;
+}
+
+#compose-tweet-body {
+  padding: 4px 16px 0px;
+}
+
+#compose-tweet-body > div {
+  display: flex;
+  justify-content: space-between;
+}
+
+#compose-tweet-body-profile {
+  padding: 12px 12px 0px 0px;
+}
+
+#compose-tweet-body-profile img {
+  width: 40px;
+  height: 40px;
+}
+
+#compose-tweet-body .separator {
+  margin-top: 12px;
+  height: 1px;
+  background-color: var(--clr-border-primary);
+}
+
+.vertical-separator {
+  width: 1px;
+  height: 31px;
+  background-color: rgb(185, 202, 211);
+  margin: 0px 12px;
 }

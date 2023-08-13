@@ -78,3 +78,15 @@
   width: 89%;
   align-self: center;
 }
+
+#account .login {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: calc(100% - 32px);
+  background-color: vaR(--clr-bg-blue);
+  margin: 0 auto;
+  border-radius: 9999px;
+  font-weight: 700;
+  height: 53px;
+}

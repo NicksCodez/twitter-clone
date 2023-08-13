@@ -27,14 +27,16 @@
   min-width: 56px;
 }
 
-#profile-page-header span:first-child {
-  font-size: 17px;
-  font-weight: 700;
-}
-
 #profile-page-header span:last-child {
   font-size: var(--fs-mili);
   line-height: var(--lh-mili);
   font-weight: 400;
   color: var(--clr-font-secondary);
+}
+
+#profile-page-header span:first-child {
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--clr-font-primary);
+  line-height: var(--lh-base);
 }

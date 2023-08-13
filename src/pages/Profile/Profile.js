@@ -1,5 +1,9 @@
-import React from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useEffect, useState } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
+
+// firebase
+import { collection, doc, getDocs, query, where } from 'firebase/firestore';
+import { firestore } from '../../firebase';
 
 // css
 import './Profile.css';
@@ -8,11 +12,50 @@ import './Profile.css';
 import ProfileContent from '../../components/profileComponents/ProfileContent/ProfileContent';
 import PageHeader from '../../components/PageHeader/PageHeader';
 
+// context provider
+import { useAppContext } from '../../contextProvider/ContextProvider';
+
 // utils
 import svgs from '../../utils/svgs';
 
 const Profile = () => {
   const navigate = useNavigate();
+  const { user } = useAppContext();
+  const { tag } = useParams();
+  console.log({ tag }, { user });
+  const [profileVisited, setProfileVisited] = useState(null);
+
+  useEffect(() => {
+    // get profile visited data
+
+    const getProfileVisited = async () => {
+      // if profile visited is same as user, don't make useless request, use the data in context
+      if (user.tagLowerCase === tag.toLowerCase()) {
+        setProfileVisited(user);
+        return;
+      }
+      // if profile visited is different, get the data if profile exists
+      const usersCollectionRef = collection(firestore, 'users');
+      const queryRef = query(
+        usersCollectionRef,
+        where('tagLowerCase', '==', tag.toLowerCase())
+      );
+      const querySnapshot = await getDocs(queryRef);
+      if (!querySnapshot.empty) {
+        const profileVisitedDoc = querySnapshot.docs[0];
+        const profileVisitedData = profileVisitedDoc.data();
+        console.log(
+          'in functie => ',
+          { querySnapshot },
+          { profileVisitedDoc },
+          { profileVisitedData }
+        );
+        setProfileVisited(profileVisitedData);
+      }
+    };
+    getProfileVisited();
+  }, []);
+
   // build left element
   const leftElement = (
     <button
@@ -31,8 +74,9 @@ const Profile = () => {
   // build middle element
   const middleElement = (
     <div className="wrapper-col">
-      <span>Profile name</span>
-      <span>2,509 Tweets</span>
+      {!profileVisited && <span>Profile</span>}
+      {profileVisited && <span>{profileVisited.name}</span>}
+      {profileVisited && <span>{profileVisited.tweetCount} Tweets</span>}
     </div>
   );
 

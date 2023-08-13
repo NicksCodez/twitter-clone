@@ -12,6 +12,8 @@ const AppContextProvider = ({ children }) => {
   const [homeFollowingTweets, setHomeFollowingTweets] = useState([]);
   // Width of the viewport for conditional rendering (mobile/tablet/desktop)
   const [viewportWidth, setViewportWidth] = useState([]);
+  // user data
+  const [user, setUser] = useState({});
 
   return (
     <AppContext.Provider
@@ -26,6 +28,8 @@ const AppContextProvider = ({ children }) => {
         setHomeFollowingScroll,
         homeFollowingTweets,
         setHomeFollowingTweets,
+        user,
+        setUser,
       }}
     >
       {children}

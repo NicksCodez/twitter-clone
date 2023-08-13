@@ -9,10 +9,21 @@ import {
   createUserWithEmailAndPassword,
   sendEmailVerification,
 } from 'firebase/auth';
+import {
+  addDoc,
+  collection,
+  doc,
+  getDoc,
+  getDocs,
+  query,
+  runTransaction,
+  serverTimestamp,
+  where,
+} from 'firebase/firestore';
 import svgs from '../../utils/svgs';
 
 // firebase
-import { auth } from '../../firebase';
+import { auth, firestore } from '../../firebase';
 import PageHeader from '../../components/PageHeader/PageHeader';
 
 const SignUp = () => {
@@ -79,7 +90,7 @@ const SignUp = () => {
   // build left element
   const leftElement = (
     <div>
-      <button type='button' onClick={() => navigate('/home')}>
+      <button type="button" onClick={() => navigate('/home')}>
         <svg viewBox="0 0 24 24">
           <path d={svgs.x} />
         </svg>
@@ -132,7 +143,9 @@ const SignUp = () => {
                   )
                 }
                 onFocus={(event) => focusHandlerInput(event)}
-                onBlur={(event) => focusOutHandlerInput(event, nameInput)}
+                onBlur={(event) =>
+                  focusOutHandlerInput(event, nameInput, setInputsState)
+                }
               />
             </div>
           </label>
@@ -159,7 +172,9 @@ const SignUp = () => {
                   )
                 }
                 onFocus={(event) => focusHandlerInput(event)}
-                onBlur={(event) => focusOutHandlerInput(event, tagInput)}
+                onBlur={(event) =>
+                  focusOutHandlerInput(event, tagInput, setInputsState)
+                }
               />
             </div>
           </label>
@@ -186,7 +201,9 @@ const SignUp = () => {
                   )
                 }
                 onFocus={(event) => focusHandlerInput(event)}
-                onBlur={(event) => focusOutHandlerInput(event, emailInput)}
+                onBlur={(event) =>
+                  focusOutHandlerInput(event, emailInput, setInputsState)
+                }
               />
             </div>
           </label>
@@ -213,7 +230,9 @@ const SignUp = () => {
                   )
                 }
                 onFocus={(event) => focusHandlerInput(event)}
-                onBlur={(event) => focusOutHandlerInput(event, passwordInput)}
+                onBlur={(event) =>
+                  focusOutHandlerInput(event, passwordInput, setInputsState)
+                }
               />
             </div>
           </label>
@@ -241,7 +260,11 @@ const SignUp = () => {
                 }
                 onFocus={(event) => focusHandlerInput(event)}
                 onBlur={(event) =>
-                  focusOutHandlerInput(event, passwordConfirmInput)
+                  focusOutHandlerInput(
+                    event,
+                    passwordConfirmInput,
+                    setInputsState
+                  )
                 }
               />
             </div>
@@ -258,7 +281,7 @@ const SignUp = () => {
         <div id="signup-existing-account">
           <span>
             Have an account already?&#160;
-            <Link to="/i/flow/login">Log in</Link>
+            <Link to="/i/flow/login">Sign in</Link>
           </span>
         </div>
       </div>
@@ -275,31 +298,72 @@ export const signUpFormAction = async ({ request }) => {
   const email = data.get('email');
   const password = data.get('password');
 
-  const newUserCredential = await createUserWithEmailAndPassword(
-    auth,
-    email,
-    password
-  );
-  console.log(newUserCredential);
+  let newUserCredential;
+
   try {
-    await sendEmailVerification(newUserCredential.user);
+    newUserCredential = await createUserWithEmailAndPassword(
+      auth,
+      email,
+      password
+    );
+    console.log('got after create user');
   } catch (error) {
     console.error(error);
   }
 
-  // await createUserWithEmailAndPassword(auth, email, password)
-  //   .then((userCredential) => {
-  //     const { user } = userCredential;
-  //     console.log(user);
-  //     sendEmailVerification(user).then(() => console.log('sent'));
-  //   })
-  //   .catch((error) => {
-  //     const errorCode = error.code;
-  //     const errorMessage = error.message;
-  //     console.log(errorCode, errorMessage);
-  //   });
+  const usersCollectionRef = collection(firestore, 'users');
+  try {
+    const user = {
+      name,
+      tag,
+      uid: newUserCredential.user.uid,
+      bio: '',
+      createdAt: serverTimestamp(),
+      externalLink: '',
+      followers: [],
+      following: [],
+      headerImg: '',
+      location: '',
+      pinnedTweetId: -1,
+      profileImg:
+        'http://localhost:9199/twitter-clone-6ebd5.appspot.com/defaults/avatar-g7ef2c1a5f_1280.png',
+      tagLowerCase: tag.toLowerCase(),
+      tweetCount: 0,
+    };
+    await addDoc(usersCollectionRef, user);
+    console.log('got after email add user doc');
+    // update totalUsers in counters collection
+    const counterslDocRef = doc(firestore, 'counters', 'general');
+    await runTransaction(firestore, async (transaction) => {
+      const generalDocSnapshot = await getDoc(counterslDocRef);
+      if (generalDocSnapshot.exists()) {
+        const currentTotalUsers = generalDocSnapshot.data().totalUsers || 0;
+        const newTotalUsers = currentTotalUsers + 1;
+        transaction.update(counterslDocRef, { totalUsers: newTotalUsers });
+      }
+    });
+    console.log('got after email counters update');
+    // update tagsInUse and emailsInUse
+    const uniquesDocRef = doc(firestore, 'uniques', 'general');
+    const tagsInUseRef = collection(uniquesDocRef, 'tagsInUse');
+    const emailsInUseRef = collection(uniquesDocRef, 'emailsInUse');
 
-  return redirect('/i/flow/login');
+    await Promise.all([
+      addDoc(tagsInUseRef, { tag: tag.toLowerCase() }),
+      addDoc(emailsInUseRef, { email: email.toLowerCase() }),
+    ]);
+    console.log('got after email uniques update');
+  } catch (error) {
+    console.error(error);
+  }
+  try {
+    await sendEmailVerification(newUserCredential.user);
+    console.log('got after email ver');
+  } catch (error) {
+    console.error(error);
+  }
+  console.log('got before redirect');
+  return redirect('/home');
 };
 
 // input change handlers
@@ -346,7 +410,7 @@ const focusHandlerInput = (event) => {
   label.querySelector('.input-placeholder').classList.remove('no-color');
 };
 
-const focusOutHandlerInput = (event, inputValue) => {
+const focusOutHandlerInput = async (event, inputValue, setInputsState) => {
   const label = event.target.closest('label');
   label.classList.remove('active');
 
@@ -354,6 +418,52 @@ const focusOutHandlerInput = (event, inputValue) => {
     label.querySelector('.input-placeholder').classList.add('no-color');
   } else {
     label.querySelector('.input-placeholder').classList.remove('active');
+  }
+
+  // for tag and email make sure they are not already in use
+  checkInputInUse(event, event.currentTarget.id, setInputsState);
+};
+
+const checkInputInUse = async (event, inputId, setInputsState) => {
+  const uniquesDocRef = doc(firestore, 'uniques', 'general');
+  let collectionRef;
+  let inputName;
+  if (inputId === 'emailInput') {
+    inputName = 'email';
+    collectionRef = collection(uniquesDocRef, 'emailsInUse');
+  } else if (inputId === 'tagInput') {
+    inputName = 'tag';
+    collectionRef = collection(uniquesDocRef, 'tagsInUse');
+  } else {
+    return;
+  }
+  const label = event.target.closest('label');
+  const errorDiv = label.nextElementSibling;
+  const inputValue = event.currentTarget.value;
+
+  const queryRef = query(
+    collectionRef,
+    where(`${inputName}`, '==', inputValue.toLowerCase())
+  );
+  const querySnapshot = await getDocs(queryRef);
+
+  if (querySnapshot.docs.length !== 0) {
+    setInputsState((prevState) => ({
+      ...prevState,
+      [inputName]: false,
+    }));
+    // input is already in use, inform user
+    errorDiv.firstChild.textContent = `Sorry, that ${inputName} is already in use`;
+    errorDiv.classList.add('active');
+    label.classList.add('error');
+  } else {
+    setInputsState((prevState) => ({
+      ...prevState,
+      [inputName]: true,
+    }));
+    // input not in use, all is good
+    errorDiv.classList.remove('active');
+    label.classList.remove('error');
   }
 };
 

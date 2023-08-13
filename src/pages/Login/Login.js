@@ -89,7 +89,7 @@ const Login = () => {
           </label>
           <div className="button-wrapper">
             <button type="submit" className="u-round" id="submit-form-button">
-              Sign up
+              Sign in
             </button>
           </div>
         </Form>

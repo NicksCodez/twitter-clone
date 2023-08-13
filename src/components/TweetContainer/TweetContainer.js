@@ -3,15 +3,12 @@ import React, { useEffect, useRef } from 'react';
 // firebase
 import {
   collection,
-  getDoc,
   getDocs,
   limit,
   query,
   where,
-  doc,
   orderBy,
   startAfter,
-  onSnapshot,
 } from 'firebase/firestore';
 import { firestore } from '../../firebase';
 
@@ -138,11 +135,15 @@ const tweetsLoader = async (setHomeTweets, lastVisibleTweetRef) => {
       querySnapshot.docs.map(async (document) => {
         const tweetData = document.data();
 
-        // Get the document reference to the user using the tweet's userId
+        // get the user who posted the tweet's data
         const userDataRef = tweetData.userId;
-        const userRef = doc(firestore, 'users', userDataRef);
-        const userDataSnapshot = await getDoc(userRef);
-        const userData = userDataSnapshot.data();
+        const usersCollectionRef = collection(firestore, 'users');
+        const usersQueryRef = query(
+          usersCollectionRef,
+          where('tag', '==', userDataRef)
+        );
+        const userDataSnapshot = await getDocs(usersQueryRef);
+        const userData = userDataSnapshot.docs[0].data();
 
         return {
           tweetId: document.id,

@@ -73,7 +73,6 @@ const scrollHandler = (lastScrollTop, setScrollTop, time) => {
     const home = document.getElementById('home');
     const homeHeader = document.getElementsByClassName('home-header');
     const st = home.scrollTop;
-    console.log({ st }, { lastScrollTop });
     if (st > lastScrollTop) {
       // scroll down, so remove 'scrolled' class to hide first row
       // final design will probably have 2 elements with class 'home-header', one for mobile and one for desktop

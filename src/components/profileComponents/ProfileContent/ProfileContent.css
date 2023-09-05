@@ -8,10 +8,11 @@
   position: relative;
   display: flex;
   justify-content: flex-end;
-  padding: 12px 0px 0px;
+  padding: 12px 16px 0px;
   margin-bottom: 16px;
   gap: 8px;
   font-weight: 700;
+  min-height: 36px;
 }
 
 #profile-page-buttons svg {
@@ -41,9 +42,12 @@
   left: 58.75px;
   transform: translateX(-50%) translateY(-50%);
   border: 2px solid var(--clr-bg-base);
+  background-color: #f7f9f8;
+  min-width: 77.5px;
+  min-height: 77.5px;
 }
 
-#profile-page-buttons .profile-picture-wrapper > a > img {
+#profile-page-buttons .profile-picture-wrapper > img {
   width: 77.5px;
   height: 77.5px;
 }
@@ -58,6 +62,33 @@
   flex-direction: column;
   gap: 12px;
   justify-content: stretch;
+}
+
+#profile-page-content .wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  justify-content: stretch;
+}
+
+#profile-page-content .title {
+  font-weight: 800;
+  line-height: 36px;
+  font-size: 31px;
+}
+
+#profile-page-content .subtitle {
+  font-weight: 400;
+  line-height: 20px;
+  font-size: 15px;
+  color: var(--clr-font-secondary);
+}
+
+#profile-page-content .not-found-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 20px;
 }
 
 #profile-page-name {
@@ -84,10 +115,7 @@
   display: flex;
   align-items: center;
   gap: 4px;
-}
-
-#profile-page-links > div:nth-child(2) > a {
-  color: var(--clr-bg-blue);
+  margin-bottom: 2px;
 }
 
 #profile-page-follower-details,
@@ -180,4 +208,8 @@
 
 #profile-page-tweet-filters button.active .underline {
   display: block;
+}
+
+.blue {
+  color: var(--clr-bg-blue);
 }

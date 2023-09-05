@@ -24,14 +24,17 @@ const Profile = () => {
   const { tag } = useParams();
   console.log({ tag }, { user });
   const [profileVisited, setProfileVisited] = useState(null);
+  const [isOwnProfile, setIsOwnProfile] = useState(false);
+  const [isFollowed, setIsFollowed] = useState(false);
 
   useEffect(() => {
     // get profile visited data
 
     const getProfileVisited = async () => {
       // if profile visited is same as user, don't make useless request, use the data in context
-      if (user.tagLowerCase === tag.toLowerCase()) {
+      if (user.tagLowerCase && user.tagLowerCase === tag.toLowerCase()) {
         setProfileVisited(user);
+        setIsOwnProfile(true);
         return;
       }
       // if profile visited is different, get the data if profile exists
@@ -51,10 +54,13 @@ const Profile = () => {
           { profileVisitedData }
         );
         setProfileVisited(profileVisitedData);
+        if (user.following && user.following.includes(profileVisitedData.uid)) {
+          setIsFollowed(true);
+        }
       }
     };
     getProfileVisited();
-  }, []);
+  }, [user]);
 
   // build left element
   const leftElement = (
@@ -92,7 +98,12 @@ const Profile = () => {
           rightElements={[rightElement]}
         />
       </div>
-      <ProfileContent />
+      <ProfileContent
+        profileVisited={profileVisited}
+        isOwnProfile={isOwnProfile}
+        isFollowed={isFollowed}
+        tag={tag}
+      />
     </div>
   );
 };

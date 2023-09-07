@@ -33,6 +33,7 @@ const TweetContainer = ({ tweets, isLoading }) => (
     )}
   </div>
 );
+
 // Function to format timestamp
 const formatTimeAgo = (timestamp) => {
   const now = new Date();

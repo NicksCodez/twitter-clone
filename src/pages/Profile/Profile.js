@@ -26,6 +26,7 @@ const Profile = () => {
   const [profileVisited, setProfileVisited] = useState(null);
   const [isOwnProfile, setIsOwnProfile] = useState(false);
   const [isFollowed, setIsFollowed] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     // get profile visited data
@@ -35,6 +36,7 @@ const Profile = () => {
       if (user.tagLowerCase && user.tagLowerCase === tag.toLowerCase()) {
         setProfileVisited(user);
         setIsOwnProfile(true);
+        setIsLoading(false);
         return;
       }
       // if profile visited is different, get the data if profile exists
@@ -58,6 +60,7 @@ const Profile = () => {
           setIsFollowed(true);
         }
       }
+      setIsLoading(false);
     };
     getProfileVisited();
   }, [user]);
@@ -90,21 +93,23 @@ const Profile = () => {
   const rightElement = <div className="minW" />;
 
   return (
-    <div id="profile-page">
-      <div id="profile-page-header">
-        <PageHeader
-          leftElements={[leftElement]}
-          middleElements={[middleElement]}
-          rightElements={[rightElement]}
+    !isLoading && (
+      <div id="profile-page">
+        <div id="profile-page-header">
+          <PageHeader
+            leftElements={[leftElement]}
+            middleElements={[middleElement]}
+            rightElements={[rightElement]}
+          />
+        </div>
+        <ProfileContent
+          profileVisited={profileVisited}
+          isOwnProfile={isOwnProfile}
+          isFollowed={isFollowed}
+          tag={tag}
         />
       </div>
-      <ProfileContent
-        profileVisited={profileVisited}
-        isOwnProfile={isOwnProfile}
-        isFollowed={isFollowed}
-        tag={tag}
-      />
-    </div>
+    )
   );
 };
 

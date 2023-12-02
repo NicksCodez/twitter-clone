@@ -1,0 +1,54 @@
+#setup-profile-picture {
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+}
+
+#setup-profile-picture .input-zone {
+  position: relative;
+  padding: 12px;
+  min-height: 31px;
+  margin-top: 64px;
+  display: flex;
+  flex-grow: 1;
+  align-items: flex-start;
+  justify-content: center;
+}
+
+#setup-profile-picture .relative {
+  position: relative;
+}
+
+#setup-profile .absolute-centered {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+}
+
+#setup-profile .absolute-centered button {
+  margin-left: 20px;
+}
+
+#setup-profile-picture .input-zone img {
+  height: 184px;
+  width: 184px;
+}
+
+#setup-profile-picture svg {
+  color: rgb(255, 255, 255);
+  height: 20px;
+  width: 20px;
+  padding: 10px;
+  background-color: rgba(15, 20, 25, 0.75);
+  backdrop-filter: blur(4px);
+}
+
+#setup-profile-picture .input-zone input {
+  display: none;
+}
+
+#setup-profile-picture .input-zone label {
+  display: flex;
+}

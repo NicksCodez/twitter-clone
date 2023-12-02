@@ -1,0 +1,24 @@
+.skip-next-button {
+  width: 100%;
+  margin: 24px 0;
+}
+
+.skip-next-button.active button {
+  background-color: var(--clr-font-following);
+  color: var(--clr-font-follow);
+}
+
+.skip-next-button button {
+  border: 1px solid var(--clr-bg-profile-header-pic);
+  border-radius: 9999px;
+  min-height: 52px;
+  min-width: 52px;
+  width: 100%;
+  background-color: inherit;
+}
+
+.skip-next-button span {
+  font-size: 17px;
+  line-height: 20px;
+  font-weight: 700;
+}

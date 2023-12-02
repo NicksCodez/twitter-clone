@@ -23,6 +23,7 @@ import ComposeTweet from './pages/ComposeTweet/ComposeTweet';
 import Profile from './pages/Profile/Profile';
 import Login, { loginFormAction } from './pages/Login/Login';
 import SignUp, { signUpFormAction } from './pages/SignUp/SignUp';
+import SetupProfile from './pages/SetupProfile/SetupProfile';
 
 // context providers
 import { useAppContext } from './contextProvider/ContextProvider';
@@ -98,6 +99,11 @@ const App = () => {
           path="/i/flow/signup"
           element={<SignUp />}
           action={signUpFormAction}
+        />
+        <Route
+          path="/i/flow/setup_profile"
+          element={<SetupProfile />}
+          // action={signUpFormAction}
         />
       </Route>
     )

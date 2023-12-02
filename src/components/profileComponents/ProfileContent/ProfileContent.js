@@ -121,7 +121,7 @@ const ProfileContent = ({ profileVisited, isOwnProfile, isFollowed, tag }) => {
   return (
     <div id="profile-page-content">
       <div id="profile-page-header-image">
-        {/* <img src='*' alt='profile header' /> */}
+        <img src={profileVisited.headerImg} alt="profile header" />
       </div>
 
       <div id="profile-page-buttons">
@@ -134,9 +134,9 @@ const ProfileContent = ({ profileVisited, isOwnProfile, isFollowed, tag }) => {
                 </button>
               )}
               {isOwnProfile && (
-                <button type="button" className="u-round">
+                <Link to="/i/flow/setup_profile" className="u-round">
                   <span>Set up profile</span>
-                </button>
+                </Link>
               )}
             </div>
           </div>

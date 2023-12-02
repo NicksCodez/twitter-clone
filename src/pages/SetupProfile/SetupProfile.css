@@ -1,0 +1,64 @@
+#setup-profile {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+#setup-profile .page-header * {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+#setup-profile .page-header .svg-wrapper {
+  width: 24px;
+}
+
+#setup-profile .page-header .middle {
+  color: var(--clr-bg-blue);
+  flex-grow: 1;
+}
+
+#setup-profile .paddblah {
+  padding: 0 32px;
+}
+
+#setup-profile .setup-padded {
+  padding: 0 32px;
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+}
+
+#setup-profile .centered {
+  display: flex;
+  align-self: center;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 40px;
+  margin: 50% 0px;
+}
+
+#setup-profile .centered > div {
+  display: flex;
+  justify-content: center;
+}
+
+#setup-profile .centered svg {
+  width: 48px;
+  height: 48px;
+  color: var(--clr-bg-blue);
+}
+
+#setup-profile .centered .details {
+  font-size: 26px;
+  font-weight: 800;
+  line-height: 32px;
+}
+
+#setup-profile .centered button {
+  width: 100%;
+  height: 50px;
+  font-weight: 700;
+  background-color: var(--clr-font-following);
+  color: var(--clr-font-follow);
+}

@@ -24,6 +24,7 @@ import Profile from './pages/Profile/Profile';
 import Login, { loginFormAction } from './pages/Login/Login';
 import SignUp, { signUpFormAction } from './pages/SignUp/SignUp';
 import SetupProfile from './pages/SetupProfile/SetupProfile';
+import EditProfile from './pages/EditProfile/EditProfile';
 
 // context providers
 import { useAppContext } from './contextProvider/ContextProvider';
@@ -88,6 +89,7 @@ const App = () => {
           <Route path="/explore" element={<Explore />} />
           <Route path="/:tag" element={<Profile />} />
           <Route path="/compose/tweet" element={<ComposeTweet />} />
+          <Route path="/settings/profile" element={<EditProfile />} />
         </Route>
 
         <Route

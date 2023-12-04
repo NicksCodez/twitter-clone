@@ -8,12 +8,12 @@
   position: relative;
   padding: 12px;
   min-height: 31px;
-  margin-top: 64px;
+  margin-top: 32px;
   display: flex;
   flex-direction: column;
   flex-grow: 1;
   align-items: flex-start;
-  gap: 32px;
+  gap: 24px;
 }
 
 #setup-profile-header .relative {

@@ -53,15 +53,6 @@ const SetupProfileBio = ({ text, setText, currentStep, setCurrentStep }) => {
             <span>{charsWritten}/160</span>
           </div>
           <div className="input-wrapper">
-            {/* <input
-              required
-              type="text"
-              id="bioInput"
-              name="bio"
-              onInput={() => console.log('input')}
-              onFocus={(event) => focusHandlerInput(event)}
-              onBlur={(event) => focusOutHandlerInput(event, inputValue)}
-            /> */}
             <textarea
               autoCapitalize="sentences"
               autoComplete="on"

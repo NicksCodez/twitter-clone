@@ -133,11 +133,19 @@ const ProfileContent = ({ profileVisited, isOwnProfile, isFollowed, tag }) => {
                   <span>{isFollowed ? 'Following' : 'Follow'}</span>
                 </button>
               )}
-              {isOwnProfile && (
-                <Link to="/i/flow/setup_profile" className="u-round">
-                  <span>Set up profile</span>
-                </Link>
-              )}
+              {isOwnProfile &&
+                (!profileVisited.setup || profileVisited.setup === false) && (
+                  <Link to="/i/flow/setup_profile" className="u-round">
+                    <span>Set up profile</span>
+                  </Link>
+                )}
+              {isOwnProfile &&
+                profileVisited.setup &&
+                profileVisited.setup === true && (
+                  <Link to="/settings/profile" className="u-round">
+                    <span>Edit profile</span>
+                  </Link>
+                )}
             </div>
           </div>
         )}

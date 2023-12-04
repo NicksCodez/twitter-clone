@@ -25,6 +25,7 @@ import Login, { loginFormAction } from './pages/Login/Login';
 import SignUp, { signUpFormAction } from './pages/SignUp/SignUp';
 import SetupProfile from './pages/SetupProfile/SetupProfile';
 import EditProfile from './pages/EditProfile/EditProfile';
+import Logout from './pages/Logout/Logout';
 
 // context providers
 import { useAppContext } from './contextProvider/ContextProvider';
@@ -107,6 +108,7 @@ const App = () => {
           element={<SetupProfile />}
           // action={signUpFormAction}
         />
+        <Route path="/logout" element={<Logout />} />
       </Route>
     )
   );

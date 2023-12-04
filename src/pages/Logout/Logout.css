@@ -1,0 +1,63 @@
+#logout {
+  width: 100vw;
+  height: 100vh;
+  position: relative;
+  background: var(--clr-bg-sidebar-blur);
+}
+
+#logout .container {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translateX(-50%) translateY(-50%);
+  background-color: var(--clr-bg-base);
+  width: 320px;
+  max-width: 80vw;
+  border-radius: 16px;
+}
+
+#logout .padded {
+  padding: 28px;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 12px;
+}
+
+#logout .container .padded .logo {
+  align-self: center;
+}
+
+#logout .container .padded .logo svg {
+  width: 40px;
+  height: 40px;
+  color: var(--clr-bg-blue);
+}
+
+#logout .container .padded .title {
+  font-size: 20px;
+  font-weight: 700;
+  line-height: 24px;
+}
+
+#logout .container .padded .subtitle {
+  font-size: 15px;
+  font-weight: 400;
+  line-height: 20px;
+  color: var(--clr-font-secondary);
+}
+
+#logout .container .padded .btn {
+  width: 100%;
+  border: 1px solid var(--clr-border-primary);
+  border-radius: 9999px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 42px;
+  font-weight: 700;
+}
+
+#logout .container .padded .btn.inverse-background {
+  background-color: var(--clr-bg-blue);
+}

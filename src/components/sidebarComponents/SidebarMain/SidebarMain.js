@@ -144,7 +144,7 @@ const SidebarMain = () => {
       <SidebarElement
         svg={svgs.logOut}
         name="Log out"
-        link="not-implemented"
+        link="/logout"
         cls="mini"
         subCls="settings"
       />
@@ -153,17 +153,9 @@ const SidebarMain = () => {
           Sign in
         </Link>
       ) : (
-        <button
-          type="button"
-          className="login"
-          onClick={async () => {
-            await signOut(auth);
-            navigate('/home');
-            console.log('signed out');
-          }}
-        >
-          Sign out
-        </button>
+        <Link to="/compose/tweet" className="login">
+          Tweet
+        </Link>
       )}
     </div>
   );

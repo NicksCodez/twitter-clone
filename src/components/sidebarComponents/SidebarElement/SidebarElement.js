@@ -19,7 +19,7 @@ const SidebarElement = ({
       subCls ? `${subCls}-submenu-item` : ''
     }`}
   >
-    <Link to={`/${link}`}>
+    <Link to={link}>
       <div>
         <svg viewBox="0 0 24 24" color={svgColor}>
           <path d={svg} />

@@ -13,7 +13,12 @@ import PageHeader from '../PageHeader/PageHeader';
 // images
 import DefaultProfile from '../../assets/images/default_profile.png';
 
+// context
+import { useAppContext } from '../../contextProvider/ContextProvider';
+
 const HomeHeader = () => {
+  const { user } = useAppContext();
+
   // build left element
   const leftElement = (
     <button
@@ -21,7 +26,11 @@ const HomeHeader = () => {
       className="image-wrapper"
       onClick={clickHandlerAccount}
     >
-      <img src={DefaultProfile} alt="profile" className="u-round" />
+      <img
+        src={user && user.profileImg ? user.profileImg : DefaultProfile}
+        alt="profile"
+        className="u-round"
+      />
     </button>
   );
 

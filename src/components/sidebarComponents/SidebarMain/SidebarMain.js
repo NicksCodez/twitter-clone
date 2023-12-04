@@ -24,16 +24,17 @@ const SidebarMain = () => {
   const { user } = useAppContext();
   return (
     <div id="account" aria-label="account">
-      {user.tag ? (
+      {user.tag && (
         <Link to={`/${user.tag}`}>
           <div className="padded-wrapper">
             <div className="account-picture">
               <img src={user.profileImg} alt="profile" className="u-round" />
+              {/* svg for adding multiple accounts, functionality not yet implemented
               <div>
                 <svg viewBox="0 0 24 24" className="u-round">
                   <path d="M11 11V4h2v7h7v2h-7v7h-2v-7H4v-2h7z" />
                 </svg>
-              </div>
+              </div> */}
             </div>
             <div className="account-name">
               <div className="primary">{user.name}</div>
@@ -51,8 +52,12 @@ const SidebarMain = () => {
             </div>
           </div>
         </Link>
-      ) : null}
-      <SidebarElement svg={svgs.profile} name="Profile" link="profile" />
+      )}
+      <SidebarElement
+        svg={svgs.profile}
+        name="Profile"
+        link={user && user.tag ? `/${user.tag}` : '/i/flow/signup'}
+      />
       <SidebarElement
         svg={svgs.blue}
         name="Twitter Blue"

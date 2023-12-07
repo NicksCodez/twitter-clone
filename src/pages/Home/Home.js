@@ -10,6 +10,7 @@ import {
   where,
   orderBy,
   startAfter,
+  onSnapshot,
 } from 'firebase/firestore';
 import { firestore } from '../../firebase';
 
@@ -36,6 +37,15 @@ const Home = () => {
   const [isLoading, setLoading] = useState(true);
   const time = useRef(Date.now());
   const lastVisibleTweetRef = useRef(null);
+  const timesLoadedRef = useRef(0);
+
+  useEffect(() => {
+    timesLoadedRef.current += 1;
+  }, []);
+
+  useEffect(() => {
+    console.log(homeTweets);
+  }, [homeTweets]);
 
   useEffect(() => {
     // home event listeners
@@ -70,8 +80,10 @@ const Home = () => {
     // populateFirestoreWithTweets(200);
 
     if (homeTweets.length === 0) {
+      console.log('calling tweets loader bc hometweets length is 0');
       tweetsLoader(setHomeTweets, lastVisibleTweetRef);
     }
+
     // deleteDuplicateTweets();
     setLoading(false);
   }, []);
@@ -79,6 +91,7 @@ const Home = () => {
   const handleIntersection = (entries) => {
     const [entry] = entries;
     if (entry.isIntersecting) {
+      console.log('calling tweets loader bc entries are intersecting');
       tweetsLoader(setHomeTweets, lastVisibleTweetRef);
     }
   };
@@ -146,6 +159,7 @@ const scrollHandler = (lastScrollTop, setScrollTop, time) => {
 
 // Function to load tweets
 const tweetsLoader = async (setHomeTweets, lastVisibleTweetRef) => {
+  let unsubscribe;
   const tweetsCollectionRef = collection(firestore, 'tweets');
 
   try {
@@ -168,47 +182,71 @@ const tweetsLoader = async (setHomeTweets, lastVisibleTweetRef) => {
     }
     const querySnapshot = await getDocs(queryRef);
     console.log({ querySnapshot });
+    // test pt snapshot
 
-    const fetchedTweets = await Promise.all(
-      querySnapshot.docs.map(async (document) => {
-        const tweetData = document.data();
+    unsubscribe = await onSnapshot(queryRef, async (querySnapshotup) => {
+      const source = querySnapshotup.docs[0].metadata.hasPendingWrites
+        ? 'Local'
+        : 'Server';
+      console.log(source, ' data: ', querySnapshotup.docs[0].data());
 
-        // get the user who posted the tweet's data
-        const userDataRef = tweetData.userId;
-        const usersCollectionRef = collection(firestore, 'users');
-        const usersQueryRef = query(
-          usersCollectionRef,
-          where('tag', '==', userDataRef)
-        );
-        const userDataSnapshot = await getDocs(usersQueryRef);
-        const userData = userDataSnapshot.docs[0].data();
+      const fetchedTweets = await Promise.all(
+        querySnapshotup.docs.map(async (document) => {
+          const tweetData = document.data();
 
-        return {
-          tweetId: document.id,
-          ...tweetData,
-          userName: userData.name,
-          userProfilePicture: userData.profileImg,
-        };
-      })
-    );
-    if (querySnapshot.docs.length > 0) {
-      const lastTweet = querySnapshot.docs[querySnapshot.docs.length - 1];
-      // eslint-disable-next-line no-param-reassign
-      lastVisibleTweetRef.current = lastTweet;
-    }
+          // get the user who posted the tweet's data
+          const userDataRef = tweetData.userId;
+          const usersCollectionRef = collection(firestore, 'users');
+          const usersQueryRef = query(
+            usersCollectionRef,
+            where('tag', '==', userDataRef)
+          );
+          const userDataSnapshot = await getDocs(usersQueryRef);
+          const userData = userDataSnapshot.docs[0].data();
 
-    // Check if the tweet is already present in the state and avoid duplication
-    setHomeTweets((prevTweets) => {
-      const tweetIds = new Set(prevTweets.map((tweet) => tweet.tweetId));
-      const newTweets = fetchedTweets.filter(
-        (tweet) => !tweetIds.has(tweet.tweetId)
+          return {
+            tweetId: document.id,
+            ...tweetData,
+            userName: userData.name,
+            userProfilePicture: userData.profileImg,
+          };
+        })
       );
-      return [...prevTweets, ...newTweets];
+      if (querySnapshotup.docs.length > 0) {
+        const lastTweet = querySnapshotup.docs[querySnapshotup.docs.length - 1];
+        // eslint-disable-next-line no-param-reassign
+        lastVisibleTweetRef.current = lastTweet;
+      }
+
+      // Check if the tweet is already present in the state and avoid duplication
+      setHomeTweets((prevTweets) => {
+        // if any fetched tweet has the same ID as any tweet already in homeTweets, update it
+        const updatedTweets = prevTweets.map((prevTweet) => {
+          const updatedTweet = fetchedTweets.find(
+            (fetchedTweet) => fetchedTweet.tweetId === prevTweet.tweetId
+          );
+          return updatedTweet || prevTweet;
+        });
+
+        // append any tweet not already in homeTweets to updatedTweets
+        fetchedTweets.forEach((fetchedTweet) => {
+          if (
+            !prevTweets.some(
+              (prevTweet) => prevTweet.tweetId === fetchedTweet.tweetId
+            )
+          ) {
+            updatedTweets.push(fetchedTweet);
+          }
+        });
+
+        return updatedTweets;
+      });
     });
-    // setHomeTweets(fetchedTweets);
   } catch (error) {
     console.error('Error fetching homeTweets:', error);
   }
+  console.log('before returning unsubscribe');
+  return unsubscribe;
 };
 
 export default Home;

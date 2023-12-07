@@ -25,7 +25,7 @@ const TweetContainer = ({ tweets, isLoading }) => (
               likes={tweet.likesCount}
               retweets={tweet.retweetsCount}
               bookmarks={tweet.bookmarksCount}
-              idProp={`tweet-${tweet.tweetId}`}
+              idProp={tweet.tweetId}
               tweetImg={tweet.imageLink}
             />
           ))}

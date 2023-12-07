@@ -122,3 +122,7 @@ svg {
   border-radius: 20px;
   margin-top: 4px;
 }
+
+.tweet-action.like .active {
+  color: rgb(249, 24, 128);
+}

@@ -20,14 +20,16 @@ import svgs from '../../utils/svgs';
 import PageHeader from '../../components/PageHeader/PageHeader';
 
 // context providers
-import { useAppContext } from '../../contextProvider/ContextProvider';
+// import { useAppContext } from '../../contextProvider/ContextProvider';
+import { useUserContext } from '../../contextProvider/ContextProvider';
 
 // components
 import BioInput from '../../components/EditProfileComponents/BioInput/BioInput';
 import GeneralInput from '../../components/EditProfileComponents/BioInput/GeneralInput/GeneralInput';
 
 const EditProfile = () => {
-  const { user } = useAppContext();
+  // const { user } = useAppContext();
+  const { user } = useUserContext();
 
   const [header, setHeader] = useState(null);
   const [headerPreview, setHeaderPreview] = useState(null);
@@ -49,41 +51,41 @@ const EditProfile = () => {
   useEffect(() => {
     let tmp;
     // make sure image is not already URL
-    if (typeof header !== 'string') {
-      // when image is uploaded, create object URL for it to use as preview
-      if (!header) return;
-      tmp = URL.createObjectURL(header[0]);
-      setHeaderPreview(tmp);
-    } else {
-      setHeaderPreview(header);
+    if (header) {
+      if (typeof header !== 'string') {
+        // when image is uploaded, create object URL for it to use as preview
+        tmp = URL.createObjectURL(header[0]);
+        setHeaderPreview(tmp);
+      } else {
+        setHeaderPreview(header);
+      }
     }
 
-    if (tmp) {
-      // free memory
-      return () => {
+    return () => {
+      if (tmp) {
         URL.revokeObjectURL(tmp);
-      };
-    }
+      }
+    };
   }, [header]);
 
   useEffect(() => {
     let tmp;
     // make sure image is not already URL
-    if (typeof profile !== 'string') {
-      // when image is uploaded, create object URL for it to use as preview
-      if (!profile) return;
-      tmp = URL.createObjectURL(profile[0]);
-      setProfilePreview(tmp);
-    } else {
-      setProfilePreview(profile);
+    if (profile) {
+      if (typeof profile !== 'string') {
+        // when image is uploaded, create object URL for it to use as preview
+        tmp = URL.createObjectURL(profile[0]);
+        setProfilePreview(tmp);
+      } else {
+        setProfilePreview(profile);
+      }
     }
 
-    if (tmp) {
-      // free memory
-      return () => {
+    return () => {
+      if (tmp) {
         URL.revokeObjectURL(tmp);
-      };
-    }
+      }
+    };
   }, [profile]);
 
   const saveButtonClickHandler = async () => {

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 
 // firebase
@@ -17,11 +17,15 @@ import SidebarElement from '../SidebarElement/SidebarElement';
 
 // utils
 import svgs from '../../../utils/svgs';
-import { useAppContext } from '../../../contextProvider/ContextProvider';
+
+// context providers
+// import { useAppContext } from '../../../contextProvider/ContextProvider';
+import { useUserContext } from '../../../contextProvider/ContextProvider';
 
 const SidebarMain = () => {
   const navigate = useNavigate();
-  const { user } = useAppContext();
+  // const { user } = useAppContext();
+  const { user } = useUserContext();
   return (
     <div id="account" aria-label="account">
       {user.tag && (

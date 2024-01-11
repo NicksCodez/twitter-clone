@@ -1,15 +1,18 @@
 import React, { useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { useAppContext } from '../../contextProvider/ContextProvider';
+// import { useAppContext } from '../../contextProvider/ContextProvider';
+import { useTweetContext } from '../../contextProvider/ContextProvider';
 
 // css
 import './FeatherButton.css';
 
 const FeatherButton = () => {
-  const { homeScroll } = useAppContext();
+  // const { homeScroll } = useAppContext();
+  const { homeScroll } = useTweetContext();
+  // replying to a tweet, quoting a tweet, making a new tweet all lead to /compose/tweet, so keep data necessary for /compose/tweet in location
   const location = useLocation();
   useEffect(() => {
-    console.log('feather => ', homeScroll);
+    // console.log('feather => ', homeScroll);
   }, [location]);
   const myData = {
     tweets: 'Some thing',

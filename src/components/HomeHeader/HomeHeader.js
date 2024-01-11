@@ -14,10 +14,12 @@ import PageHeader from '../PageHeader/PageHeader';
 import DefaultProfile from '../../assets/images/default_profile.png';
 
 // context
-import { useAppContext } from '../../contextProvider/ContextProvider';
+// import { useAppContext } from '../../contextProvider/ContextProvider';
+import { useUserContext } from '../../contextProvider/ContextProvider';
 
-const HomeHeader = () => {
-  const { user } = useAppContext();
+const HomeHeader = ({ setIsForYouSelected }) => {
+  // const { user } = useAppContext();
+  const { user } = useUserContext();
 
   // build left element
   const leftElement = (
@@ -62,7 +64,7 @@ const HomeHeader = () => {
         middleElements={[middleElement]}
         rightElements={[rightElement]}
       />
-      <SecondRow />
+      <SecondRow setIsForYouSelected={setIsForYouSelected} />
     </div>
   );
 };

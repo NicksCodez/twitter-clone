@@ -13,14 +13,16 @@ import ProfileContent from '../../components/profileComponents/ProfileContent/Pr
 import PageHeader from '../../components/PageHeader/PageHeader';
 
 // context provider
-import { useAppContext } from '../../contextProvider/ContextProvider';
+// import { useAppContext } from '../../contextProvider/ContextProvider';
+import { useUserContext } from '../../contextProvider/ContextProvider';
 
 // utils
 import svgs from '../../utils/svgs';
 
 const Profile = () => {
   const navigate = useNavigate();
-  const { user } = useAppContext();
+  // const { user } = useAppContext();
+  const { user } = useUserContext();
   const { tag } = useParams();
   console.log({ tag }, { user });
   const [profileVisited, setProfileVisited] = useState(null);

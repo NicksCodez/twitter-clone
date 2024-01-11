@@ -13,7 +13,8 @@ import People from '../../components/People/People';
 import Searchbar from '../../components/Searchbar/SearchBar';
 
 // context provider
-import { useAppContext } from '../../contextProvider/ContextProvider';
+// import { useAppContext } from '../../contextProvider/ContextProvider';
+import { useViewportContext } from '../../contextProvider/ContextProvider';
 
 // utils
 import svgs from '../../utils/svgs';
@@ -24,7 +25,8 @@ import DefaultProfile from '../../assets/images/default_profile.png';
 import PageHeader from '../../components/PageHeader/PageHeader';
 
 const Explore = () => {
-  const { viewportWidth } = useAppContext();
+  // const { viewportWidth } = useAppContext();
+  const { viewportWidth } = useViewportContext();
 
   useEffect(() => {
     // search input events

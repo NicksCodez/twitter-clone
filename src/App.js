@@ -28,13 +28,18 @@ import EditProfile from './pages/EditProfile/EditProfile';
 import Logout from './pages/Logout/Logout';
 
 // context providers
-import { useAppContext } from './contextProvider/ContextProvider';
+// import { useAppContext } from './contextProvider/ContextProvider';
+import {
+  useUserContext,
+  useViewportContext,
+} from './contextProvider/ContextProvider';
 
 // utils
 import { resizeHandler } from './utils/functions';
 
 const App = () => {
-  const { setViewportWidth, setUser } = useAppContext();
+  const { setViewportWidth } = useViewportContext();
+  const { user, setUser } = useUserContext();
 
   useEffect(() => {
     // window event listeners
@@ -46,45 +51,63 @@ const App = () => {
     // define unsubscribe here to call it in return and free resources
     // set the user in context whenever authentication changes to have easy access
     let unsubscribe = () => null;
-    auth.onAuthStateChanged((user) => {
+    auth.onAuthStateChanged((authUser) => {
       // use setTimeout because changing the context on e.g. sign up causes a rerender which somehow breaks redirect functionality
       // making the rerender happen at a later point is fine, redirect has already happenned
       // gonna have to check it out in more detail sometime and find a proper fix
-      if (user) {
+      if (authUser) {
         setTimeout(async () => {
           const usersCollectionRef = collection(firestore, 'users');
           const queryRef = query(
             usersCollectionRef,
-            where('uid', '==', user.uid)
+            where('uid', '==', authUser.uid)
           );
           // use onSnapshot to be notified of changes to user data
+          // ! wrap in try catch
           unsubscribe = onSnapshot(queryRef, (snapshot) => {
             let userData = {};
             if (snapshot.docs) {
-              userData = snapshot.docs[0].data();
+              const data = snapshot.docs[0].data();
+              userData = {
+                name: data.name,
+                tag: data.tag,
+                profileImg: data.profileImg,
+                followers: data.followers,
+                following: data.following,
+              };
+              // * keep only profile pic, tag, display name, following count, followers count as this information is needed more often
+              if (
+                user.profileImg !== userData.profileImg ||
+                user.name !== userData.name ||
+                user.tag !== userData.tag ||
+                user.followers.length !== userData.followers.length ||
+                user.following.length !== userData.following.length
+              ) {
+                setUser(userData);
+              }
             }
-            setUser(userData);
           });
         }, 2000);
       } else {
-        setUser({});
-        // setTimeout(() => {
-        //   setUser({});
-        // }, 2000);
+        // user logs out, stop sending user data to client
+        unsubscribe();
+        // setUser({});
+        setTimeout(() => {
+          setUser({});
+        }, 2000);
       }
     });
 
     // remove event listeners
     return () => {
       window.removeEventListener('resize', resizeFunc);
-      unsubscribe();
     };
   }, []);
 
   const router = createBrowserRouter(
     createRoutesFromElements(
       <Route errorElement={<NotFound />}>
-        <Route path="/" element={<RootLayout />}>
+        <Route path="/" element={<RootLayout />} exact>
           <Route index element={<Navigate to="/home" replace />} />
           <Route path="/home" element={<Home />} />
           <Route path="/explore" element={<Explore />} />
@@ -103,11 +126,7 @@ const App = () => {
           element={<SignUp />}
           action={signUpFormAction}
         />
-        <Route
-          path="/i/flow/setup_profile"
-          element={<SetupProfile />}
-          // action={signUpFormAction}
-        />
+        <Route path="/i/flow/setup_profile" element={<SetupProfile />} />
         <Route path="/logout" element={<Logout />} />
       </Route>
     )

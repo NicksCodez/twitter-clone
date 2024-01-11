@@ -24,7 +24,8 @@ import SetupProfileBio from '../../components/setupProfileComponents/setupProfil
 import SetupProfileLocation from '../../components/setupProfileComponents/setupProfileLocation/SetupProfileLocation';
 
 // context provider
-import { useAppContext } from '../../contextProvider/ContextProvider';
+// import { useAppContext } from '../../contextProvider/ContextProvider';
+import { useUserContext } from '../../contextProvider/ContextProvider';
 
 // utils
 import svgs from '../../utils/svgs';
@@ -35,7 +36,8 @@ const SetupProfile = () => {
   const [headerPic, setHeaderPic] = useState(null);
   const [bio, setBio] = useState('');
   const [location, setLocation] = useState('');
-  const { user } = useAppContext();
+  // const { user } = useAppContext();
+  const { user } = useUserContext();
   const navigate = useNavigate();
 
   let leftElement;

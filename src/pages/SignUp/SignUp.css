@@ -103,6 +103,7 @@
 #signup-existing-account {
   display: flex;
   margin-top: 40px;
+  justify-content: center;
 }
 
 #signup-existing-account span {

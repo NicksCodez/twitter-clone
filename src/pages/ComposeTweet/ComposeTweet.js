@@ -18,7 +18,8 @@ import NewTweetMedia from '../../components/NewTweetComponents/NewTweetMedia/New
 import NewTweetActions from '../../components/NewTweetComponents/NewTweetCounters/NewTweetActions';
 
 // context provider
-import { useAppContext } from '../../contextProvider/ContextProvider';
+// import { useAppContext } from '../../contextProvider/ContextProvider';
+import { useViewportContext } from '../../contextProvider/ContextProvider';
 
 // utils
 import svgs from '../../utils/svgs';
@@ -30,7 +31,8 @@ import DefaultProfile from '../../assets/images/default_profile.png';
 const ComposeTweet = ({ type = 'tweet' }) => {
   const navigate = useNavigate();
 
-  const { viewportWidth } = useAppContext();
+  // const { viewportWidth } = useAppContext();
+  const { viewportWidth } = useViewportContext();
   const [buttonText, setButtonText] = useState(type); // gonna have to get me from the location and make default type tweet if nothing in location state
   const [previews, setPreviews] = useState([]);
   const [charsLeft, setCharsLeft] = useState(280);

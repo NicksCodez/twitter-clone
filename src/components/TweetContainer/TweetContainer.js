@@ -6,7 +6,9 @@ import './TweetContainer.css';
 // components
 import Tweet from '../Tweet/Tweet';
 
-const TweetContainer = ({ tweets, isLoading }) => (
+const TweetContainer = React.memo(({ tweets, isLoading }) => (
+  // console.log('IN TWEET CONTAINER => ', { tweets }, { isLoading });
+
   <div className="tweet-container">
     {isLoading ? (
       <div> loading </div>
@@ -32,7 +34,7 @@ const TweetContainer = ({ tweets, isLoading }) => (
       </div>
     )}
   </div>
-);
+));
 
 // Function to format timestamp
 const formatTimeAgo = (timestamp) => {

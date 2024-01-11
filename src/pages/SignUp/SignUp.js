@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Form, Link, redirect, useNavigate } from 'react-router-dom';
+import { Form, Link, Navigate, redirect, useNavigate } from 'react-router-dom';
 
 // css
 import './SignUp.css';
@@ -44,6 +44,12 @@ const SignUp = () => {
     password: false,
     confirmPassword: false,
   });
+
+  useEffect(() => {
+    console.log('Sign up mounted');
+
+    return () => console.log('Sign up unmounted');
+  }, []);
 
   useEffect(() => {
     // only make submit button clickable if all inputs are valid
@@ -290,7 +296,7 @@ const SignUp = () => {
 };
 
 // form action
-export const signUpFormAction = async ({ request }) => {
+export const signUpFormAction = async ({ request, navigate }) => {
   const data = await request.formData();
 
   const name = data.get('name');
@@ -358,10 +364,12 @@ export const signUpFormAction = async ({ request }) => {
   }
   try {
     await sendEmailVerification(newUserCredential.user);
+
     console.log('got after email ver');
   } catch (error) {
     console.error(error);
   }
+
   console.log('got before redirect');
   return redirect('/home');
 };

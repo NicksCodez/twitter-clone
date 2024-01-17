@@ -208,13 +208,23 @@ const Home = () => {
         orderBy('tweetId', 'desc'),
         limit(25)
       );
-    } else {
+    } else if (user.following && user.following.length !== 0) {
+      // if user has yet to follow anyone, user.following would be empty, throwing an error
+      // ! if user is following more than 30 people, this will throw an error as where ... in does not accept arrays with length > 30
+      // ! will need to refactor code
+      // ! also, no more than 30 DISJUNCTIONS allowed, since the second "where" filter has 2 items in the aray, the first one can have a maximum of 15
       queryRef = query(
         tweetsCollectionRef,
         where('userId', 'in', user.following),
         where('type', 'in', ['tweet', 'retweet']),
         orderBy('tweetId', 'desc'),
         limit(25)
+      );
+    } else {
+      // if user has not followed anyone, make query which finds no documents
+      queryRef = query(
+        tweetsCollectionRef,
+        where('thisFieldDoesNotExist', '==', 'gibberish189413yhurjbnf')
       );
     }
 
@@ -534,18 +544,63 @@ const processTweetsQuerySnapshot = async (querySnapshot) => {
   // create fetchedTweets array consisting of objects that have both tweet and user data
   const fetchedTweets = await Promise.all(
     querySnapshot.docs.map(async (document) => {
+      // ? try to find a more efficient way to retrieve data
+      // ? right now, for each document you execute multiple read operations on the database
+      // ? this would cost dollas if this app was real, dollas are expensive
+
+      // ? also, this should be slower than if you could find a way to get batches of data
+      // ? e.g. for tweetinteractions do batch queries (where, in, tweetIds)
+      // ? no idea for user data right now though
+
       const tweetData = document.data();
 
       // get the user who posted the tweet's data
       const userDataRef = tweetData.userId;
       const userData = await getUserData(userDataRef);
 
+      // find out if tweet is liked/bookmarked/retweeted
+      const tweetInteractionsCollection = collection(
+        firestore,
+        'tweetInteractions'
+      );
+      const tweetInteractionsQuery = query(
+        tweetInteractionsCollection,
+        where('userId', '==', tweetData.userId),
+        where('tweetId', '==', tweetData.tweetId),
+        where('type', 'in', ['like', 'bookmark', 'retweet'])
+      );
+
+      const tweetInteractionsSnapshot = await getDocs(tweetInteractionsQuery);
+
+      // console.log(tweetInteractionsSnapshot.docs);
+      const interactionsData = {
+        isLiked: false,
+        isBookmarked: false,
+        isRetweeted: false,
+      };
+
+      tweetInteractionsSnapshot.docs.forEach((doc) => {
+        switch (doc.data().type) {
+          case 'like':
+            interactionsData.isLiked = true;
+            break;
+          case 'bookmark':
+            interactionsData.isBookmarked = true;
+            break;
+          case 'retweet':
+            interactionsData.isRetweeted = true;
+            break;
+          default:
+            break;
+        }
+      });
       // return complete object
       return {
         tweetId: document.id,
         ...tweetData,
         userName: userData.name,
         userProfilePicture: userData.profileImg,
+        ...interactionsData,
       };
     })
   );

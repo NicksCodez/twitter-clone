@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 
 // css
@@ -7,19 +7,17 @@ import './Tweet.css';
 // firebase
 import {
   collection,
+  doc,
   getDocs,
   query,
   runTransaction,
+  serverTimestamp,
   where,
 } from 'firebase/firestore';
-import { firestore } from '../../firebase';
+import { auth, firestore } from '../../firebase';
 
 // utils
 import svgs from '../../utils/svgs';
-
-// context providers
-// import { useAppContext } from '../../contextProvider/ContextProvider';
-import { useUserContext } from '../../contextProvider/ContextProvider';
 
 const Tweet = React.memo(
   ({
@@ -34,62 +32,35 @@ const Tweet = React.memo(
     bookmarks,
     idProp,
     tweetImg,
+    isLiked,
+    isBookmarked,
+    isRetweeted,
   }) => {
-    // const { user } = useAppContext();
-    const { user } = useUserContext();
     const navigate = useNavigate();
-    // if (idProp === 199) {
-    //   console.log(
-    //     { profileImg },
-    //     { name },
-    //     { tag },
-    //     { createdAt },
-    //     { text },
-    //     { replies },
-    //     { retweets },
-    //     { likes },
-    //     { bookmarks },
-    //     { idProp },
-    //     { tweetImg }
-    //   );
-    // }
+    const [actionInProgress, setActionInProgress] = useState(false);
 
-    // Log when the props or user change
-    // useEffect(() => {
-    //   console.log(
-    //     'props changed:',
-    //     { profileImg },
-    //     { name },
-    //     { tag },
-    //     { createdAt },
-    //     { text },
-    //     { replies },
-    //     { retweets },
-    //     { likes },
-    //     { bookmarks },
-    //     { idProp },
-    //     { tweetImg }
-    //   );
-    // }, [
-    //   profileImg,
-    //   name,
-    //   tag,
-    //   createdAt,
-    //   text,
-    //   replies,
-    //   retweets,
-    //   likes,
-    //   bookmarks,
-    //   idProp,
-    //   tweetImg,
-    // ]);
-    // useEffect(() => {
-    //   console.log('user changed:', { user });
-    // }, [user]);
+    useEffect(
+      () => {
+        // only set action as complete if it fails(in like function try catch) or when changes have been propagated
+        // this stops double or triple actions
+        // e.g. of problem averted: if actionInProgress is set to false in likeHandler, after transaction is run, and if user clicks rapidly on like button, if one click happens in the time period between setting actionInProgress to false and Home noticing the change to isLiked and propagating it, tweet could be liked twice
+        setActionInProgress(false);
+      },
+      [isLiked],
+      [isBookmarked],
+      [isRetweeted]
+    );
 
     const memoizedLikeHandler = useCallback(
-      async () => likeHandler(user, idProp, navigate),
-      [user, idProp, navigate]
+      async () =>
+        likeHandler(
+          idProp,
+          navigate,
+          isLiked,
+          actionInProgress,
+          setActionInProgress
+        ),
+      [idProp, navigate, isLiked, actionInProgress, setActionInProgress]
     );
 
     return (
@@ -159,18 +130,15 @@ const Tweet = React.memo(
               </div>
               <div className="tweet-action like">
                 <button type="button" onClick={memoizedLikeHandler}>
-                  {/* {user.likedTweets && user.likedTweets.includes(idProp) ? (
-                  <svg viewBox="0 0 24 24" className="active">
-                    <path d={svgs.likeActive} />
-                  </svg>
-                ) : (
-                  <svg viewBox="0 0 24 24">
-                    <path d={svgs.like} />
-                  </svg>
-                )} */}
-                  <svg viewBox="0 0 24 24">
-                    <path d={svgs.like} />
-                  </svg>
+                  {isLiked ? (
+                    <svg viewBox="0 0 24 24" className="active">
+                      <path d={svgs.likeActive} />
+                    </svg>
+                  ) : (
+                    <svg viewBox="0 0 24 24">
+                      <path d={svgs.like} />
+                    </svg>
+                  )}
                   <span>{likes}</span>
                 </button>
               </div>
@@ -190,78 +158,96 @@ const Tweet = React.memo(
   }
 );
 
-const likeHandler = async (user, idProp, navigate) => {
-  // on like, update tweet and user documents if user is logged in and didn't already like respective tweet
-  if (user.uid) {
-    // get reference to tweet document
-    const tweetsCollectionRef = collection(firestore, 'tweets');
-    const tweetsQueryRef = query(
-      tweetsCollectionRef,
-      where('tweetId', '==', idProp)
-    );
+const likeHandler = async (
+  idProp,
+  navigate,
+  isLiked,
+  actionInProgress,
+  setActionInProgress
+) => {
+  // on like, update tweet and tweetInteraction documents if user is logged in and didn't already like respective tweet
+  if (auth.currentUser) {
+    if (!actionInProgress) {
+      setActionInProgress(true);
+      // get reference to tweet document
+      const tweetsCollectionRef = collection(firestore, 'tweets');
+      const tweetsQueryRef = query(
+        tweetsCollectionRef,
+        where('tweetId', '==', idProp)
+      );
 
-    const tweetsQuerySnapshot = await getDocs(tweetsQueryRef);
+      const tweetsQuerySnapshot = await getDocs(tweetsQueryRef);
 
-    // get reference to user document
-    const usersCollectionRef = collection(firestore, 'users');
-    const userQueryRef = query(
-      usersCollectionRef,
-      where('uid', '==', user.uid)
-    );
+      // get reference to tweetInteractions document
+      const tweetInteractionsCollectionRef = collection(
+        firestore,
+        'tweetInteractions'
+      );
+      const tweetInteractionsQueryRef = query(
+        tweetInteractionsCollectionRef,
+        where('tweetId', '==', idProp),
+        where('userId', '==', auth.currentUser.uid),
+        where('type', '==', 'like')
+      );
 
-    const userQuerySnapshot = await getDocs(userQueryRef);
+      const tweetInteractionsQuerySnapshot = await getDocs(
+        tweetInteractionsQueryRef
+      );
 
-    // ! quick consecutive clicks on like might lead to errors
-    // ! e.g. user.liked tweets context updates too slowly, so tweet is liked or unlicked multiple times
-    // ! should use likedTweets from database to ensure consistent behaviour
-    if (!user.likedTweets || !user.likedTweets.includes(idProp)) {
-      // if user didn't already like tweet, like it
+      if (!isLiked) {
+        // if user didn't already like tweet, like it
 
-      try {
-        await runTransaction(firestore, async (transaction) => {
-          // update user document
-          transaction.update(userQuerySnapshot.docs[0].ref, {
-            likedTweets: [
-              ...(userQuerySnapshot.docs[0].data().likedTweets || []),
-              idProp,
-            ],
+        // * mock like to make website feel faster
+
+        try {
+          // * the real like
+          await runTransaction(firestore, async (transaction) => {
+            // set tweet interactions document
+            const newTweetInteractionRef = doc(tweetInteractionsCollectionRef);
+            const newTweetInteractionData = {
+              type: 'like',
+              userId: auth.currentUser.uid,
+              tweetId: idProp,
+              timestamp: serverTimestamp(),
+            };
+            await transaction.set(
+              newTweetInteractionRef,
+              newTweetInteractionData
+            );
+
+            // update tweet document
+            await transaction.update(tweetsQuerySnapshot.docs[0].ref, {
+              likesCount: tweetsQuerySnapshot.docs[0].data().likesCount + 1,
+            });
           });
+        } catch (error) {
+          // something went wrong, log error for now
+          console.log('error => ', { error });
+          setActionInProgress(false);
+        }
+      } else {
+        // user already liked tweet, so unlike it
+        try {
+          await runTransaction(firestore, async (transaction) => {
+            // delete tweetInteraction document
+            await transaction.delete(
+              tweetInteractionsQuerySnapshot.docs[0].ref
+            );
 
-          // update tweet document
-          transaction.update(tweetsQuerySnapshot.docs[0].ref, {
-            likesCount: tweetsQuerySnapshot.docs[0].data().likesCount + 1,
+            // update tweet document
+            await transaction.update(tweetsQuerySnapshot.docs[0].ref, {
+              likesCount: tweetsQuerySnapshot.docs[0].data().likesCount - 1,
+            });
           });
-        });
-        console.log('transaction successful');
-      } catch (error) {
-        // something went wrong, log error for now
-        console.log('error => ', { error });
-      }
-    } else {
-      // user already liked tweet, so unlike it
-
-      try {
-        await runTransaction(firestore, async (transaction) => {
-          // update user document
-          transaction.update(userQuerySnapshot.docs[0].ref, {
-            likedTweets: (
-              userQuerySnapshot.docs[0].data().likedTweets || []
-            ).filter((id) => id !== idProp),
-          });
-
-          // update tweet document
-          transaction.update(tweetsQuerySnapshot.docs[0].ref, {
-            likesCount: tweetsQuerySnapshot.docs[0].data().likesCount - 1,
-          });
-        });
-        console.log('transaction successful');
-      } catch (error) {
-        // something went wrong, so log error for now
-        console.log('error => ', { error });
+        } catch (error) {
+          // something went wrong, so log error for now
+          console.log('error => ', { error });
+          setActionInProgress(false);
+        }
       }
     }
   } else {
-    console.log('before redirect');
+    // user isn't logged in, send him to log in
     navigate('/i/flow/login');
   }
 };

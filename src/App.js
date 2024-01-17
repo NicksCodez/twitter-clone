@@ -39,7 +39,7 @@ import { resizeHandler } from './utils/functions';
 
 const App = () => {
   const { setViewportWidth } = useViewportContext();
-  const { user, setUser } = useUserContext();
+  const { setUser } = useUserContext();
 
   useEffect(() => {
     // window event listeners
@@ -51,6 +51,13 @@ const App = () => {
     // define unsubscribe here to call it in return and free resources
     // set the user in context whenever authentication changes to have easy access
     let unsubscribe = () => null;
+    let prevUserData = {
+      name: '',
+      tag: '',
+      profileImg: '',
+      followers: [],
+      following: [],
+    };
     auth.onAuthStateChanged((authUser) => {
       // use setTimeout because changing the context on e.g. sign up causes a rerender which somehow breaks redirect functionality
       // making the rerender happen at a later point is fine, redirect has already happenned
@@ -76,14 +83,16 @@ const App = () => {
                 following: data.following,
               };
               // * keep only profile pic, tag, display name, following count, followers count as this information is needed more often
+              // prevent useless rerenders
               if (
-                user.profileImg !== userData.profileImg ||
-                user.name !== userData.name ||
-                user.tag !== userData.tag ||
-                user.followers.length !== userData.followers.length ||
-                user.following.length !== userData.following.length
+                prevUserData.name !== userData.name ||
+                prevUserData.tag !== userData.tag ||
+                prevUserData.profileImg !== userData.profileImg ||
+                prevUserData.followers.length !== userData.followers.length ||
+                prevUserData.following.length !== userData.following.length
               ) {
                 setUser(userData);
+                prevUserData = userData;
               }
             }
           });

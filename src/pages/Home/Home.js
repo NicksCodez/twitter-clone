@@ -12,7 +12,7 @@ import {
   startAfter,
   onSnapshot,
 } from 'firebase/firestore';
-import { firestore } from '../../firebase';
+import { auth, firestore } from '../../firebase';
 
 // css
 import './Home.css';
@@ -565,7 +565,7 @@ const processTweetsQuerySnapshot = async (querySnapshot) => {
       );
       const tweetInteractionsQuery = query(
         tweetInteractionsCollection,
-        where('userId', '==', tweetData.userId),
+        where('userId', '==', auth?.currentUser.uid),
         where('tweetId', '==', tweetData.tweetId),
         where('type', 'in', ['like', 'bookmark', 'retweet'])
       );

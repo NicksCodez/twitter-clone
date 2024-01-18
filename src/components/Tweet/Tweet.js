@@ -54,6 +54,7 @@ const Tweet = React.memo(
     const memoizedLikeHandler = useCallback(
       async () =>
         likeHandler(
+          event,
           idProp,
           navigate,
           isLiked,
@@ -159,6 +160,7 @@ const Tweet = React.memo(
 );
 
 const likeHandler = async (
+  event,
   idProp,
   navigate,
   isLiked,
@@ -169,6 +171,8 @@ const likeHandler = async (
   if (auth.currentUser) {
     if (!actionInProgress) {
       setActionInProgress(true);
+      // * mock like to make website feel faster
+      mockTweetInteraction(event, isLiked, svgs.like, svgs.likeActive);
       // get reference to tweet document
       const tweetsCollectionRef = collection(firestore, 'tweets');
       const tweetsQueryRef = query(
@@ -196,9 +200,6 @@ const likeHandler = async (
 
       if (!isLiked) {
         // if user didn't already like tweet, like it
-
-        // * mock like to make website feel faster
-
         try {
           // * the real like
           await runTransaction(firestore, async (transaction) => {
@@ -249,6 +250,22 @@ const likeHandler = async (
   } else {
     // user isn't logged in, send him to log in
     navigate('/i/flow/login');
+  }
+};
+
+const mockTweetInteraction = (event, isActive, oldPath, newPath) => {
+  // make tweet visually seem liked/unliked/bookmarked/unbookmarked, etc
+  const spanElement = event.target.closest('button').querySelector('span');
+  const svgElement = event.target.closest('button').querySelector('svg');
+  const svgPath = svgElement.querySelector('path');
+  if (!isActive) {
+    svgElement.classList.add('active');
+    spanElement.textContent = parseInt(spanElement.textContent, 10) + 1;
+    svgPath.setAttribute('d', newPath);
+  } else {
+    svgElement.classList.remove('active');
+    spanElement.textContent = parseInt(spanElement.textContent, 10) - 1;
+    svgPath.setAttribute('d', oldPath);
   }
 };
 

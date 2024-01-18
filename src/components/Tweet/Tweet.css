@@ -126,3 +126,7 @@ svg {
 .tweet-action.like .active {
   color: rgb(249, 24, 128);
 }
+
+.tweet-action.bookmark .active {
+  color: var(--clr-bg-blue);
+}

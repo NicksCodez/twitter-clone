@@ -37,32 +37,23 @@ const Tweet = React.memo(
     isRetweeted,
   }) => {
     const navigate = useNavigate();
-    const [actionInProgress, setActionInProgress] = useState(false);
+    const [likeInProgress, setLikeInProgress] = useState(false);
+    const [bookmarkInProgress, setBookmarkInProgress] = useState(false);
 
-    useEffect(
-      () => {
-        // only set action as complete if it fails(in like function try catch) or when changes have been propagated
-        // this stops double or triple actions
-        // e.g. of problem averted: if actionInProgress is set to false in likeHandler, after transaction is run, and if user clicks rapidly on like button, if one click happens in the time period between setting actionInProgress to false and Home noticing the change to isLiked and propagating it, tweet could be liked twice
-        setActionInProgress(false);
-      },
-      [isLiked],
-      [isBookmarked],
-      [isRetweeted]
-    );
+    useEffect(() => {
+      // only set action as complete if it fails(in like function try catch) or when changes have been propagated
+      // this stops double or triple actions
+      // e.g. of problem averted: if actionInProgress is set to false in likeHandler, after transaction is run, and if user clicks rapidly on like button, if one click happens in the time period between setting actionInProgress to false and Home noticing the change to isLiked and propagating it, tweet could be liked twice
+      setLikeInProgress(false);
+    }, [isLiked]);
 
-    const memoizedLikeHandler = useCallback(
-      async () =>
-        likeHandler(
-          event,
-          idProp,
-          navigate,
-          isLiked,
-          actionInProgress,
-          setActionInProgress
-        ),
-      [idProp, navigate, isLiked, actionInProgress, setActionInProgress]
-    );
+    useEffect(() => {
+      // only set action as complete if it fails(in like function try catch) or when changes have been propagated
+      // this stops double or triple actions
+      // e.g. of problem averted: if actionInProgress is set to false in likeHandler, after transaction is run, and if user clicks rapidly on like button, if one click happens in the time period between setting actionInProgress to false and Home noticing the change to isLiked and propagating it, tweet could be liked twice
+      setBookmarkInProgress(false);
+      console.log('bookmarkedChanged', isBookmarked);
+    }, [isBookmarked]);
 
     return (
       <div className="tweet" id={`tweet-${idProp}`}>
@@ -130,7 +121,20 @@ const Tweet = React.memo(
                 </button>
               </div>
               <div className="tweet-action like">
-                <button type="button" onClick={memoizedLikeHandler}>
+                <button
+                  type="button"
+                  onClick={(event) =>
+                    likeHandler(
+                      event,
+                      'like',
+                      idProp,
+                      navigate,
+                      isLiked,
+                      likeInProgress,
+                      setLikeInProgress
+                    )
+                  }
+                >
                   {isLiked ? (
                     <svg viewBox="0 0 24 24" className="active">
                       <path d={svgs.likeActive} />
@@ -143,11 +147,30 @@ const Tweet = React.memo(
                   <span>{likes}</span>
                 </button>
               </div>
-              <div className="tweet-action">
-                <button type="button">
-                  <svg viewBox="0 0 24 24">
-                    <path d={svgs.bookmarks} />
-                  </svg>
+              <div className="tweet-action bookmark">
+                <button
+                  type="button"
+                  onClick={(event) =>
+                    likeHandler(
+                      event,
+                      'bookmark',
+                      idProp,
+                      navigate,
+                      isBookmarked,
+                      bookmarkInProgress,
+                      setBookmarkInProgress
+                    )
+                  }
+                >
+                  {isBookmarked ? (
+                    <svg viewBox="0 0 24 24" className="active">
+                      <path d={svgs.bookmarksActive} />
+                    </svg>
+                  ) : (
+                    <svg viewBox="0 0 24 24">
+                      <path d={svgs.bookmarks} />
+                    </svg>
+                  )}
                   <span>{bookmarks}</span>
                 </button>
               </div>
@@ -161,6 +184,7 @@ const Tweet = React.memo(
 
 const likeHandler = async (
   event,
+  type,
   idProp,
   navigate,
   isLiked,
@@ -172,7 +196,7 @@ const likeHandler = async (
     if (!actionInProgress) {
       setActionInProgress(true);
       // * mock like to make website feel faster
-      mockTweetInteraction(event, isLiked, svgs.like, svgs.likeActive);
+      mockTweetInteraction(event, isLiked, type);
       // get reference to tweet document
       const tweetsCollectionRef = collection(firestore, 'tweets');
       const tweetsQueryRef = query(
@@ -191,7 +215,7 @@ const likeHandler = async (
         tweetInteractionsCollectionRef,
         where('tweetId', '==', idProp),
         where('userId', '==', auth.currentUser.uid),
-        where('type', '==', 'like')
+        where('type', '==', type)
       );
 
       const tweetInteractionsQuerySnapshot = await getDocs(
@@ -206,7 +230,7 @@ const likeHandler = async (
             // set tweet interactions document
             const newTweetInteractionRef = doc(tweetInteractionsCollectionRef);
             const newTweetInteractionData = {
-              type: 'like',
+              type,
               userId: auth.currentUser.uid,
               tweetId: idProp,
               timestamp: serverTimestamp(),
@@ -217,14 +241,35 @@ const likeHandler = async (
             );
 
             // update tweet document
-            await transaction.update(tweetsQuerySnapshot.docs[0].ref, {
-              likesCount: tweetsQuerySnapshot.docs[0].data().likesCount + 1,
-            });
+            switch (type) {
+              case 'like':
+                await transaction.update(tweetsQuerySnapshot.docs[0].ref, {
+                  likesCount: tweetsQuerySnapshot.docs[0].data().likesCount + 1,
+                });
+                break;
+              case 'bookmark':
+                await transaction.update(tweetsQuerySnapshot.docs[0].ref, {
+                  bookmarksCount:
+                    tweetsQuerySnapshot.docs[0].data().bookmarksCount + 1,
+                });
+                break;
+              case 'retweet':
+                await transaction.update(tweetsQuerySnapshot.docs[0].ref, {
+                  retweetsCount:
+                    tweetsQuerySnapshot.docs[0].data().retweetsCount + 1,
+                });
+                break;
+              default:
+                break;
+            }
           });
         } catch (error) {
           // something went wrong, log error for now
           console.log('error => ', { error });
+          // allow further actions to happen
           setActionInProgress(false);
+          // reverse visual changes
+          mockTweetInteraction(event, !isLiked, type);
         }
       } else {
         // user already liked tweet, so unlike it
@@ -236,14 +281,35 @@ const likeHandler = async (
             );
 
             // update tweet document
-            await transaction.update(tweetsQuerySnapshot.docs[0].ref, {
-              likesCount: tweetsQuerySnapshot.docs[0].data().likesCount - 1,
-            });
+            switch (type) {
+              case 'like':
+                await transaction.update(tweetsQuerySnapshot.docs[0].ref, {
+                  likesCount: tweetsQuerySnapshot.docs[0].data().likesCount - 1,
+                });
+                break;
+              case 'bookmark':
+                await transaction.update(tweetsQuerySnapshot.docs[0].ref, {
+                  bookmarksCount:
+                    tweetsQuerySnapshot.docs[0].data().bookmarksCount - 1,
+                });
+                break;
+              case 'retweet':
+                await transaction.update(tweetsQuerySnapshot.docs[0].ref, {
+                  retweetsCount:
+                    tweetsQuerySnapshot.docs[0].data().retweetsCount - 1,
+                });
+                break;
+              default:
+                break;
+            }
           });
         } catch (error) {
           // something went wrong, so log error for now
           console.log('error => ', { error });
+          // allow further actions to happen
           setActionInProgress(false);
+          // reverse visual changes
+          mockTweetInteraction(event, !isLiked, type);
         }
       }
     }
@@ -253,11 +319,33 @@ const likeHandler = async (
   }
 };
 
-const mockTweetInteraction = (event, isActive, oldPath, newPath) => {
+const mockTweetInteraction = (event, isActive, type) => {
   // make tweet visually seem liked/unliked/bookmarked/unbookmarked, etc
+  // get DOM elements
   const spanElement = event.target.closest('button').querySelector('span');
   const svgElement = event.target.closest('button').querySelector('svg');
   const svgPath = svgElement.querySelector('path');
+
+  // prepare oldPath and newPath for SVG's
+  let oldPath = '';
+  let newPath = '';
+
+  switch (type) {
+    case 'like':
+      oldPath = svgs.like;
+      newPath = svgs.likeActive;
+      break;
+    case 'bookmark':
+      oldPath = svgs.bookmarks;
+      newPath = svgs.bookmarksActive;
+      break;
+    case 'retweet':
+      oldPath = svgs.retweet;
+      newPath = svgs.retweet;
+      break;
+    default:
+      break;
+  }
   if (!isActive) {
     svgElement.classList.add('active');
     spanElement.textContent = parseInt(spanElement.textContent, 10) + 1;

@@ -39,6 +39,7 @@ const Tweet = React.memo(
     const navigate = useNavigate();
     const [likeInProgress, setLikeInProgress] = useState(false);
     const [bookmarkInProgress, setBookmarkInProgress] = useState(false);
+    const [retweetInProgress, setRetweetInProgress] = useState(false);
 
     useEffect(() => {
       // only set action as complete if it fails(in like function try catch) or when changes have been propagated
@@ -52,8 +53,14 @@ const Tweet = React.memo(
       // this stops double or triple actions
       // e.g. of problem averted: if actionInProgress is set to false in likeHandler, after transaction is run, and if user clicks rapidly on like button, if one click happens in the time period between setting actionInProgress to false and Home noticing the change to isLiked and propagating it, tweet could be liked twice
       setBookmarkInProgress(false);
-      console.log('bookmarkedChanged', isBookmarked);
     }, [isBookmarked]);
+
+    useEffect(() => {
+      // only set action as complete if it fails(in like function try catch) or when changes have been propagated
+      // this stops double or triple actions
+      // e.g. of problem averted: if actionInProgress is set to false in likeHandler, after transaction is run, and if user clicks rapidly on like button, if one click happens in the time period between setting actionInProgress to false and Home noticing the change to isLiked and propagating it, tweet could be liked twice
+      setRetweetInProgress(false);
+    }, [isRetweeted]);
 
     return (
       <div className="tweet" id={`tweet-${idProp}`}>
@@ -112,15 +119,32 @@ const Tweet = React.memo(
                   <span>{replies}</span>
                 </button>
               </div>
-              <div className="tweet-action">
-                <button type="button">
+              <div
+                className={`tweet-action retweet ${
+                  isRetweeted ? 'active' : ''
+                }`}
+              >
+                <button
+                  type="button"
+                  onClick={(event) =>
+                    likeHandler(
+                      event,
+                      'retweet',
+                      idProp,
+                      navigate,
+                      isRetweeted,
+                      retweetInProgress,
+                      setRetweetInProgress
+                    )
+                  }
+                >
                   <svg viewBox="0 0 24 24">
                     <path d={svgs.retweet} />
                   </svg>
                   <span>{retweets}</span>
                 </button>
               </div>
-              <div className="tweet-action like">
+              <div className={`tweet-action like ${isLiked ? 'active' : ''}`}>
                 <button
                   type="button"
                   onClick={(event) =>
@@ -136,7 +160,7 @@ const Tweet = React.memo(
                   }
                 >
                   {isLiked ? (
-                    <svg viewBox="0 0 24 24" className="active">
+                    <svg viewBox="0 0 24 24">
                       <path d={svgs.likeActive} />
                     </svg>
                   ) : (
@@ -147,7 +171,11 @@ const Tweet = React.memo(
                   <span>{likes}</span>
                 </button>
               </div>
-              <div className="tweet-action bookmark">
+              <div
+                className={`tweet-action bookmark ${
+                  isBookmarked ? 'active' : ''
+                }`}
+              >
                 <button
                   type="button"
                   onClick={(event) =>
@@ -163,7 +191,7 @@ const Tweet = React.memo(
                   }
                 >
                   {isBookmarked ? (
-                    <svg viewBox="0 0 24 24" className="active">
+                    <svg viewBox="0 0 24 24">
                       <path d={svgs.bookmarksActive} />
                     </svg>
                   ) : (
@@ -218,50 +246,58 @@ const likeHandler = async (
         where('type', '==', type)
       );
 
-      const tweetInteractionsQuerySnapshot = await getDocs(
-        tweetInteractionsQueryRef
+      // get reference to retweet document
+      const retweetQuery = query(
+        tweetsCollectionRef,
+        where('retweetId', '==', idProp),
+        where('userId', '==', auth.currentUser.uid)
       );
+
+      let docToDelete = null;
+      if (type === 'retweet') {
+        const retweetSnapshot = await getDocs(retweetQuery);
+        docToDelete = retweetSnapshot?.docs[0]?.ref;
+      } else if (type === 'like' || type === 'bookmark') {
+        const tweetInteractionsQuerySnapshot = await getDocs(
+          tweetInteractionsQueryRef
+        );
+        docToDelete = tweetInteractionsQuerySnapshot?.docs[0]?.ref;
+      }
 
       if (!isLiked) {
         // if user didn't already like tweet, like it
         try {
-          // * the real like
+          // * store like in database
           await runTransaction(firestore, async (transaction) => {
             // set tweet interactions document
-            const newTweetInteractionRef = doc(tweetInteractionsCollectionRef);
+            let newDocRef = null;
+            let newId = idProp;
+            if (type === 'like' || type === 'bookmark') {
+              // for likes and bookmarks, want to write new document in tweetInteractions collection
+              newDocRef = doc(tweetInteractionsCollectionRef);
+            } else if (type === 'retweet') {
+              // for retweets, want to write new tweet doc in tweets collection
+              const countersCollection = collection(firestore, 'counters');
+              const countersDoc = doc(countersCollection, 'general');
+              const countersData = await transaction.get(countersDoc);
+              newId = countersData.data().totalTweets + 1;
+              transaction.update(countersDoc, { totalTweets: newId });
+              newDocRef = doc(tweetsCollectionRef);
+            }
             const newTweetInteractionData = {
               type,
               userId: auth.currentUser.uid,
-              tweetId: idProp,
-              timestamp: serverTimestamp(),
+              tweetId: newId,
+              createdAt: serverTimestamp(),
+              ...(type === 'retweet' && { retweetId: idProp }),
             };
-            await transaction.set(
-              newTweetInteractionRef,
-              newTweetInteractionData
-            );
+            await transaction.set(newDocRef, newTweetInteractionData);
 
             // update tweet document
-            switch (type) {
-              case 'like':
-                await transaction.update(tweetsQuerySnapshot.docs[0].ref, {
-                  likesCount: tweetsQuerySnapshot.docs[0].data().likesCount + 1,
-                });
-                break;
-              case 'bookmark':
-                await transaction.update(tweetsQuerySnapshot.docs[0].ref, {
-                  bookmarksCount:
-                    tweetsQuerySnapshot.docs[0].data().bookmarksCount + 1,
-                });
-                break;
-              case 'retweet':
-                await transaction.update(tweetsQuerySnapshot.docs[0].ref, {
-                  retweetsCount:
-                    tweetsQuerySnapshot.docs[0].data().retweetsCount + 1,
-                });
-                break;
-              default:
-                break;
-            }
+            const countField = `${type}sCount`;
+            await transaction.update(tweetsQuerySnapshot.docs[0].ref, {
+              [countField]: tweetsQuerySnapshot.docs[0].data()[countField] + 1,
+            });
           });
         } catch (error) {
           // something went wrong, log error for now
@@ -276,32 +312,13 @@ const likeHandler = async (
         try {
           await runTransaction(firestore, async (transaction) => {
             // delete tweetInteraction document
-            await transaction.delete(
-              tweetInteractionsQuerySnapshot.docs[0].ref
-            );
+            await transaction.delete(docToDelete);
 
             // update tweet document
-            switch (type) {
-              case 'like':
-                await transaction.update(tweetsQuerySnapshot.docs[0].ref, {
-                  likesCount: tweetsQuerySnapshot.docs[0].data().likesCount - 1,
-                });
-                break;
-              case 'bookmark':
-                await transaction.update(tweetsQuerySnapshot.docs[0].ref, {
-                  bookmarksCount:
-                    tweetsQuerySnapshot.docs[0].data().bookmarksCount - 1,
-                });
-                break;
-              case 'retweet':
-                await transaction.update(tweetsQuerySnapshot.docs[0].ref, {
-                  retweetsCount:
-                    tweetsQuerySnapshot.docs[0].data().retweetsCount - 1,
-                });
-                break;
-              default:
-                break;
-            }
+            const countField = `${type}sCount`;
+            await transaction.update(tweetsQuerySnapshot.docs[0].ref, {
+              [countField]: tweetsQuerySnapshot.docs[0].data()[countField] - 1,
+            });
           });
         } catch (error) {
           // something went wrong, so log error for now
@@ -322,6 +339,7 @@ const likeHandler = async (
 const mockTweetInteraction = (event, isActive, type) => {
   // make tweet visually seem liked/unliked/bookmarked/unbookmarked, etc
   // get DOM elements
+  const divElement = event.target.closest('.tweet-action');
   const spanElement = event.target.closest('button').querySelector('span');
   const svgElement = event.target.closest('button').querySelector('svg');
   const svgPath = svgElement.querySelector('path');
@@ -347,11 +365,11 @@ const mockTweetInteraction = (event, isActive, type) => {
       break;
   }
   if (!isActive) {
-    svgElement.classList.add('active');
+    divElement.classList.add('active');
     spanElement.textContent = parseInt(spanElement.textContent, 10) + 1;
     svgPath.setAttribute('d', newPath);
   } else {
-    svgElement.classList.remove('active');
+    divElement.classList.remove('active');
     spanElement.textContent = parseInt(spanElement.textContent, 10) - 1;
     svgPath.setAttribute('d', oldPath);
   }

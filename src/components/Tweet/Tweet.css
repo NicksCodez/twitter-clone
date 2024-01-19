@@ -123,10 +123,14 @@ svg {
   margin-top: 4px;
 }
 
-.tweet-action.like .active {
+.tweet-action.like.active {
   color: rgb(249, 24, 128);
 }
 
-.tweet-action.bookmark .active {
+.tweet-action.bookmark.active {
   color: var(--clr-bg-blue);
+}
+
+.tweet-action.retweet.active {
+  color: rgb(0, 186, 124);
 }

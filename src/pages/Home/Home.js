@@ -558,7 +558,7 @@ const processTweetsQuerySnapshot = async (querySnapshot) => {
       const userDataRef = tweetData.userId;
       const userData = await getUserData(userDataRef);
 
-      // find out if tweet is liked/bookmarked/retweeted
+      // find out if tweet is liked/bookmarked
       const tweetInteractionsCollection = collection(
         firestore,
         'tweetInteractions'
@@ -587,16 +587,26 @@ const processTweetsQuerySnapshot = async (querySnapshot) => {
           case 'bookmark':
             interactionsData.isBookmarked = true;
             break;
-          case 'retweet':
-            interactionsData.isRetweeted = true;
-            break;
           default:
             break;
         }
       });
+
+      // find out if the tweet is retweeted
+      const tweetsCollection = collection(firestore, 'tweets');
+      const retweetQuery = query(
+        tweetsCollection,
+        where('type', '==', 'retweet'),
+        where('userId', '==', auth.currentUser.uid),
+        where('retweetId', '==', tweetData.tweetId)
+      );
+      const retweetSnapshot = await getDocs(retweetQuery);
+      if (!retweetSnapshot.empty) {
+        interactionsData.isRetweeted = true;
+      }
+
       // return complete object
       return {
-        tweetId: document.id,
         ...tweetData,
         userName: userData.name,
         userProfilePicture: userData.profileImg,

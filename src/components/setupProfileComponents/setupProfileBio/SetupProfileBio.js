@@ -54,6 +54,7 @@ const SetupProfileBio = ({ text, setText, currentStep, setCurrentStep }) => {
           </div>
           <div className="input-wrapper">
             <textarea
+              value={text}
               autoCapitalize="sentences"
               autoComplete="on"
               autoCorrect="on"

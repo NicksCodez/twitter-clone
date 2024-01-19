@@ -13,25 +13,27 @@ const TweetContainer = ({ tweets, isLoading }) => (
     ) : (
       <div>
         {tweets &&
-          tweets.map((tweet) => (
-            <Tweet
-              key={tweet.tweetId}
-              profileImg={tweet.userProfilePicture}
-              name={tweet.userName}
-              tag={tweet.userId}
-              createdAt={formatTimeAgo(tweet.createdAt)}
-              text={tweet.text}
-              replies={tweet.repliesCount}
-              likes={tweet.likesCount}
-              retweets={tweet.retweetsCount}
-              bookmarks={tweet.bookmarksCount}
-              idProp={tweet.tweetId}
-              tweetImg={tweet.imageLink}
-              isLiked={tweet.isLiked}
-              isBookmarked={tweet.isBookmarked}
-              isRetweeted={tweet.isRetweeted}
-            />
-          ))}
+          tweets
+            .filter((tweet) => tweet.tweetId)
+            .map((tweet) => (
+              <Tweet
+                key={tweet.tweetId}
+                profileImg={tweet.userProfilePicture}
+                name={tweet.userName}
+                tag={tweet.userTag}
+                createdAt={formatTimeAgo(tweet.createdAt)}
+                text={tweet.text}
+                replies={tweet.repliesCount}
+                likes={tweet.likesCount}
+                retweets={tweet.retweetsCount}
+                bookmarks={tweet.bookmarksCount}
+                idProp={tweet.tweetId}
+                tweetImg={tweet.imageLink}
+                isLiked={tweet.isLiked}
+                isBookmarked={tweet.isBookmarked}
+                isRetweeted={tweet.isRetweeted}
+              />
+            ))}
       </div>
     )}
   </div>

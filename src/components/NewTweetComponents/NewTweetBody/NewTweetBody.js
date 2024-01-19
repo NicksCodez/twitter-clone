@@ -28,15 +28,8 @@ const NewTweetBody = ({
   const [previews, setPreviews] = useState([]);
 
   useEffect(() => {
-    if (typeof setTweetContent === 'function') {
-      setTweetContent(initialText);
-    }
-  }, [setTweetContent]);
-
-  useEffect(() => {
     // when images are uploaded, create object URLS for them and add to previews
     if (!files) return;
-    console.log({ files });
     const tmp = [];
     for (let i = 0; i < files.length; i++) {
       tmp.push(URL.createObjectURL(files[i]));
@@ -92,12 +85,13 @@ const NewTweetBody = ({
 
   return (
     <div className="new-tweet-body">
+      {tweetContent === '' && (
+        <div className="new-tweet-placeholder">{initialText}</div>
+      )}
       <ContentEditable
         spellCheck="false"
         className="new-tweet-textarea"
         onChange={handleTweetTextChange}
-        onFocus={(event) => focusHandler(event, setTweetContent, initialText)}
-        onBlur={(event) => blurHandler(event, setTweetContent, initialText)}
         html={tweetContent}
       />
       <div className="new-tweet-img-wrp">
@@ -130,24 +124,6 @@ const NewTweetBody = ({
       </div>
     </div>
   );
-};
-
-const focusHandler = (event, setTweetContent, initialText) => {
-  const plainText = event.currentTarget.textContent;
-  if (plainText === initialText) {
-    setTweetContent('');
-    event.currentTarget.classList.add('active');
-  }
-};
-
-const blurHandler = (event, setTweetContent, initialText) => {
-  const plainText = event.currentTarget.textContent;
-  if (plainText === '') {
-    setTweetContent(initialText);
-    event.currentTarget.classList.remove('active');
-  } else {
-    event.currentTarget.classList.add('active');
-  }
 };
 
 export default NewTweetBody;

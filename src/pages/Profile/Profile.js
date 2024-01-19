@@ -35,11 +35,8 @@ const Profile = () => {
 
     const getProfileVisited = async () => {
       // if profile visited is same as user, don't make useless request, use the data in context
-      if (user.tagLowerCase && user.tagLowerCase === tag.toLowerCase()) {
-        setProfileVisited(user);
+      if (user.tag?.toLowerCase() === tag.toLowerCase()) {
         setIsOwnProfile(true);
-        setIsLoading(false);
-        return;
       }
       // if profile visited is different, get the data if profile exists
       const usersCollectionRef = collection(firestore, 'users');

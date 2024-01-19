@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Form, redirect, useNavigate } from 'react-router-dom';
+import { Form, useNavigate } from 'react-router-dom';
 
 // css
 import './ComposeTweet.css';
@@ -7,8 +7,13 @@ import './ComposeTweet.css';
 // firebase
 import { getDownloadURL, ref, uploadBytes } from 'firebase/storage';
 import { v4 as uuidv4 } from 'uuid';
-import { addDoc, collection, serverTimestamp } from 'firebase/firestore';
-import { firestore, storage } from '../../firebase';
+import {
+  collection,
+  doc,
+  runTransaction,
+  serverTimestamp,
+} from 'firebase/firestore';
+import { auth, firestore, storage } from '../../firebase';
 
 // components
 import Home from '../Home/Home';
@@ -128,40 +133,56 @@ const ComposeTweet = ({ type = 'tweet' }) => {
 };
 
 const handleTweetUpload = async (event, navigate, tweetContent, files) => {
-  // prevent default redirect
-  event.preventDefault();
-  let url;
+  if (auth.currentUser) {
+    // prevent default redirect
+    event.preventDefault();
+    let url;
 
-  if (files.length > 0) {
-    // tweet image ref
-    const fileRef = ref(storage, `tweets/${files[0].name}${uuidv4()}`);
-    await uploadBytes(fileRef, files[0]);
-    url = await getDownloadURL(fileRef);
-    console.log({ url });
+    if (files.length > 0) {
+      // tweet image ref
+      const fileRef = ref(storage, `tweets/${files[0].name}${uuidv4()}`);
+      await uploadBytes(fileRef, files[0]);
+      url = await getDownloadURL(fileRef);
+    }
+
+    // tweets collection
+    const tweetsCollectionRef = collection(firestore, 'tweets');
+    try {
+      await runTransaction(firestore, async (transaction) => {
+        // get total tweets
+        const countersCollection = collection(firestore, 'counters');
+        const generalCounters = doc(countersCollection, 'general');
+        const countersData = await transaction.get(generalCounters);
+        const newId = countersData.data().totalTweets + 1;
+
+        // build tweet object
+        const tweet = {
+          tweetId: newId,
+          likesCount: 0,
+          retweetsCount: 0,
+          bookmarksCount: 0,
+          createdAt: serverTimestamp(),
+          repliesCount: 0,
+          text: `${tweetContent}`,
+          type: 'tweet',
+          userId: auth.currentUser.uid,
+          imageLink: `${url || ''}`,
+        };
+
+        // update total tweets
+        transaction.update(generalCounters, { totalTweets: newId });
+
+        // write tweet document
+        const newTweetDocRef = doc(tweetsCollectionRef);
+        transaction.set(newTweetDocRef, tweet);
+      });
+    } catch (error) {
+      console.error(error);
+    }
+
+    return navigate('/home');
   }
-
-  // tweets collection
-  const tweetsCollectionRef = collection(firestore, 'tweets');
-  try {
-    const tweet = {
-      tweetId: Math.floor(Math.random() * 10000) + 10000,
-      likesCount: 0,
-      retweetsCount: 0,
-      bookmarksCount: 0,
-      createdAt: serverTimestamp(),
-      repliesCount: 0,
-      text: `${tweetContent}`,
-      type: 'tweet',
-      userId: 'NickTag',
-      imageLink: `${url || ''}`,
-    };
-
-    await addDoc(tweetsCollectionRef, tweet);
-  } catch (error) {
-    console.error(error);
-  }
-
-  return navigate('/home');
+  return navigate('/i/flow/login');
 };
 
 export default ComposeTweet;

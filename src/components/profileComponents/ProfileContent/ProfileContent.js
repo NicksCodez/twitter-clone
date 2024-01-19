@@ -20,27 +20,29 @@ import TweetContainer from '../../TweetContainer/TweetContainer';
 
 // utils
 import svgs from '../../../utils/svgs';
+import { chunkArray, getInteractionsData } from '../../../utils/functions';
 
 // images
 import DefaultProfile from '../../../assets/images/default_profile.png';
 
 const ProfileContent = ({ profileVisited, isOwnProfile, isFollowed, tag }) => {
-  console.log({ profileVisited }, { isFollowed }, { isOwnProfile });
   const [tweets, setTweets] = useState(null);
   const [tweetsLoading, setTweetsLoading] = useState(true);
 
   // function to get tweets made by profileVisited user according to category
   const getTweets = async (category) => {
     setTweetsLoading(true);
+
     const tweetsCollectionRef = collection(firestore, 'tweets');
+
     let queryRef;
     switch (category) {
       case 'tweets':
         queryRef = query(
           tweetsCollectionRef,
           where('type', 'in', ['tweet', 'retweet']),
-          where('userId', '==', profileVisited.tag),
-          orderBy('tweetId', 'desc'),
+          where('userId', '==', profileVisited.uid),
+          orderBy('createdAt', 'desc'),
           limit(200)
         );
         break;
@@ -48,17 +50,16 @@ const ProfileContent = ({ profileVisited, isOwnProfile, isFollowed, tag }) => {
         queryRef = query(
           tweetsCollectionRef,
           where('type', '==', 'reply'),
-          where('userId', '==', profileVisited.tag),
-          orderBy('tweetId', 'desc'),
+          where('userId', '==', profileVisited.uid),
+          orderBy('createdAt', 'desc'),
           limit(200)
         );
         break;
       case 'media':
         queryRef = query(
           tweetsCollectionRef,
-          where('userId', '==', profileVisited.tag),
-          orderBy('imageLink'),
-          orderBy('createdAt', 'desc'),
+          where('userId', '==', profileVisited.uid),
+          where('imageLink', '!=', ''),
           limit(200)
         );
         break;
@@ -66,8 +67,8 @@ const ProfileContent = ({ profileVisited, isOwnProfile, isFollowed, tag }) => {
         queryRef = query(
           tweetsCollectionRef,
           where('tweetId', 'in', profileVisited.likes || [-1]),
-          where('userId', '==', profileVisited.tag),
-          orderBy('tweetId', 'desc'),
+          where('userId', '==', profileVisited.uid),
+          orderBy('createdAt', 'desc'),
           limit(200)
         );
         break;
@@ -75,32 +76,106 @@ const ProfileContent = ({ profileVisited, isOwnProfile, isFollowed, tag }) => {
         queryRef = query(
           tweetsCollectionRef,
           where('type', 'in', ['tweet', 'retweet']),
-          where('userId', '==', profileVisited.tag),
-          orderBy('tweetId', 'desc'),
+          where('userId', '==', profileVisited.uid),
+          orderBy('createdAt', 'desc'),
           limit(200)
         );
     }
     try {
       const querySnapshot = await getDocs(queryRef);
-      console.log('documente => ', querySnapshot.docs);
 
       const fetchedTweets = await Promise.all(
         querySnapshot.docs.map(async (document) => {
           const tweetData = document.data();
+          const interactionsData = await getInteractionsData(tweetData.tweetId);
 
           return {
-            tweetId: document.id,
             ...tweetData,
+            ...interactionsData,
             userName: profileVisited.name,
             userProfilePicture: profileVisited.profileImg,
+            userTag: profileVisited.tag,
           };
         })
       );
+
+      if (category === 'media') {
+        fetchedTweets.sort((a, b) => b.createdAt - a.createdAt);
+      }
       setTweets(fetchedTweets);
       setTweetsLoading(false);
     } catch (error) {
       console.error('Error fetching homeTweets:', error);
     }
+  };
+
+  const getLikes = async () => {
+    // set loading to true
+    setTweetsLoading(true);
+
+    // get liked tweets ids
+    const tweetInteractionsCollection = collection(
+      firestore,
+      'tweetInteractions'
+    );
+    const likesQuery = query(
+      tweetInteractionsCollection,
+      where('userId', '==', profileVisited.uid),
+      where('type', '==', 'like'),
+      orderBy('createdAt', 'desc')
+    );
+    const likesSnapshot = await getDocs(likesQuery);
+    const likedTweets =
+      likesSnapshot.docs.map((doc) => doc.data().tweetId) || [];
+    // prepare query for tweets
+    const tweetsCollectionRef = collection(firestore, 'tweets');
+
+    // chunk array into multiple arrays with max length of 30 (firestore limitation)
+    const chunks = chunkArray(likedTweets, 30);
+
+    // array to store tweets
+    let fetchedLikedTweets = [];
+
+    // get data for chunk of tweets separately
+    const promises = chunks.map(async (chunk) => {
+      // looking for specific tweet IDs, so no need for separate queries depending on "isForYouSelected"
+      const queryRef = query(
+        tweetsCollectionRef,
+        where('tweetId', 'in', chunk),
+        orderBy('createdAt', 'desc')
+      );
+      // create listener for tweets and set tweets
+      try {
+        // get tweet data for chunk
+        const querySnapshot = await getDocs(queryRef);
+        const fetchedTweets = await Promise.all(
+          querySnapshot.docs.map(async (doc) => {
+            const tweetData = doc.data();
+            const interactionsData = await getInteractionsData(
+              tweetData.tweetId
+            );
+            return {
+              ...tweetData,
+              ...interactionsData,
+              userName: profileVisited.name,
+              userTag: profileVisited.tag,
+              userProfilePicture: profileVisited.profileImg,
+            };
+          })
+        );
+
+        fetchedLikedTweets = fetchedLikedTweets.concat(fetchedTweets);
+      } catch (error) {
+        // ! implement error handling
+        console.log('error => ', { error });
+      }
+    });
+
+    // wait for all promises to be resolved to assure isLoading set to false only after all tweets loaded
+    await Promise.all(promises);
+    setTweets(fetchedLikedTweets);
+    // set loading to false
+    setTweetsLoading(false);
   };
 
   useEffect(() => {
@@ -121,7 +196,9 @@ const ProfileContent = ({ profileVisited, isOwnProfile, isFollowed, tag }) => {
   return (
     <div id="profile-page-content">
       <div id="profile-page-header-image">
-        <img src={profileVisited.headerImg} alt="profile header" />
+        {profileVisited?.headerImg && (
+          <img src={profileVisited.headerImg} alt="profile header" />
+        )}
       </div>
 
       <div id="profile-page-buttons">
@@ -274,7 +351,7 @@ const ProfileContent = ({ profileVisited, isOwnProfile, isFollowed, tag }) => {
                   type="button"
                   onClick={(event) => {
                     buttonClickHandler(event);
-                    getTweets('likes');
+                    getLikes();
                   }}
                 >
                   <span>Likes</span>

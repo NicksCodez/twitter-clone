@@ -1,8 +1,17 @@
 .new-tweet-body {
+  position: relative;
   display: flex;
   flex-direction: column;
   flex-grow: 1;
   flex-shrink: 1;
+}
+
+.new-tweet-placeholder {
+  position: absolute;
+  font-size: var(--fs-h2);
+  line-height: var(--lh-h2);
+  color: var(--clr-font-secondary);
+  pointer-events: none;
 }
 
 .new-tweet-body img {
@@ -22,7 +31,7 @@
   max-height: calc(100vh - 114px);
   overflow-y: scroll;
   outline: none;
-  color: var(--clr-font-secondary);
+  color: var(--clr-font-primary);
 }
 
 .new-tweet-textarea.active {

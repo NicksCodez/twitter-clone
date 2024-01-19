@@ -31,6 +31,13 @@ import {
   useViewportContext,
 } from '../../contextProvider/ContextProvider';
 
+// utils
+import {
+  chunkArray,
+  getInteractionsData,
+  updateTweets,
+} from '../../utils/functions';
+
 const Home = () => {
   // const {
   //   homeScroll,
@@ -205,7 +212,7 @@ const Home = () => {
       queryRef = query(
         tweetsCollectionRef,
         where('type', 'in', ['tweet', 'retweet']),
-        orderBy('tweetId', 'desc'),
+        orderBy('createdAt', 'desc'),
         limit(25)
       );
     } else if (user.following && user.following.length !== 0) {
@@ -401,7 +408,6 @@ const tweetsLoader = async (
 
       // build fetchedTweets array from tweet documents plus information needed from twitter user
       const fetchedTweets = await processTweetsQuerySnapshot(querySnapshot);
-
       // set last visible tweet
       if (querySnapshot.docs.length > 0) {
         const lastTweet = querySnapshot.docs[querySnapshot.docs.length - 1];
@@ -452,7 +458,7 @@ const attachListenersToTweets = async (
     const queryRef = query(
       tweetsCollectionRef,
       where('tweetId', 'in', chunk),
-      orderBy('tweetId', 'desc')
+      orderBy('createdAt', 'desc')
     );
 
     // create listener for tweets and set tweets
@@ -499,41 +505,12 @@ const attachListenersToTweets = async (
   return unsubscribers || null;
 };
 
-const updateTweets = (prevTweets, fetchedTweets) => {
-  //! urmatoarele comentarii sunt scrise pentru cazul in care se apeleaza din functia attachListenersToTweets
-  //! daca nu filtrez astfel incat fetchedtweets sa nu existe deja in prevtweets, apar duplicate
-  //! duplicatele apar cand am mai mult de setul initial de 25 de tweeturi incarcate, dar nu toate tweeturile
-  //! ex: sunt pe pagina home, dau scroll, incarc inca un set de tweeturi, merg la explore, dupa inapoi la home
-  //! eroarea nu apare chiar mereu, dar apare destul de des
-  //! eroarea apare sigur daca dupa ce m-am intors la home page se incarca automat inca un set de tweeturi datorita intersectiei, desi nu ar trebui caci nu am dat scroll pana la ultimul tweet
-  // update duplicate tweets
-  const updatedTweets = prevTweets.map((prevTweet) => {
-    const updatedTweet = fetchedTweets.find(
-      (fetchedTweet) => fetchedTweet.tweetId === prevTweet.tweetId
-    );
-    return updatedTweet || prevTweet;
-  });
-
-  // append any tweet not already in homeTweets to updatedTweets
-  fetchedTweets.forEach((fetchedTweet) => {
-    if (
-      !prevTweets.some(
-        (prevTweet) => prevTweet.tweetId === fetchedTweet.tweetId
-      )
-    ) {
-      updatedTweets.push(fetchedTweet);
-    }
-  });
-
-  return updatedTweets;
-};
-
 const getUserData = async (userDataRef) => {
   // function to get a user's data according to tag
   const usersCollectionRef = collection(firestore, 'users');
   const usersQueryRef = query(
     usersCollectionRef,
-    where('tag', '==', userDataRef)
+    where('uid', '==', userDataRef)
   );
   const userDataSnapshot = await getDocs(usersQueryRef);
 
@@ -558,74 +535,24 @@ const processTweetsQuerySnapshot = async (querySnapshot) => {
       const userDataRef = tweetData.userId;
       const userData = await getUserData(userDataRef);
 
-      // find out if tweet is liked/bookmarked
-      const tweetInteractionsCollection = collection(
-        firestore,
-        'tweetInteractions'
-      );
-      const tweetInteractionsQuery = query(
-        tweetInteractionsCollection,
-        where('userId', '==', auth?.currentUser.uid),
-        where('tweetId', '==', tweetData.tweetId),
-        where('type', 'in', ['like', 'bookmark', 'retweet'])
-      );
+      if (userData.uid) {
+        // get interactions data
+        const interactionsData = await getInteractionsData(tweetData.tweetId);
 
-      const tweetInteractionsSnapshot = await getDocs(tweetInteractionsQuery);
-
-      // console.log(tweetInteractionsSnapshot.docs);
-      const interactionsData = {
-        isLiked: false,
-        isBookmarked: false,
-        isRetweeted: false,
-      };
-
-      tweetInteractionsSnapshot.docs.forEach((doc) => {
-        switch (doc.data().type) {
-          case 'like':
-            interactionsData.isLiked = true;
-            break;
-          case 'bookmark':
-            interactionsData.isBookmarked = true;
-            break;
-          default:
-            break;
-        }
-      });
-
-      // find out if the tweet is retweeted
-      const tweetsCollection = collection(firestore, 'tweets');
-      const retweetQuery = query(
-        tweetsCollection,
-        where('type', '==', 'retweet'),
-        where('userId', '==', auth.currentUser.uid),
-        where('retweetId', '==', tweetData.tweetId)
-      );
-      const retweetSnapshot = await getDocs(retweetQuery);
-      if (!retweetSnapshot.empty) {
-        interactionsData.isRetweeted = true;
+        // return complete object
+        return {
+          ...tweetData,
+          userName: userData.name,
+          userProfilePicture: userData.profileImg,
+          userTag: userData.tag,
+          ...interactionsData,
+        };
       }
-
-      // return complete object
-      return {
-        ...tweetData,
-        userName: userData.name,
-        userProfilePicture: userData.profileImg,
-        ...interactionsData,
-      };
+      return {};
     })
   );
 
   return fetchedTweets;
-};
-
-const chunkArray = (array, chunkSize) => {
-  // function to chunk array into multiple arrays of smaller size
-  const chunks = [];
-  for (let i = 0; i < array.length; i += chunkSize) {
-    chunks.push(array.slice(i, i + chunkSize));
-  }
-
-  return chunks;
 };
 
 export default Home;

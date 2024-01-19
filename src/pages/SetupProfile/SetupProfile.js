@@ -1,5 +1,5 @@
 /* eslint-disable no-nested-ternary */
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 
 // css
@@ -14,7 +14,7 @@ import {
   updateDoc,
   where,
 } from 'firebase/firestore';
-import { firestore, storage } from '../../firebase';
+import { auth, firestore, storage } from '../../firebase';
 
 // components
 import PageHeader from '../../components/PageHeader/PageHeader';
@@ -25,7 +25,6 @@ import SetupProfileLocation from '../../components/setupProfileComponents/setupP
 
 // context provider
 // import { useAppContext } from '../../contextProvider/ContextProvider';
-import { useUserContext } from '../../contextProvider/ContextProvider';
 
 // utils
 import svgs from '../../utils/svgs';
@@ -36,11 +35,27 @@ const SetupProfile = () => {
   const [headerPic, setHeaderPic] = useState(null);
   const [bio, setBio] = useState('');
   const [location, setLocation] = useState('');
-  // const { user } = useAppContext();
-  const { user } = useUserContext();
+  const [userData, setUserData] = useState({});
   const navigate = useNavigate();
 
   let leftElement;
+
+  useEffect(() => {
+    if (!auth.currentUser) {
+      navigate('/i/flow/login');
+    } else {
+      const setUser = async () => {
+        const usersCollection = collection(firestore, 'users');
+        const userQuery = query(
+          usersCollection,
+          where('uid', '==', auth.currentUser.uid)
+        );
+        const userSnapshot = await getDocs(userQuery);
+        setUserData(userSnapshot.docs[0].data());
+      };
+      setUser();
+    }
+  }, [auth.currentUser]);
 
   const saveButtonClickHandler = async () => {
     // upload profile and header pictures if they exist and save their urls
@@ -48,20 +63,23 @@ const SetupProfile = () => {
     let headerURL;
 
     if (profilePic) {
-      const profileRef = ref(storage, `users/${user.uid}/profile`);
+      const profileRef = ref(storage, `users/${userData.uid}/profile`);
       await uploadBytes(profileRef, profilePic[0]);
       profileURL = await getDownloadURL(profileRef);
     }
 
     if (headerPic) {
-      const headerRef = ref(storage, `users/${user.uid}/header`);
+      const headerRef = ref(storage, `users/${userData.uid}/header`);
       await uploadBytes(headerRef, headerPic[0]);
       headerURL = await getDownloadURL(headerRef);
     }
 
-    // get reference to user document
+    // get reference to userData document
     const usersCollectionRef = collection(firestore, 'users');
-    const queryRef = query(usersCollectionRef, where('uid', '==', user.uid));
+    const queryRef = query(
+      usersCollectionRef,
+      where('uid', '==', userData.uid)
+    );
 
     const querySnapshot = await getDocs(queryRef);
 
@@ -136,7 +154,7 @@ const SetupProfile = () => {
       <div className="setup-padded">
         {currentStep === 0 && (
           <SetupProfilePicture
-            user={user}
+            user={userData}
             file={profilePic}
             setFile={setProfilePic}
             currentStep={currentStep}
@@ -145,7 +163,7 @@ const SetupProfile = () => {
         )}
         {currentStep === 1 && (
           <SetupProfileHeader
-            user={user}
+            user={userData}
             profileFile={profilePic}
             file={headerPic}
             setFile={setHeaderPic}
@@ -159,6 +177,7 @@ const SetupProfile = () => {
             setText={setBio}
             currentStep={currentStep}
             setCurrentStep={setCurrentStep}
+            initialValue="test"
           />
         )}
         {currentStep === 3 && (

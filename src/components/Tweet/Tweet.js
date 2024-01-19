@@ -298,6 +298,7 @@ const likeHandler = async (
             await transaction.update(tweetsQuerySnapshot.docs[0].ref, {
               [countField]: tweetsQuerySnapshot.docs[0].data()[countField] + 1,
             });
+            setActionInProgress(false);
           });
         } catch (error) {
           // something went wrong, log error for now
@@ -319,6 +320,7 @@ const likeHandler = async (
             await transaction.update(tweetsQuerySnapshot.docs[0].ref, {
               [countField]: tweetsQuerySnapshot.docs[0].data()[countField] - 1,
             });
+            setActionInProgress(false);
           });
         } catch (error) {
           // something went wrong, so log error for now

@@ -17,7 +17,9 @@ const TweetContainer = ({ tweets, isLoading }) => (
             .filter((tweet) => tweet.tweetId)
             .map((tweet) => (
               <Tweet
-                key={tweet.tweetId}
+                key={tweet.key}
+                docRef={tweet.docRef}
+                reposterId={tweet.reposterId}
                 profileImg={tweet.userProfilePicture}
                 name={tweet.userName}
                 tag={tweet.userTag}

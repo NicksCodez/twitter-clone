@@ -56,34 +56,84 @@ const chunkArray = (array, chunkSize) => {
   return chunks;
 };
 
-const updateTweets = (prevTweets, fetchedTweets) => {
+const updateTweets = (prevTweets, docsToModify, docsToDelete, docsToAdd) => {
+  console.log('-------------in update------------\n');
   // function to update tweets
-  //! urmatoarele comentarii sunt scrise pentru cazul in care se apeleaza din functia attachListenersToTweets
-  //! daca nu filtrez astfel incat fetchedtweets sa nu existe deja in prevtweets, apar duplicate
-  //! duplicatele apar cand am mai mult de setul initial de 25 de tweeturi incarcate, dar nu toate tweeturile
-  //! ex: sunt pe pagina home, dau scroll, incarc inca un set de tweeturi, merg la explore, dupa inapoi la home
-  //! eroarea nu apare chiar mereu, dar apare destul de des
-  //! eroarea apare sigur daca dupa ce m-am intors la home page se incarca automat inca un set de tweeturi datorita intersectiei, desi nu ar trebui caci nu am dat scroll pana la ultimul tweet
-  const filteredFetchedTweets = fetchedTweets.filter((tweet) => tweet.userName);
-  // update duplicate tweets
-  const updatedTweets = prevTweets.map((prevTweet) => {
-    const updatedTweet = filteredFetchedTweets.find(
-      (fetchedTweet) => fetchedTweet.tweetId === prevTweet.tweetId
+  // ! uses key to delete because that is unique in each document, tweetId can be repeated if there are retweeted tweets so tweetId is used for modifying
+  // ! best order of operations is delete -> modify -> add
+
+  // clone prevTweets into new array
+  let updatedTweets = prevTweets.map((tweet) => tweet);
+  console.log({ prevTweets }, { updatedTweets });
+
+  // delete tweets
+  if (docsToDelete?.length > 0) {
+    updatedTweets = updatedTweets.filter(
+      (tweet) => !docsToDelete.includes(tweet.key)
     );
-    return updatedTweet || prevTweet;
-  });
+  }
 
-  // append any tweet not already in homeTweets to updatedTweets
-  filteredFetchedTweets.forEach((fetchedTweet) => {
-    if (
-      !prevTweets.some(
-        (prevTweet) => prevTweet.tweetId === fetchedTweet.tweetId
-      )
-    ) {
-      updatedTweets.push(fetchedTweet);
-    }
-  });
+  // modify tweets to modify
+  if (docsToModify?.length > 0) {
+    // make map for faster lookup
+    const docsToModifyMap = new Map(
+      docsToModify.map((doc) => [doc.tweetId, doc])
+    );
 
+    // replace tweets where tweetId matches
+    updatedTweets.forEach((tweet, index) => {
+      if (docsToModifyMap.has(tweet.tweetId)) {
+        const docInMap = docsToModifyMap.get(tweet.tweetId);
+        // ! keep data that should not change in place and change only the data that can change
+        // ! else retweeted posts do not get updated correctly if both original tweet and retweet post on the same page
+        const newTweet = {
+          createdAt: tweet.createdAt,
+          docRef: tweet.docRef,
+          key: tweet.key,
+          ...[tweet.repostTime && { repostTime: tweet.repostTime }],
+          ...[tweet.reposterId && { reposterId: tweet.reposterId }],
+          tweetId: tweet.tweetId,
+          type: tweet.type,
+          userId: tweet.userId,
+          bookmarksCount: docInMap.bookmarksCount,
+          imageLink: docInMap.imageLink,
+          isBookmarked: docInMap.isBookmarked,
+          isLiked: docInMap.isLiked,
+          isRetweeted: docInMap.isRetweeted,
+          likesCount: docInMap.likesCount,
+          repliesCount: docInMap.repliesCount,
+          retweetsCount: docInMap.retweetsCount,
+          text: docInMap.text,
+          userName: docInMap.userName,
+          userProfilePicture: docInMap.userProfilePicture,
+          userTag: docInMap.userTag,
+        };
+        // updatedTweets[index] = docsToModifyMap.get(tweet.key);
+        updatedTweets[index] = newTweet;
+      }
+    });
+  }
+
+  // add new tweets
+  if (docsToAdd?.length > 0) {
+    const firstDocTime =
+      updatedTweets[0]?.repostTime || updatedTweets[0]?.createdAt;
+    docsToAdd.forEach((doc) => {
+      const currentDocTime = doc.repostTime || doc.createdAt;
+      if (
+        currentDocTime.seconds > firstDocTime?.seconds ||
+        (currentDocTime.seconds === firstDocTime?.seconds &&
+          currentDocTime.nanoseconds > firstDocTime?.nanoseconds)
+      ) {
+        updatedTweets.splice(0, 0, doc);
+      } else {
+        updatedTweets.push(doc);
+      }
+    });
+  }
+
+  console.log({ prevTweets }, { updatedTweets });
+  console.log('-------------gata update------------\n');
   return updatedTweets;
 };
 

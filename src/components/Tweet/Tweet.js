@@ -8,6 +8,7 @@ import './Tweet.css';
 import {
   collection,
   doc,
+  getDoc,
   getDocs,
   query,
   runTransaction,
@@ -21,6 +22,8 @@ import svgs from '../../utils/svgs';
 
 const Tweet = React.memo(
   ({
+    docRef,
+    reposterId,
     profileImg,
     name,
     tag,
@@ -134,7 +137,8 @@ const Tweet = React.memo(
                       navigate,
                       isRetweeted,
                       retweetInProgress,
-                      setRetweetInProgress
+                      setRetweetInProgress,
+                      docRef
                     )
                   }
                 >
@@ -155,7 +159,8 @@ const Tweet = React.memo(
                       navigate,
                       isLiked,
                       likeInProgress,
-                      setLikeInProgress
+                      setLikeInProgress,
+                      docRef
                     )
                   }
                 >
@@ -186,7 +191,8 @@ const Tweet = React.memo(
                       navigate,
                       isBookmarked,
                       bookmarkInProgress,
-                      setBookmarkInProgress
+                      setBookmarkInProgress,
+                      docRef
                     )
                   }
                 >
@@ -217,8 +223,10 @@ const likeHandler = async (
   navigate,
   isLiked,
   actionInProgress,
-  setActionInProgress
+  setActionInProgress,
+  ref
 ) => {
+  console.log({ idProp }, { isLiked });
   // on like, update tweet and tweetInteraction documents if user is logged in and didn't already like respective tweet
   if (auth.currentUser) {
     if (!actionInProgress) {
@@ -233,6 +241,10 @@ const likeHandler = async (
       );
 
       const tweetsQuerySnapshot = await getDocs(tweetsQueryRef);
+      console.log({ ref });
+      const tweetDocRef = doc(tweetsCollectionRef, ref);
+      const tweetDoc = await getDoc(tweetDocRef);
+      console.log('test =>', tweetDoc.data(), tweetDoc.ref);
 
       // get reference to tweetInteractions document
       const tweetInteractionsCollectionRef = collection(
@@ -295,8 +307,8 @@ const likeHandler = async (
 
             // update tweet document
             const countField = `${type}sCount`;
-            await transaction.update(tweetsQuerySnapshot.docs[0].ref, {
-              [countField]: tweetsQuerySnapshot.docs[0].data()[countField] + 1,
+            await transaction.update(tweetDoc.ref, {
+              [countField]: tweetDoc.data()[countField] + 1,
             });
             setActionInProgress(false);
           });
@@ -314,12 +326,12 @@ const likeHandler = async (
           await runTransaction(firestore, async (transaction) => {
             // delete tweetInteraction document
             await transaction.delete(docToDelete);
-
             // update tweet document
             const countField = `${type}sCount`;
-            await transaction.update(tweetsQuerySnapshot.docs[0].ref, {
-              [countField]: tweetsQuerySnapshot.docs[0].data()[countField] - 1,
+            await transaction.update(tweetDoc.ref, {
+              [countField]: tweetDoc.data()[countField] - 1,
             });
+
             setActionInProgress(false);
           });
         } catch (error) {

@@ -12,7 +12,7 @@ import {
   startAfter,
   onSnapshot,
 } from 'firebase/firestore';
-import { auth, firestore } from '../../firebase';
+import { firestore } from '../../firebase';
 
 // css
 import './Home.css';
@@ -236,6 +236,7 @@ const Home = () => {
     }
 
     if (state.tweets.length === 0) {
+      console.log('loading tweets bc length is 0');
       // if no tweets, get initial tweets
       const unsubscribe = tweetsLoader(
         queryRef,
@@ -310,7 +311,7 @@ const Home = () => {
             startAfter(state.lastVisibleTweetRef.current)
           );
         }
-
+        console.log('loading new tweets in intersection ');
         // load next 25 tweets and store unsubscriber in ref to use when unmounting component
         const unsubscribePromise = tweetsLoader(
           queryRef,
@@ -344,6 +345,11 @@ const Home = () => {
       observer.disconnect();
     };
   }, [state.tweets, state.seenLastTweetRef.current, isLoading]);
+
+  useEffect(() => {
+    // ? debug weird behavior when bookmarking or liking if I have one reposted tweet
+    console.log('state tweets changed => ', state.tweets);
+  }, [state.tweets]);
 
   return (
     <div id="home">
@@ -400,6 +406,8 @@ const tweetsLoader = async (
   let unsubscribe;
   try {
     unsubscribe = onSnapshot(queryRef, async (querySnapshot) => {
+      console.log('inside tweetsLoader onSnapshot => ', Date.now());
+      querySnapshot.docChanges().forEach((change) => console.log({ change }));
       // if querySnapshot has no docs, most likely last tweet was seen
       if (!querySnapshot.docs[0]) {
         setSeenLastTweet(true);
@@ -407,10 +415,26 @@ const tweetsLoader = async (
       }
 
       // build fetchedTweets array from tweet documents plus information needed from twitter user
-      const fetchedTweets = await processTweetsQuerySnapshot(querySnapshot);
+      const [docsToModify, docsToDelete, docsToAdd] =
+        await processTweetsQuerySnapshot(querySnapshot);
+
       // set last visible tweet
       if (querySnapshot.docs.length > 0) {
-        const lastTweet = querySnapshot.docs[querySnapshot.docs.length - 1];
+        // Sort the docs based on createdAt (oldest to newest)
+        const sortedDocs = querySnapshot.docs.sort((a, b) => {
+          const aCreatedAt = a.data().createdAt;
+          const bCreatedAt = b.data().createdAt;
+
+          // Compare seconds first, then nanoseconds if seconds are equal
+          if (aCreatedAt.seconds !== bCreatedAt.seconds) {
+            return aCreatedAt.seconds - bCreatedAt.seconds;
+          }
+          return aCreatedAt.nanoseconds - bCreatedAt.nanoseconds;
+        });
+
+        // Select the first document (oldest)
+        const lastTweet = sortedDocs[0];
+
         // eslint-disable-next-line no-param-reassign
         setLastVisibleTweetRef(lastTweet);
       }
@@ -420,7 +444,7 @@ const tweetsLoader = async (
       setHomeTweets((prevTweets) => {
         // set loading to false only after state update
         setLoading(false);
-        return updateTweets(prevTweets, fetchedTweets);
+        return updateTweets(prevTweets, docsToModify, docsToDelete, docsToAdd);
       });
     });
   } catch (error) {
@@ -452,6 +476,10 @@ const attachListenersToTweets = async (
   // chunk array into multiple arrays with max length of 30 (firestore limitation)
   const chunks = chunkArray(tweetIds, 30);
 
+  // delete old tweets from state to avoid duplicating them
+  const tweetKeys = tweets.map((tweet) => tweet.key);
+  setTweets((prevTweets) => updateTweets(prevTweets, [], tweetKeys, []));
+
   // subcribe to each chunk of tweets separately and add unsubsriber function to unsubsribers array
   const promises = chunks.map(async (chunk) => {
     // looking for specific tweet IDs, so no need for separate queries depending on "isForYouSelected"
@@ -467,21 +495,39 @@ const attachListenersToTweets = async (
         try {
           if (querySnapshot.docs.length > 0) {
             // build fetchedTweets array from tweet documents plus information needed from tweeter user
-            const fetchedTweets = await processTweetsQuerySnapshot(
-              querySnapshot
-            );
+            const [docsToModify, docsToDelete, docsToAdd] =
+              await processTweetsQuerySnapshot(querySnapshot);
 
             // set tweets
             setTweets((prevTweets) => {
               // resolve promise
               resolve();
-              return updateTweets(prevTweets, fetchedTweets);
+              return updateTweets(
+                prevTweets,
+                docsToModify,
+                docsToDelete,
+                docsToAdd
+              );
             });
 
             // set last visible tweet ref  in last chunk
             if (chunks.indexOf(chunk) === chunks.length - 1) {
-              const lastTweet =
-                querySnapshot.docs[querySnapshot.docs.length - 1];
+              // Sort the docs based on createdAt (oldest to newest)
+              const sortedDocs = querySnapshot.docs.sort((a, b) => {
+                const aCreatedAt = a.data().createdAt;
+                const bCreatedAt = b.data().createdAt;
+
+                // Compare seconds first, then nanoseconds if seconds are equal
+                if (aCreatedAt.seconds !== bCreatedAt.seconds) {
+                  return aCreatedAt.seconds - bCreatedAt.seconds;
+                }
+                return aCreatedAt.nanoseconds - bCreatedAt.nanoseconds;
+              });
+
+              // Select the first document (oldest)
+              const lastTweet = sortedDocs[0];
+
+              // eslint-disable-next-line no-param-reassign
               setLastVisibleTweetRef(lastTweet);
             }
           }
@@ -518,8 +564,32 @@ const getUserData = async (userDataRef) => {
 };
 
 const processTweetsQuerySnapshot = async (querySnapshot) => {
-  // create fetchedTweets array consisting of objects that have both tweet and user data
-  const fetchedTweets = await Promise.all(
+  // make array of docs to delete if any docs were removed from the querySnapshot
+  const docsToDeleteIds = [];
+  const docsToModifyIds = [];
+  const docsToAddIds = [];
+  querySnapshot.docChanges().forEach((change) => {
+    switch (change.type) {
+      case 'removed':
+        console.log(`Document with ID ${change.doc.id} was deleted`);
+        docsToDeleteIds.push(change.doc.id);
+        break;
+      case 'added':
+        console.log(`Document with ID ${change.doc.id} was added`);
+        docsToAddIds.push(change.doc.id);
+        break;
+      case 'modified':
+        console.log(`Document with ID ${change.doc.id} was modified`);
+        docsToModifyIds.push(change.doc.id);
+        break;
+      default:
+        break;
+    }
+  });
+  // create arrays for modified and added documents
+  const docsToAdd = [];
+  const docsToModify = [];
+  await Promise.all(
     querySnapshot.docs.map(async (document) => {
       // ? try to find a more efficient way to retrieve data
       // ? right now, for each document you execute multiple read operations on the database
@@ -528,31 +598,75 @@ const processTweetsQuerySnapshot = async (querySnapshot) => {
       // ? also, this should be slower than if you could find a way to get batches of data
       // ? e.g. for tweetinteractions do batch queries (where, in, tweetIds)
       // ? no idea for user data right now though
+      console.log({ docsToDeleteIds });
 
-      const tweetData = document.data();
+      if (!docsToDeleteIds?.includes(document.id)) {
+        // if doc has to be deleted, no point in getting data for it
+        let tweetData = document.data();
+        let reposterId = null;
+        let tweetDocRef = document.id;
+        let repostTime = null;
 
-      // get the user who posted the tweet's data
-      const userDataRef = tweetData.userId;
-      const userData = await getUserData(userDataRef);
+        if (tweetData.type === 'retweet') {
+          // if retweet, get original tweet data and set reposterId, repostTime and tweetDocRef
+          // ! this step creates multiple objects with the same tweetId in state, not in the database
+          if (!tweetData.retweetId) {
+            // error in tweet data so return empty object
+            return {};
+          }
 
-      if (userData.uid) {
-        // get interactions data
-        const interactionsData = await getInteractionsData(tweetData.tweetId);
+          reposterId = tweetData.userId;
+          repostTime = tweetData.createdAt;
 
-        // return complete object
-        return {
-          ...tweetData,
-          userName: userData.name,
-          userProfilePicture: userData.profileImg,
-          userTag: userData.tag,
-          ...interactionsData,
-        };
+          const tweetsCollection = collection(firestore, 'tweets');
+          const tweetQuery = query(
+            tweetsCollection,
+            where('tweetId', '==', tweetData.retweetId)
+          );
+          const tweetSnapshot = await getDocs(tweetQuery);
+          tweetData = tweetSnapshot.docs[0]?.data() || {};
+          tweetDocRef = tweetSnapshot.docs[0].id;
+        }
+        // get the user who posted the tweet's data
+        const userDataRef = tweetData.userId;
+        const userData = await getUserData(userDataRef);
+
+        if (userData.uid) {
+          // get interactions data
+          const interactionsData = await getInteractionsData(tweetData.tweetId);
+
+          // return complete object
+          const processedTweetDocument = {
+            key: document.id,
+            docRef: tweetDocRef,
+            ...tweetData,
+            userName: userData.name,
+            userProfilePicture: userData.profileImg,
+            userTag: userData.tag,
+            ...interactionsData,
+            reposterId,
+            repostTime,
+          };
+
+          if (docsToAddIds.includes(document.id)) {
+            docsToAdd.push(processedTweetDocument);
+          }
+
+          if (docsToModifyIds.includes(document.id)) {
+            docsToModify.push(processedTweetDocument);
+          }
+        }
       }
       return {};
     })
   );
-
-  return fetchedTweets;
+  console.log(
+    'in process => ',
+    { docsToAdd },
+    { docsToModify },
+    { docsToDeleteIds }
+  );
+  return [docsToModify, docsToDeleteIds, docsToAdd];
 };
 
 export default Home;

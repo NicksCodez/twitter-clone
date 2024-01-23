@@ -57,14 +57,12 @@ const chunkArray = (array, chunkSize) => {
 };
 
 const updateTweets = (prevTweets, docsToModify, docsToDelete, docsToAdd) => {
-  console.log('-------------in update------------\n');
   // function to update tweets
   // ! uses key to delete because that is unique in each document, tweetId can be repeated if there are retweeted tweets so tweetId is used for modifying
   // ! best order of operations is delete -> modify -> add
 
   // clone prevTweets into new array
   let updatedTweets = prevTweets.map((tweet) => tweet);
-  console.log({ prevTweets }, { updatedTweets });
 
   // delete tweets
   if (docsToDelete?.length > 0) {
@@ -92,6 +90,8 @@ const updateTweets = (prevTweets, docsToModify, docsToDelete, docsToAdd) => {
           key: tweet.key,
           ...[tweet.repostTime && { repostTime: tweet.repostTime }],
           ...[tweet.reposterId && { reposterId: tweet.reposterId }],
+          reposterData: tweet.reposterData,
+          originalTweetId: tweet.originalTweetId,
           tweetId: tweet.tweetId,
           type: tweet.type,
           userId: tweet.userId,
@@ -108,7 +108,6 @@ const updateTweets = (prevTweets, docsToModify, docsToDelete, docsToAdd) => {
           userProfilePicture: docInMap.userProfilePicture,
           userTag: docInMap.userTag,
         };
-        // updatedTweets[index] = docsToModifyMap.get(tweet.key);
         updatedTweets[index] = newTweet;
       }
     });
@@ -116,24 +115,76 @@ const updateTweets = (prevTweets, docsToModify, docsToDelete, docsToAdd) => {
 
   // add new tweets
   if (docsToAdd?.length > 0) {
-    const firstDocTime =
-      updatedTweets[0]?.repostTime || updatedTweets[0]?.createdAt;
     docsToAdd.forEach((doc) => {
-      const currentDocTime = doc.repostTime || doc.createdAt;
-      if (
-        currentDocTime.seconds > firstDocTime?.seconds ||
-        (currentDocTime.seconds === firstDocTime?.seconds &&
-          currentDocTime.nanoseconds > firstDocTime?.nanoseconds)
-      ) {
-        updatedTweets.splice(0, 0, doc);
+      // if doc with same key already exists, find it
+      const index = updatedTweets.findIndex(
+        (updatedTweet) => updatedTweet.key === doc.key
+      );
+      if (index === -1) {
+        // no doc with same key, can add
+        const firstDocTime =
+          updatedTweets[0]?.repostTime || updatedTweets[0]?.createdAt;
+        const currentDocTime = doc.repostTime || doc.createdAt;
+        if (
+          currentDocTime.seconds > firstDocTime?.seconds ||
+          (currentDocTime.seconds === firstDocTime?.seconds &&
+            currentDocTime.nanoseconds >= firstDocTime?.nanoseconds)
+        ) {
+          updatedTweets.splice(0, 0, doc);
+        } else {
+          updatedTweets.push(doc);
+        }
       } else {
-        updatedTweets.push(doc);
+        // doc with same key, need to replace it
+        // ? this can happen when a document is deleted, causing the snapshot to retrieve one document from the following snapshot, which leads to duplication
+        const newTweet = {
+          createdAt: updatedTweets[index].createdAt,
+          docRef: updatedTweets[index].docRef,
+          key: updatedTweets[index].key,
+          ...[
+            updatedTweets[index].repostTime && {
+              repostTime: updatedTweets[index].repostTime,
+            },
+          ],
+          ...[
+            updatedTweets[index].reposterId && {
+              reposterId: updatedTweets[index].reposterId,
+            },
+          ],
+          reposterData: updatedTweets[index].reposterData,
+          originalTweetId: updatedTweets[index].originalTweetId,
+          tweetId: updatedTweets[index].tweetId,
+          type: updatedTweets[index].type,
+          userId: updatedTweets[index].userId,
+          bookmarksCount: doc.bookmarksCount,
+          imageLink: doc.imageLink,
+          isBookmarked: doc.isBookmarked,
+          isLiked: doc.isLiked,
+          isRetweeted: doc.isRetweeted,
+          likesCount: doc.likesCount,
+          repliesCount: doc.repliesCount,
+          retweetsCount: doc.retweetsCount,
+          text: doc.text,
+          userName: doc.userName,
+          userProfilePicture: doc.userProfilePicture,
+          userTag: doc.userTag,
+        };
+        updatedTweets[index] = newTweet;
       }
     });
   }
 
-  console.log({ prevTweets }, { updatedTweets });
-  console.log('-------------gata update------------\n');
+  // Sort the docs based on createdAt (newest to oldest)
+  updatedTweets.sort((a, b) => {
+    const aCreatedAt = a.repostTime || a.createdAt;
+    const bCreatedAt = b.repostTime || b.createdAt;
+
+    // Compare seconds first, then nanoseconds if seconds are equal
+    if (aCreatedAt.seconds !== bCreatedAt.seconds) {
+      return bCreatedAt.seconds - aCreatedAt.seconds;
+    }
+    return bCreatedAt.nanoseconds - aCreatedAt.nanoseconds;
+  });
   return updatedTweets;
 };
 
@@ -153,7 +204,6 @@ const getInteractionsData = async (tweetUid) => {
 
   const tweetInteractionsSnapshot = await getDocs(tweetInteractionsQuery);
 
-  // console.log(tweetInteractionsSnapshot.docs);
   const interactionsData = {
     isLiked: false,
     isBookmarked: false,
@@ -188,6 +238,51 @@ const getInteractionsData = async (tweetUid) => {
   return interactionsData;
 };
 
+// function to debounce another function
+// makes sure function only runs once in delay interval
+const debounce =
+  (func, delay, lastCalled, setLastCalled) =>
+  (...args) => {
+    const now = Date.now();
+    if (now - lastCalled > delay) {
+      setLastCalled(now);
+      func(...args);
+    }
+  };
+
+// function to retrieve a user's data
+const getUserData = async (userDataRef) => {
+  // function to get a user's data according to tag
+  const usersCollectionRef = collection(firestore, 'users');
+  const usersQueryRef = query(
+    usersCollectionRef,
+    where('uid', '==', userDataRef)
+  );
+  const userDataSnapshot = await getDocs(usersQueryRef);
+
+  return userDataSnapshot.docs[0]?.data() || {};
+};
+
+// Function to format timestamp
+const formatTimeAgo = (timestamp) => {
+  const now = new Date();
+  const diffInSeconds = Math.floor((now - timestamp.toDate()) / 1000);
+
+  if (diffInSeconds < 60) {
+    return `${diffInSeconds}s`;
+  }
+  if (diffInSeconds < 3600) {
+    const minutes = Math.floor(diffInSeconds / 60);
+    return `${minutes}m`;
+  }
+  if (diffInSeconds < 86400) {
+    const hours = Math.floor(diffInSeconds / 3600);
+    return `${hours}h`;
+  }
+  const options = { month: 'short', day: 'numeric' };
+  return timestamp.toDate().toLocaleDateString('en-US', options);
+};
+
 export {
   clickHandlerAccount,
   resizeHandler,
@@ -196,4 +291,7 @@ export {
   chunkArray,
   updateTweets,
   getInteractionsData,
+  debounce,
+  getUserData,
+  formatTimeAgo,
 };

@@ -35,22 +35,39 @@ const AppContextProvider = ({ children }) => {
     setUser,
   };
 
-  const tweetContextValue = {
-    homeScroll,
-    setHomeScroll,
-    homeTweets,
-    setHomeTweets,
-    homeFollowingScroll,
-    setHomeFollowingScroll,
-    homeFollowingTweets,
-    setHomeFollowingTweets,
-    isForYouSelected,
-    setIsForYouSelected,
-    seenLastForYouTweetRef,
-    seenLastFollowingTweetRef,
-    lastVisibleForYouTweetRef,
-    lastVisibleFollowingTweetRef,
-  };
+  const tweetContextValue = isForYouSelected
+    ? {
+        tweets: homeTweets,
+        setTweets: setHomeTweets,
+        scroll: homeScroll,
+        setScroll: setHomeScroll,
+        seenLastTweetRef: seenLastForYouTweetRef,
+        setSeenLastTweetRef: (newValue) => {
+          seenLastForYouTweetRef.current = newValue;
+        },
+        lastVisibleTweetRef: lastVisibleForYouTweetRef,
+        setLastVisibleTweetRef: (newValue) => {
+          lastVisibleForYouTweetRef.current = newValue;
+        },
+        isForYouSelected,
+        setIsForYouSelected,
+      }
+    : {
+        tweets: homeFollowingTweets,
+        setTweets: setHomeFollowingTweets,
+        scroll: homeFollowingScroll,
+        setScroll: setHomeFollowingScroll,
+        seenLastTweetRef: seenLastFollowingTweetRef,
+        setSeenLastTweetRef: (newValue) => {
+          seenLastFollowingTweetRef.current = newValue;
+        },
+        lastVisibleTweetRef: lastVisibleFollowingTweetRef,
+        setLastVisibleTweetRef: (newValue) => {
+          lastVisibleFollowingTweetRef.current = newValue;
+        },
+        isForYouSelected,
+        setIsForYouSelected,
+      };
 
   const viewportContextValue = {
     viewportWidth,

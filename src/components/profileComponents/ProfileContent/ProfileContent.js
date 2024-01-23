@@ -20,7 +20,11 @@ import TweetContainer from '../../TweetContainer/TweetContainer';
 
 // utils
 import svgs from '../../../utils/svgs';
-import { chunkArray, getInteractionsData } from '../../../utils/functions';
+import {
+  chunkArray,
+  getInteractionsData,
+  getUserData,
+} from '../../../utils/functions';
 
 // images
 import DefaultProfile from '../../../assets/images/default_profile.png';
@@ -63,15 +67,6 @@ const ProfileContent = ({ profileVisited, isOwnProfile, isFollowed, tag }) => {
           limit(200)
         );
         break;
-      case 'likes':
-        queryRef = query(
-          tweetsCollectionRef,
-          where('tweetId', 'in', profileVisited.likes || [-1]),
-          where('userId', '==', profileVisited.uid),
-          orderBy('createdAt', 'desc'),
-          limit(200)
-        );
-        break;
       default:
         queryRef = query(
           tweetsCollectionRef,
@@ -80,32 +75,6 @@ const ProfileContent = ({ profileVisited, isOwnProfile, isFollowed, tag }) => {
           orderBy('createdAt', 'desc'),
           limit(200)
         );
-    }
-    try {
-      const querySnapshot = await getDocs(queryRef);
-
-      const fetchedTweets = await Promise.all(
-        querySnapshot.docs.map(async (document) => {
-          const tweetData = document.data();
-          const interactionsData = await getInteractionsData(tweetData.tweetId);
-
-          return {
-            ...tweetData,
-            ...interactionsData,
-            userName: profileVisited.name,
-            userProfilePicture: profileVisited.profileImg,
-            userTag: profileVisited.tag,
-          };
-        })
-      );
-
-      if (category === 'media') {
-        fetchedTweets.sort((a, b) => b.createdAt - a.createdAt);
-      }
-      setTweets(fetchedTweets);
-      setTweetsLoading(false);
-    } catch (error) {
-      console.error('Error fetching homeTweets:', error);
     }
   };
 
@@ -149,17 +118,49 @@ const ProfileContent = ({ profileVisited, isOwnProfile, isFollowed, tag }) => {
         // get tweet data for chunk
         const querySnapshot = await getDocs(queryRef);
         const fetchedTweets = await Promise.all(
-          querySnapshot.docs.map(async (doc) => {
-            const tweetData = doc.data();
+          querySnapshot.docs.map(async (document) => {
+            let tweetData = document.data();
+            let reposterData = null;
+            let tweetDocRef = document.id;
+            let repostTime = null;
+            const originalTweetId = tweetData.tweetId;
+
+            if (tweetData.type === 'retweet') {
+              // if retweet, get original tweet data and set reposterId, repostTime and tweetDocRef
+              // ! this step creates multiple objects with the same tweetId in context, not in the database
+              if (!tweetData.retweetId) {
+                // error in tweet data so return empty object
+                return {};
+              }
+
+              reposterData = await getUserData(tweetData.userId);
+              repostTime = tweetData.createdAt;
+
+              const tweetsCollection = collection(firestore, 'tweets');
+              const tweetQuery = query(
+                tweetsCollection,
+                where('tweetId', '==', tweetData.retweetId)
+              );
+              const tweetSnapshot = await getDocs(tweetQuery);
+              tweetData = tweetSnapshot.docs[0]?.data() || {};
+              tweetDocRef = tweetSnapshot.docs[0].id;
+            }
+
             const interactionsData = await getInteractionsData(
               tweetData.tweetId
             );
+
             return {
+              key: document.id,
+              docRef: tweetDocRef,
               ...tweetData,
               ...interactionsData,
               userName: profileVisited.name,
-              userTag: profileVisited.tag,
               userProfilePicture: profileVisited.profileImg,
+              userTag: profileVisited.tag,
+              reposterData,
+              repostTime,
+              originalTweetId,
             };
           })
         );

@@ -6,6 +6,23 @@
   min-height: 12px;
 }
 
+.tweet-repost {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: -4px 0px 4px;
+  color: var(--clr-font-secondary);
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 16px;
+}
+
+.tweet-repost > div {
+  min-width: 40px;
+  display: flex;
+  justify-content: flex-end;
+}
+
 .tweet-wrapper {
   display: flex;
   align-items: stretch;

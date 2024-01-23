@@ -17,7 +17,7 @@ import DefaultProfile from '../../assets/images/default_profile.png';
 // import { useAppContext } from '../../contextProvider/ContextProvider';
 import { useUserContext } from '../../contextProvider/ContextProvider';
 
-const HomeHeader = ({ setIsForYouSelected }) => {
+const HomeHeader = () => {
   // const { user } = useAppContext();
   const { user } = useUserContext();
 
@@ -64,7 +64,7 @@ const HomeHeader = ({ setIsForYouSelected }) => {
         middleElements={[middleElement]}
         rightElements={[rightElement]}
       />
-      <SecondRow setIsForYouSelected={setIsForYouSelected} />
+      <SecondRow />
     </div>
   );
 };

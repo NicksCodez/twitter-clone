@@ -14,6 +14,9 @@ const AppContextProvider = ({ children }) => {
   // In the homepage, 'Following' section, how much has the user scrolled and what tweets were loaded
   const [homeFollowingScroll, setHomeFollowingScroll] = useState(0);
   const [homeFollowingTweets, setHomeFollowingTweets] = useState([]);
+  // In the homepage, keep track of new tweets
+  const [homeForYouNewTweets, setHomeForYouNewTweets] = useState([]);
+  const [homeFollowingNewTweets, setHomeFollowingNewTweets] = useState([]);
   // keep track of selected tab in the homepage
   const [isForYouSelected, setIsForYouSelected] = useState(true);
   // Width of the viewport for conditional rendering (mobile/tablet/desktop)
@@ -35,22 +38,43 @@ const AppContextProvider = ({ children }) => {
     setUser,
   };
 
-  const tweetContextValue = {
-    homeScroll,
-    setHomeScroll,
-    homeTweets,
-    setHomeTweets,
-    homeFollowingScroll,
-    setHomeFollowingScroll,
-    homeFollowingTweets,
-    setHomeFollowingTweets,
-    isForYouSelected,
-    setIsForYouSelected,
-    seenLastForYouTweetRef,
-    seenLastFollowingTweetRef,
-    lastVisibleForYouTweetRef,
-    lastVisibleFollowingTweetRef,
-  };
+  const tweetContextValue = isForYouSelected
+    ? {
+        tweets: homeTweets,
+        setTweets: setHomeTweets,
+        scroll: homeScroll,
+        setScroll: setHomeScroll,
+        seenLastTweetRef: seenLastForYouTweetRef,
+        setSeenLastTweetRef: (newValue) => {
+          seenLastForYouTweetRef.current = newValue;
+        },
+        lastVisibleTweetRef: lastVisibleForYouTweetRef,
+        setLastVisibleTweetRef: (newValue) => {
+          lastVisibleForYouTweetRef.current = newValue;
+        },
+        isForYouSelected,
+        setIsForYouSelected,
+        newTweets: homeForYouNewTweets,
+        setNewTweets: setHomeForYouNewTweets,
+      }
+    : {
+        tweets: homeFollowingTweets,
+        setTweets: setHomeFollowingTweets,
+        scroll: homeFollowingScroll,
+        setScroll: setHomeFollowingScroll,
+        seenLastTweetRef: seenLastFollowingTweetRef,
+        setSeenLastTweetRef: (newValue) => {
+          seenLastFollowingTweetRef.current = newValue;
+        },
+        lastVisibleTweetRef: lastVisibleFollowingTweetRef,
+        setLastVisibleTweetRef: (newValue) => {
+          lastVisibleFollowingTweetRef.current = newValue;
+        },
+        isForYouSelected,
+        setIsForYouSelected,
+        newTweets: homeFollowingNewTweets,
+        setNewTweets: setHomeFollowingNewTweets,
+      };
 
   const viewportContextValue = {
     viewportWidth,

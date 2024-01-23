@@ -1,0 +1,16 @@
+#new-tweets-button {
+  position: absolute;
+  bottom: -56px;
+  left: 50%;
+  transform: translateX(-50%);
+  color: var(--clr-font-primary);
+  font-size: 15px;
+  font-weight: 700;
+}
+
+#new-tweets-button button {
+  height: 40px;
+  background-color: var(--clr-bg-blue);
+  padding: 4px 16px;
+  border-radius: 999px;
+}

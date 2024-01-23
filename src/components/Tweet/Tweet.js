@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { forwardRef, useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 
 // css
@@ -6,343 +6,412 @@ import './Tweet.css';
 
 // firebase
 import {
+  QuerySnapshot,
   collection,
+  deleteDoc,
   doc,
   getDoc,
   getDocs,
   query,
   runTransaction,
   serverTimestamp,
+  setDoc,
   where,
 } from 'firebase/firestore';
 import { auth, firestore } from '../../firebase';
 
 // utils
 import svgs from '../../utils/svgs';
+import { debounce, formatTimeAgo } from '../../utils/functions';
 
-const Tweet = React.memo(
-  ({
+const Tweet = forwardRef(({ element }, ref) => {
+  const {
     docRef,
-    reposterId,
-    profileImg,
-    name,
-    tag,
+    reposterData,
+    userProfilePicture: profileImg,
+    userName: name,
+    userTag: tag,
     createdAt,
     text,
-    replies,
-    retweets,
-    likes,
-    bookmarks,
-    idProp,
-    tweetImg,
+    repliesCounte: replies,
+    retweetsCount: retweets,
+    likesCount: likes,
+    bookmarksCount: bookmarks,
+    tweetId: idProp,
+    imageLink: tweetImg,
     isLiked,
     isBookmarked,
     isRetweeted,
-  }) => {
-    const navigate = useNavigate();
-    const [likeInProgress, setLikeInProgress] = useState(false);
-    const [bookmarkInProgress, setBookmarkInProgress] = useState(false);
-    const [retweetInProgress, setRetweetInProgress] = useState(false);
+  } = element;
+  const navigate = useNavigate();
 
-    useEffect(() => {
-      // only set action as complete if it fails(in like function try catch) or when changes have been propagated
-      // this stops double or triple actions
-      // e.g. of problem averted: if actionInProgress is set to false in likeHandler, after transaction is run, and if user clicks rapidly on like button, if one click happens in the time period between setting actionInProgress to false and Home noticing the change to isLiked and propagating it, tweet could be liked twice
-      setLikeInProgress(false);
-    }, [isLiked]);
+  // states used to keep track of action in progress
+  const [likeInProgress, setLikeInProgress] = useState(false);
+  const [bookmarkInProgress, setBookmarkInProgress] = useState(false);
+  const [retweetInProgress, setRetweetInProgress] = useState(false);
 
-    useEffect(() => {
-      // only set action as complete if it fails(in like function try catch) or when changes have been propagated
-      // this stops double or triple actions
-      // e.g. of problem averted: if actionInProgress is set to false in likeHandler, after transaction is run, and if user clicks rapidly on like button, if one click happens in the time period between setting actionInProgress to false and Home noticing the change to isLiked and propagating it, tweet could be liked twice
-      setBookmarkInProgress(false);
-    }, [isBookmarked]);
+  // states used for debounce
+  const [lastLikeAction, setLastLikeAction] = useState(Date.now());
+  const [lastBookmarkAction, setLastBookmarkAction] = useState(Date.now());
+  const [lastRetweetAction, setLastRetweetAction] = useState(Date.now());
 
-    useEffect(() => {
-      // only set action as complete if it fails(in like function try catch) or when changes have been propagated
-      // this stops double or triple actions
-      // e.g. of problem averted: if actionInProgress is set to false in likeHandler, after transaction is run, and if user clicks rapidly on like button, if one click happens in the time period between setting actionInProgress to false and Home noticing the change to isLiked and propagating it, tweet could be liked twice
-      setRetweetInProgress(false);
-    }, [isRetweeted]);
+  useEffect(() => {
+    // only set action as complete if it fails(in like function try catch) or when changes have been propagated
+    // this stops double or triple actions
+    // e.g. of problem averted: if actionInProgress is set to false in likeHandler, after transaction is run, and if user clicks rapidly on like button, if one click happens in the time period between setting actionInProgress to false and Home noticing the change to isLiked and propagating it, tweet could be liked twice
+    setLikeInProgress(false);
+  }, [isLiked]);
 
-    return (
-      <div className="tweet" id={`tweet-${idProp}`}>
-        <div className="tweet-top-separator" />
-        <div className="tweet-wrapper">
-          <div className="tweet-profile-picture">
-            <div className="profile-picture-wrapper u-round">
-              <Link to="/profile">
-                <img src={profileImg} alt="profile" />
-              </Link>
+  useEffect(() => {
+    // only set action as complete if it fails(in like function try catch) or when changes have been propagated
+    // this stops double or triple actions
+    // e.g. of problem averted: if actionInProgress is set to false in likeHandler, after transaction is run, and if user clicks rapidly on like button, if one click happens in the time period between setting actionInProgress to false and Home noticing the change to isLiked and propagating it, tweet could be liked twice
+    setBookmarkInProgress(false);
+  }, [isBookmarked]);
+
+  useEffect(() => {
+    // only set action as complete if it fails(in like function try catch) or when changes have been propagated
+    // this stops double or triple actions
+    // e.g. of problem averted: if actionInProgress is set to false in likeHandler, after transaction is run, and if user clicks rapidly on like button, if one click happens in the time period between setting actionInProgress to false and Home noticing the change to isLiked and propagating it, tweet could be liked twice
+    setRetweetInProgress(false);
+  }, [isRetweeted]);
+
+  const debouncedLikeHandler = debounce(
+    () => {
+      likeHandler(
+        event,
+        'like',
+        idProp,
+        navigate,
+        likeInProgress,
+        setLikeInProgress,
+        docRef
+      );
+    },
+    500,
+    lastLikeAction,
+    setLastLikeAction
+  );
+
+  const debouncedBookmarkHandler = debounce(
+    () => {
+      likeHandler(
+        event,
+        'bookmark',
+        idProp,
+        navigate,
+        bookmarkInProgress,
+        setBookmarkInProgress,
+        docRef
+      );
+    },
+    500,
+    lastBookmarkAction,
+    setLastBookmarkAction
+  );
+
+  const debouncedRetweetHandler = debounce(
+    () => {
+      likeHandler(
+        event,
+        'retweet',
+        idProp,
+        navigate,
+        retweetInProgress,
+        setRetweetInProgress,
+        docRef
+      );
+    },
+    500,
+    lastRetweetAction,
+    setLastRetweetAction
+  );
+
+  return (
+    <div className="tweet" id={`tweet-${idProp}`} ref={ref}>
+      <div className="tweet-top-separator" />
+      {reposterData && (
+        <div className="tweet-repost">
+          <div>
+            <svg viewBox="0 0 24 24">
+              <path d={svgs.retweet} />
+            </svg>
+          </div>
+          <span>
+            {reposterData.uid === auth.currentUser.uid
+              ? 'You'
+              : reposterData.name}{' '}
+            retweeted
+          </span>
+        </div>
+      )}
+      <div className="tweet-wrapper">
+        <div className="tweet-profile-picture">
+          <div className="profile-picture-wrapper u-round">
+            <Link to="/profile">
+              <img src={profileImg} alt="profile" />
+            </Link>
+          </div>
+          <div className="gray-line">
+            <Link to="/status/123" />
+          </div>
+        </div>
+        <div className="tweet-content">
+          <div className="tweet-row">
+            <div className="profile-details">
+              <div className="profile-name">
+                <span>{name}</span>
+              </div>
+              <div className="profile-tag">
+                <span>@{tag}</span>
+              </div>
+              <div className="separator">
+                <span>·</span>
+              </div>
+              <div className="date-posted">
+                <span>{formatTimeAgo(createdAt)}</span>
+              </div>
             </div>
-            <div className="gray-line">
-              <Link to="/status/123" />
+            <button type="button">
+              <svg viewBox="0 0 24 24">
+                <path d={svgs.moreNoOutline} />
+              </svg>
+            </button>
+          </div>
+          <div className="tweet-row">
+            <div className="flex-column">
+              <div
+                className="tweet-text"
+                dangerouslySetInnerHTML={{ __html: text }}
+              />
+              {tweetImg ? (
+                <div className="tweet-image-wrapper">
+                  <img src={tweetImg} alt="tweet" />
+                </div>
+              ) : null}
             </div>
           </div>
-          <div className="tweet-content">
-            <div className="tweet-row">
-              <div className="profile-details">
-                <div className="profile-name">
-                  <span>{name}</span>
-                </div>
-                <div className="profile-tag">
-                  <span>@{tag}</span>
-                </div>
-                <div className="separator">
-                  <span>·</span>
-                </div>
-                <div className="date-posted">
-                  <span>{createdAt}</span>
-                </div>
-              </div>
+          <div className="tweet-row tweet-actions">
+            <div className="tweet-action">
               <button type="button">
                 <svg viewBox="0 0 24 24">
-                  <path d={svgs.moreNoOutline} />
+                  <path d={svgs.comment} />
                 </svg>
+                <span>{replies}</span>
               </button>
             </div>
-            <div className="tweet-row">
-              <div className="flex-column">
-                <div className="tweet-text">
-                  <span>{text}</span>
-                </div>
-                {tweetImg ? (
-                  <div className="tweet-image-wrapper">
-                    <img src={tweetImg} alt="tweet" />
-                  </div>
-                ) : null}
-              </div>
+            <div
+              className={`tweet-action retweet ${isRetweeted ? 'active' : ''}`}
+            >
+              <button
+                type="button"
+                onClick={(event) => debouncedRetweetHandler(event)}
+              >
+                <svg viewBox="0 0 24 24">
+                  <path d={svgs.retweet} />
+                </svg>
+                <span>{retweets}</span>
+              </button>
             </div>
-            <div className="tweet-row tweet-actions">
-              <div className="tweet-action">
-                <button type="button">
-                  <svg viewBox="0 0 24 24">
-                    <path d={svgs.comment} />
-                  </svg>
-                  <span>{replies}</span>
-                </button>
-              </div>
-              <div
-                className={`tweet-action retweet ${
-                  isRetweeted ? 'active' : ''
-                }`}
+            <div className={`tweet-action like ${isLiked ? 'active' : ''}`}>
+              <button
+                type="button"
+                onClick={(event) => debouncedLikeHandler(event)}
               >
-                <button
-                  type="button"
-                  onClick={(event) =>
-                    likeHandler(
-                      event,
-                      'retweet',
-                      idProp,
-                      navigate,
-                      isRetweeted,
-                      retweetInProgress,
-                      setRetweetInProgress,
-                      docRef
-                    )
-                  }
-                >
+                {isLiked ? (
                   <svg viewBox="0 0 24 24">
-                    <path d={svgs.retweet} />
+                    <path d={svgs.likeActive} />
                   </svg>
-                  <span>{retweets}</span>
-                </button>
-              </div>
-              <div className={`tweet-action like ${isLiked ? 'active' : ''}`}>
-                <button
-                  type="button"
-                  onClick={(event) =>
-                    likeHandler(
-                      event,
-                      'like',
-                      idProp,
-                      navigate,
-                      isLiked,
-                      likeInProgress,
-                      setLikeInProgress,
-                      docRef
-                    )
-                  }
-                >
-                  {isLiked ? (
-                    <svg viewBox="0 0 24 24">
-                      <path d={svgs.likeActive} />
-                    </svg>
-                  ) : (
-                    <svg viewBox="0 0 24 24">
-                      <path d={svgs.like} />
-                    </svg>
-                  )}
-                  <span>{likes}</span>
-                </button>
-              </div>
-              <div
-                className={`tweet-action bookmark ${
-                  isBookmarked ? 'active' : ''
-                }`}
+                ) : (
+                  <svg viewBox="0 0 24 24">
+                    <path d={svgs.like} />
+                  </svg>
+                )}
+                <span>{likes}</span>
+              </button>
+            </div>
+            <div
+              className={`tweet-action bookmark ${
+                isBookmarked ? 'active' : ''
+              }`}
+            >
+              <button
+                type="button"
+                onClick={(event) => debouncedBookmarkHandler(event)}
               >
-                <button
-                  type="button"
-                  onClick={(event) =>
-                    likeHandler(
-                      event,
-                      'bookmark',
-                      idProp,
-                      navigate,
-                      isBookmarked,
-                      bookmarkInProgress,
-                      setBookmarkInProgress,
-                      docRef
-                    )
-                  }
-                >
-                  {isBookmarked ? (
-                    <svg viewBox="0 0 24 24">
-                      <path d={svgs.bookmarksActive} />
-                    </svg>
-                  ) : (
-                    <svg viewBox="0 0 24 24">
-                      <path d={svgs.bookmarks} />
-                    </svg>
-                  )}
-                  <span>{bookmarks}</span>
-                </button>
-              </div>
+                {isBookmarked ? (
+                  <svg viewBox="0 0 24 24">
+                    <path d={svgs.bookmarksActive} />
+                  </svg>
+                ) : (
+                  <svg viewBox="0 0 24 24">
+                    <path d={svgs.bookmarks} />
+                  </svg>
+                )}
+                <span>{bookmarks}</span>
+              </button>
             </div>
           </div>
         </div>
       </div>
-    );
-  }
-);
+    </div>
+  );
+});
 
 const likeHandler = async (
   event,
   type,
   idProp,
   navigate,
-  isLiked,
   actionInProgress,
   setActionInProgress,
   ref
 ) => {
-  console.log({ idProp }, { isLiked });
-  // on like, update tweet and tweetInteraction documents if user is logged in and didn't already like respective tweet
+  // on like, update tweet and 'likes' or 'bookmars' subcollection tweetInteraction documents if user is logged in and didn't already like respective tweet
   if (auth.currentUser) {
     if (!actionInProgress) {
       setActionInProgress(true);
       // * mock like to make website feel faster
-      mockTweetInteraction(event, isLiked, type);
+      mockTweetInteraction(event, type);
       // get reference to tweet document
       const tweetsCollectionRef = collection(firestore, 'tweets');
-      const tweetsQueryRef = query(
-        tweetsCollectionRef,
-        where('tweetId', '==', idProp)
-      );
-
-      const tweetsQuerySnapshot = await getDocs(tweetsQueryRef);
-      console.log({ ref });
       const tweetDocRef = doc(tweetsCollectionRef, ref);
-      const tweetDoc = await getDoc(tweetDocRef);
-      console.log('test =>', tweetDoc.data(), tweetDoc.ref);
 
-      // get reference to tweetInteractions document
-      const tweetInteractionsCollectionRef = collection(
-        firestore,
-        'tweetInteractions'
-      );
-      const tweetInteractionsQueryRef = query(
-        tweetInteractionsCollectionRef,
-        where('tweetId', '==', idProp),
-        where('userId', '==', auth.currentUser.uid),
-        where('type', '==', type)
-      );
-
-      // get reference to retweet document
-      const retweetQuery = query(
-        tweetsCollectionRef,
-        where('retweetId', '==', idProp),
-        where('userId', '==', auth.currentUser.uid)
-      );
-
-      let docToDelete = null;
-      if (type === 'retweet') {
-        const retweetSnapshot = await getDocs(retweetQuery);
-        docToDelete = retweetSnapshot?.docs[0]?.ref;
-      } else if (type === 'like' || type === 'bookmark') {
-        const tweetInteractionsQuerySnapshot = await getDocs(
-          tweetInteractionsQueryRef
+      if (type === 'like' || type === 'bookmark') {
+        // reference to 'likes' or 'bookmarks' collection
+        const tweetInteractionsCollectionRef = collection(
+          tweetDocRef,
+          `${type}s`
         );
-        docToDelete = tweetInteractionsQuerySnapshot?.docs[0]?.ref;
-      }
 
-      if (!isLiked) {
-        // if user didn't already like tweet, like it
-        try {
-          // * store like in database
-          await runTransaction(firestore, async (transaction) => {
-            // set tweet interactions document
-            let newDocRef = null;
-            let newId = idProp;
-            if (type === 'like' || type === 'bookmark') {
-              // for likes and bookmarks, want to write new document in tweetInteractions collection
-              newDocRef = doc(tweetInteractionsCollectionRef);
-            } else if (type === 'retweet') {
-              // for retweets, want to write new tweet doc in tweets collection
-              const countersCollection = collection(firestore, 'counters');
-              const countersDoc = doc(countersCollection, 'general');
-              const countersData = await transaction.get(countersDoc);
-              newId = countersData.data().totalTweets + 1;
-              transaction.update(countersDoc, { totalTweets: newId });
-              newDocRef = doc(tweetsCollectionRef);
+        // query for interaction document inside 'likes' or 'bookmarks' subcollection
+        const tweetInteractionsQueryRef = query(
+          tweetInteractionsCollectionRef,
+          where('userId', '==', auth.currentUser.uid)
+        );
+        // get interaction snapshot
+        const interactionSnapshot = await getDocs(tweetInteractionsQueryRef);
+
+        // if interactionSnapshot is empty, then tweet isn't alread liked or bookmarked by current user
+        if (interactionSnapshot.empty) {
+          // create like or bookmark document
+          const newDocRef = doc(tweetInteractionsCollectionRef);
+          setDoc(newDocRef, {
+            createdAt: serverTimestamp(),
+            userId: auth.currentUser.uid,
+          });
+
+          // update counter with a transaction to ensure correct update
+          // ! this should be done by a cloud function
+          runTransaction(firestore, async (transaction) => {
+            // get tweet doc
+            const tweetDoc = await transaction.get(tweetDocRef);
+            // get tweet doc counter data
+            const oldCounter = tweetDoc.data()[`${type}sCount`];
+            // update tweet doc counter data
+            const newCounter = oldCounter + 1;
+            await transaction.update(tweetDocRef, {
+              [`${type}sCount`]: newCounter,
+            });
+          });
+        } else {
+          // delete like or bookmark document
+          deleteDoc(interactionSnapshot.docs[0].ref);
+          // update counter with a transaction to ensure correct update
+          // ! this should be done by a cloud function
+          runTransaction(firestore, async (transaction) => {
+            // get tweet doc
+            const tweetDoc = await transaction.get(tweetDocRef);
+            // get tweet doc counter data
+            const oldCounter = tweetDoc.data()[`${type}sCount`];
+            // update tweet doc counter data
+            const newCounter = oldCounter - 1;
+            await transaction.update(tweetDocRef, {
+              [`${type}sCount`]: newCounter,
+            });
+          });
+        }
+      } else if (type === 'retweet') {
+        console.log('--------in retweet--------');
+        // query for retweet document
+        const retweetQuery = query(
+          tweetsCollectionRef,
+          where('retweetId', '==', idProp),
+          where('userId', '==', auth.currentUser.uid)
+        );
+
+        // get retweet snapshot
+        const retweetSnapshot = await getDocs(retweetQuery);
+        console.log('--------dupa snapshot--------');
+        // create or delete retweet document based on whether it already exists or not and increment or decrement totalTweets counter in transaction
+        if (retweetSnapshot.empty) {
+          // document doesn't already exist, create it
+
+          // update total tweets counters and get new tweet id
+          const newTweetId = await runTransaction(
+            firestore,
+            async (transaction) => {
+              // reference to general counters doc
+              const generalCountersRef = doc(firestore, 'counters', 'general');
+              // get general counters doc
+              const countersDoc = await transaction.get(generalCountersRef);
+              // get general doc total tweets counter data
+              const oldCounter = countersDoc.data().totalTweets;
+              // update general doc total tweets counter data
+              const newCounter = oldCounter + 1;
+              await transaction.update(generalCountersRef, {
+                totalTweets: newCounter,
+              });
+              return newCounter;
             }
-            const newTweetInteractionData = {
-              type,
-              userId: auth.currentUser.uid,
-              tweetId: newId,
-              createdAt: serverTimestamp(),
-              ...(type === 'retweet' && { retweetId: idProp }),
-            };
-            await transaction.set(newDocRef, newTweetInteractionData);
+          );
+          console.log('--------dupa prima tranzactie--------');
+          // create new tweet in tweets collection
+          const retweetDocRef = doc(tweetsCollectionRef);
+          const newTweetData = {
+            type,
+            userId: auth.currentUser.uid,
+            tweetId: newTweetId,
+            createdAt: serverTimestamp(),
+            retweetId: idProp,
+          };
+          setDoc(retweetDocRef, newTweetData);
 
-            // update tweet document
-            const countField = `${type}sCount`;
-            await transaction.update(tweetDoc.ref, {
-              [countField]: tweetDoc.data()[countField] + 1,
+          // update tweet retweets counter in transaction
+          // ! this should be done by a cloud function
+          runTransaction(firestore, async (transaction) => {
+            // get tweet doc
+            const tweetDoc = await transaction.get(tweetDocRef);
+            // get tweet doc counter data
+            const oldCounter = tweetDoc.data()[`${type}sCount`];
+            // update tweet doc counter data
+            const newCounter = oldCounter + 1;
+            await transaction.update(tweetDocRef, {
+              [`${type}sCount`]: newCounter,
             });
-            setActionInProgress(false);
           });
-        } catch (error) {
-          // something went wrong, log error for now
-          console.log('error => ', { error });
-          // allow further actions to happen
-          setActionInProgress(false);
-          // reverse visual changes
-          mockTweetInteraction(event, !isLiked, type);
-        }
-      } else {
-        // user already liked tweet, so unlike it
-        try {
-          await runTransaction(firestore, async (transaction) => {
-            // delete tweetInteraction document
-            await transaction.delete(docToDelete);
-            // update tweet document
-            const countField = `${type}sCount`;
-            await transaction.update(tweetDoc.ref, {
-              [countField]: tweetDoc.data()[countField] - 1,
-            });
+        } else {
+          // document already exists, delete it
+          deleteDoc(retweetSnapshot.docs[0].ref);
 
-            setActionInProgress(false);
+          // ! counter not decremented
+
+          // update tweet retweets counter in transaction
+          // ! this should be done by a cloud function
+          runTransaction(firestore, async (transaction) => {
+            // get tweet doc
+            const tweetDoc = await transaction.get(tweetDocRef);
+            // get tweet doc counter data
+            const oldCounter = tweetDoc.data()[`${type}sCount`];
+            // update tweet doc counter data
+            const newCounter = oldCounter - 1;
+            await transaction.update(tweetDocRef, {
+              [`${type}sCount`]: newCounter,
+            });
           });
-        } catch (error) {
-          // something went wrong, so log error for now
-          console.log('error => ', { error });
-          // allow further actions to happen
-          setActionInProgress(false);
-          // reverse visual changes
-          mockTweetInteraction(event, !isLiked, type);
         }
       }
+      setActionInProgress(false);
     }
   } else {
     // user isn't logged in, send him to log in
@@ -350,7 +419,7 @@ const likeHandler = async (
   }
 };
 
-const mockTweetInteraction = (event, isActive, type) => {
+const mockTweetInteraction = (event, type) => {
   // make tweet visually seem liked/unliked/bookmarked/unbookmarked, etc
   // get DOM elements
   const divElement = event.target.closest('.tweet-action');
@@ -378,7 +447,7 @@ const mockTweetInteraction = (event, isActive, type) => {
     default:
       break;
   }
-  if (!isActive) {
+  if (!divElement.classList.contains('active')) {
     divElement.classList.add('active');
     spanElement.textContent = parseInt(spanElement.textContent, 10) + 1;
     svgPath.setAttribute('d', newPath);

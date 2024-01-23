@@ -4,12 +4,12 @@ import React, { useEffect, useRef, useState } from 'react';
 // firebase
 import {
   collection,
-  getDocs,
   limit,
   query,
   where,
   orderBy,
   startAfter,
+  getDocs,
   onSnapshot,
 } from 'firebase/firestore';
 import { firestore } from '../../firebase';
@@ -21,156 +21,41 @@ import './Home.css';
 import FeatherButton from '../../components/FeatherButton/FeatherButton';
 import Sidebar from '../../components/Sidebar/Sidebar';
 import HomeHeader from '../../components/HomeHeader/HomeHeader';
-import TweetContainer from '../../components/TweetContainer/TweetContainer';
 
 // context providers
-// import { useAppContext } from '../../contextProvider/ContextProvider';
 import {
   useTweetContext,
   useUserContext,
   useViewportContext,
 } from '../../contextProvider/ContextProvider';
-
-// utils
 import {
   chunkArray,
   getInteractionsData,
+  getUserData,
+  sortDocsCreatedAtDesc,
   updateTweets,
 } from '../../utils/functions';
+import ScrollableElementsLoader from '../../components/ScrollableElementsLoader/ScrollableElementsLoader';
+import Tweet from '../../components/Tweet/Tweet';
 
 const Home = () => {
-  // const {
-  //   homeScroll,
-  //   setHomeScroll,
-  //   viewportWidth,
-  //   homeTweets,
-  //   setHomeTweets,
-  //   homeFollowingTweets,
-  //   setHomeFollowingTweets,
-  //   homeFollowingScroll,
-  //   setHomeFollowingScroll,
-  //   isForYouSelected,
-  //   setIsForYouSelected,
-  //   seenLastForYouTweetRef,
-  //   seenLastFollowingTweetRef,
-  //   lastVisibleForYouTweetRef,
-  //   lastVisibleFollowingTweetRef,
-  //   user,
-  // } = useAppContext();
-
-  const {
-    homeScroll,
-    setHomeScroll,
-    homeTweets,
-    setHomeTweets,
-    homeFollowingTweets,
-    setHomeFollowingTweets,
-    homeFollowingScroll,
-    setHomeFollowingScroll,
-    isForYouSelected,
-    setIsForYouSelected,
-    seenLastForYouTweetRef,
-    seenLastFollowingTweetRef,
-    lastVisibleForYouTweetRef,
-    lastVisibleFollowingTweetRef,
-  } = useTweetContext();
+  const tweetsContext = useTweetContext();
 
   const { viewportWidth } = useViewportContext();
 
   const { user } = useUserContext();
 
-  // state to determine if tweets are loading
+  // tweetsContext to determine if tweets are loading
   const [isLoading, setLoading] = useState(true);
-  // states to determine if tabs were switched and cause initial loading of tweets for switched tab
-  const [prevIsForYouSelected, setPrevIsForYouSelected] =
-    useState(isForYouSelected);
-  const [switchedTabs, setSwitchedTabs] = useState(false);
+  // state to keep query and attach flag
+  const [loaderInfo, setLoaderInfo] = useState({
+    queryRef: null,
+    attach: false,
+  });
   // ref to keep time for throttling scroll handler
   const time = useRef(Date.now());
   // ref to unsubscriber functions
   const unsubscribersRef = useRef([]);
-  // state to set variables used in functions to avoid using too many if else in code
-  const [state, setState] = useState(
-    isForYouSelected
-      ? {
-          tweets: homeTweets,
-          setTweets: setHomeTweets,
-          scroll: homeScroll,
-          setScroll: setHomeScroll,
-          seenLastTweetRef: seenLastForYouTweetRef,
-          setSeenLastTweetRef: (newValue) => {
-            seenLastForYouTweetRef.current = newValue;
-          },
-          lastVisibleTweetRef: lastVisibleForYouTweetRef,
-          setLastVisibleTweetRef: (newValue) => {
-            lastVisibleForYouTweetRef.current = newValue;
-          },
-        }
-      : {
-          tweets: homeFollowingTweets,
-          setTweets: setHomeFollowingTweets,
-          scroll: homeFollowingScroll,
-          setScroll: setHomeFollowingScroll,
-          seenLastTweetRef: seenLastFollowingTweetRef,
-          setSeenLastTweetRef: (newValue) => {
-            seenLastFollowingTweetRef.current = newValue;
-          },
-          lastVisibleTweetRef: lastVisibleFollowingTweetRef,
-          setLastVisibleTweetRef: (newValue) => {
-            lastVisibleFollowingTweetRef.current = newValue;
-          },
-        }
-  );
-
-  useEffect(() => {
-    // determine if tab was switched
-    if (isForYouSelected !== prevIsForYouSelected) {
-      setPrevIsForYouSelected(isForYouSelected);
-      setSwitchedTabs((prevState) => !prevState);
-    }
-    // update state every time a variable it depends on changes
-    if (isForYouSelected) {
-      setState({
-        tweets: homeTweets,
-        setTweets: setHomeTweets,
-        scroll: homeScroll,
-        setScroll: setHomeScroll,
-        seenLastTweetRef: seenLastForYouTweetRef,
-        setSeenLastTweetRef: (newValue) => {
-          seenLastForYouTweetRef.current = newValue;
-        },
-        lastVisibleTweetRef: lastVisibleForYouTweetRef,
-        setLastVisibleTweetRef: (newValue) => {
-          lastVisibleForYouTweetRef.current = newValue;
-        },
-      });
-    } else {
-      setState({
-        tweets: homeFollowingTweets,
-        setTweets: setHomeFollowingTweets,
-        scroll: homeFollowingScroll,
-        setScroll: setHomeFollowingScroll,
-        seenLastTweetRef: seenLastFollowingTweetRef,
-        setSeenLastTweetRef: (newValue) => {
-          seenLastFollowingTweetRef.current = newValue;
-        },
-        lastVisibleTweetRef: lastVisibleFollowingTweetRef,
-        setLastVisibleTweetRef: (newValue) => {
-          lastVisibleFollowingTweetRef.current = newValue;
-        },
-      });
-    }
-  }, [
-    isForYouSelected,
-    homeTweets,
-    homeScroll,
-    seenLastForYouTweetRef.current,
-    lastVisibleForYouTweetRef.current,
-    homeFollowingTweets,
-    homeFollowingScroll,
-    seenLastFollowingTweetRef.current,
-    lastVisibleFollowingTweetRef.current,
-  ]);
 
   useEffect(() => {
     // home event listeners
@@ -178,7 +63,7 @@ const Home = () => {
 
     // attach scroll handler to home
     const scrollHandlerFunc = () => {
-      scrollHandler(state.scroll, state.setScroll, time);
+      scrollHandler(tweetsContext.scroll, tweetsContext.setScroll, time);
     };
     home.addEventListener('scroll', scrollHandlerFunc);
 
@@ -186,7 +71,7 @@ const Home = () => {
     return () => {
       home.removeEventListener('scroll', scrollHandlerFunc);
     };
-  }, [state.scroll, isForYouSelected]);
+  }, [tweetsContext.scroll, tweetsContext.isForYouSelected]);
 
   useEffect(() => {
     // scroll to where user left off in For You or Following tab accordingly
@@ -194,21 +79,20 @@ const Home = () => {
 
     if (!isLoading) {
       home.scrollTo({
-        top: state.scroll,
+        top: tweetsContext.scroll,
         behavior: 'auto',
       });
     }
-  }, [isLoading, isForYouSelected]);
+  }, [isLoading, tweetsContext.isForYouSelected]);
 
   useEffect(() => {
     // initial tweets loading
-
     // create query to get tweets
     const tweetsCollectionRef = collection(firestore, 'tweets');
     let queryRef;
 
     // load For You or Following tweets accordingly
-    if (isForYouSelected) {
+    if (tweetsContext.isForYouSelected) {
       queryRef = query(
         tweetsCollectionRef,
         where('type', 'in', ['tweet', 'retweet']),
@@ -216,6 +100,7 @@ const Home = () => {
         limit(25)
       );
     } else if (user.following && user.following.length !== 0) {
+      console.log('before risky query');
       // if user has yet to follow anyone, user.following would be empty, throwing an error
       // ! if user is following more than 30 people, this will throw an error as where ... in does not accept arrays with length > 30
       // ! will need to refactor code
@@ -224,7 +109,7 @@ const Home = () => {
         tweetsCollectionRef,
         where('userId', 'in', user.following),
         where('type', 'in', ['tweet', 'retweet']),
-        orderBy('tweetId', 'desc'),
+        orderBy('createdAt', 'desc'),
         limit(25)
       );
     } else {
@@ -235,127 +120,88 @@ const Home = () => {
       );
     }
 
-    if (state.tweets.length === 0) {
-      console.log('loading tweets bc length is 0');
-      // if no tweets, get initial tweets
-      const unsubscribe = tweetsLoader(
-        queryRef,
-        state.setTweets,
-        state.setLastVisibleTweetRef,
-        state.setSeenLastTweetRef,
-        setLoading
-      );
-      unsubscribersRef.current.push(unsubscribe);
-    } else {
-      // already have tweets, attach listener to be notified of changes to tweet documents
-      const unsubscribers = attachListenersToTweets(
-        state.tweets,
-        state.setTweets,
-        state.setLastVisibleTweetRef,
-        setLoading
-      );
-      unsubscribers.then((result) => {
-        // add unsubscriber functions to unsubsribers reference
-        result.forEach((unsubscriber) => {
-          unsubscribersRef.current.push(unsubscriber);
+    // if there are tweets in context, need to attach listeners to them
+    // else, need to load
+    let attach = false;
+    if (tweetsContext.tweets.length > 0) {
+      attach = true;
+    }
+    setLoaderInfo({ queryRef, attach });
+
+    return () => {
+      // unsubscribe from tweets listeners
+      // unsubsribersRef is an array, each element in it is an promise returned by tweetsLoader
+      // each of these promises resolves to an array returned by attachListeners...
+      // each element in this array is a function which unsubscribes from the tweets listener
+
+      unsubscribersRef.current.forEach((unsubbersArray) => {
+        unsubbersArray.forEach((unsubber) => {
+          unsubber();
         });
       });
-    }
-    return () => {
-      // cleanup when unmounting
-      // unsubscribe from tweets listeners, if any
-      unsubscribersRef.current.forEach((unsubscriber) => {
-        if (unsubscriber && typeof unsubscriber.then === 'function') {
-          // if unsubscribe is a promise that returns the function to unsubscribe from the listener
-          unsubscriber.then((unsubFunc) => {
-            if (typeof unsubFunc === 'function') {
-              unsubFunc();
-            }
-          });
-        } else if (unsubscriber && typeof unsubscriber === 'function') {
-          // if unsubscribe is the function to unsubscribe from the listener
-          unsubscriber();
-        }
-      });
     };
-  }, [switchedTabs]);
+  }, [tweetsContext.isForYouSelected]);
+  // era switched tabs
 
-  useEffect(() => {
-    // load new tweets when last tweet is visible
+  const pushUnsubscriber = (unsubscriber) => {
+    unsubscribersRef.current.push(unsubscriber);
+  };
 
-    // function to handleIntersection
-    const handleIntersection = async (entries) => {
-      const [entry] = entries;
-      // if already seen last tweet no need to run
-      if (entry.isIntersecting && !state.seenLastTweetRef.current) {
-        // construct query to get next 25 tweets after intersection
-        const tweetsCollectionRef = collection(firestore, 'tweets');
+  // function to handleIntersection
+  const handleIntersection = (entries) => {
+    const [entry] = entries;
+    // if already seen last tweet no need to run
+    if (entry.isIntersecting && !tweetsContext.seenLastTweetRef.current) {
+      // construct query to get next 25 tweets after intersection
+      const tweetsCollectionRef = collection(firestore, 'tweets');
 
-        let queryRef;
-        // load For You or Following tweets accordingly
-        if (isForYouSelected) {
-          queryRef = query(
-            tweetsCollectionRef,
-            where('type', 'in', ['tweet', 'retweet']),
-            orderBy('tweetId', 'desc'),
-            limit(25),
-            startAfter(state.lastVisibleTweetRef.current)
-          );
-        } else {
-          queryRef = query(
-            tweetsCollectionRef,
-            where('userId', 'in', user.following),
-            where('type', 'in', ['tweet', 'retweet']),
-            orderBy('tweetId', 'desc'),
-            limit(25),
-            startAfter(state.lastVisibleTweetRef.current)
-          );
-        }
-        console.log('loading new tweets in intersection ');
-        // load next 25 tweets and store unsubscriber in ref to use when unmounting component
-        const unsubscribePromise = tweetsLoader(
-          queryRef,
-          state.setTweets,
-          state.setLastVisibleTweetRef,
-          state.setSeenLastTweetRef,
-          setLoading
+      let queryRef;
+      // load For You or Following tweets accordingly
+      if (tweetsContext.isForYouSelected) {
+        queryRef = query(
+          tweetsCollectionRef,
+          where('type', 'in', ['tweet', 'retweet']),
+          orderBy('createdAt', 'desc'),
+          limit(25),
+          startAfter(tweetsContext.lastVisibleTweetRef.current)
         );
-        unsubscribersRef.current.push(unsubscribePromise);
+      } else {
+        queryRef = query(
+          tweetsCollectionRef,
+          where('userId', 'in', user.following),
+          where('type', 'in', ['tweet', 'retweet']),
+          orderBy('createdAt', 'desc'),
+          limit(25),
+          startAfter(tweetsContext.lastVisibleTweetRef.current)
+        );
       }
-    };
-
-    // create intersection observer
-    const observer = new IntersectionObserver(handleIntersection, {
-      threshold: 0.5,
-    });
-
-    if (!isLoading && state.tweets.length > 20) {
-      // attach observer to last tweet in DOM
-      const lastTweetElement = document.getElementById(
-        `tweet-${state.tweets[state.tweets.length - 1].tweetId}`
-      );
-      if (lastTweetElement) {
-        observer.observe(lastTweetElement);
-      }
+      setLoaderInfo({ queryRef, attach: false });
     }
-
-    return () => {
-      // cleanup when unmounting or dependencies change
-      // disconnect intersection observer
-      observer.disconnect();
-    };
-  }, [state.tweets, state.seenLastTweetRef.current, isLoading]);
-
-  useEffect(() => {
-    // ? debug weird behavior when bookmarking or liking if I have one reposted tweet
-    console.log('state tweets changed => ', state.tweets);
-  }, [state.tweets]);
-
+  };
   return (
     <div id="home">
-      <HomeHeader setIsForYouSelected={setIsForYouSelected} />
+      <HomeHeader
+        homeLoading={isLoading}
+        attachListenersToTweets={attachListenersToTweets}
+      />
       <div className="padded">
-        <TweetContainer tweets={state.tweets} isLoading={isLoading} />
+        {loaderInfo.queryRef && (
+          <ScrollableElementsLoader
+            elementsLoader={loaderInfo}
+            elements={tweetsContext.tweets}
+            setElements={tweetsContext.setTweets}
+            loadElements={tweetsLoader}
+            attachListenersToElements={attachListenersToTweets}
+            setLoadedSignal={setLoading}
+            intersectionHandler={handleIntersection}
+            ElementComponent={Tweet}
+            setLastRetrievedElement={tweetsContext.setLastVisibleTweetRef}
+            seenLastElement={tweetsContext.seenLastTweetRef}
+            setSeenLastElement={tweetsContext.setSeenLastTweetRef}
+            pushUnsubscriber={pushUnsubscriber}
+          />
+        )}
+        {isLoading && 'homeLoading'}
       </div>
       {viewportWidth < 500 ? <FeatherButton /> : null}
       <Sidebar />
@@ -395,7 +241,7 @@ const scrollHandler = (lastScrollTop, setScrollTop, time) => {
 };
 
 // Function to load tweets
-const tweetsLoader = async (
+export const tweetsLoader = async (
   queryRef,
   setHomeTweets,
   setLastVisibleTweetRef,
@@ -403,67 +249,42 @@ const tweetsLoader = async (
   setLoading
 ) => {
   // variable to store unsubsribe function
-  let unsubscribe;
+  let unsubscribe = [];
+
+  // get id's of tweets, then attach listeners to them
+  // this prevents tweet duplication, reordering, disappearance that would happen if querySnapshot was used directly with query
+  // e.g. a query that gets the first 25 docs will return many changes if one or more of those docs is deleted or if docs are added to the beginning
   try {
-    unsubscribe = onSnapshot(queryRef, async (querySnapshot) => {
-      console.log('inside tweetsLoader onSnapshot => ', Date.now());
-      querySnapshot.docChanges().forEach((change) => console.log({ change }));
-      // if querySnapshot has no docs, most likely last tweet was seen
-      if (!querySnapshot.docs[0]) {
-        setSeenLastTweet(true);
-        return;
-      }
+    const querySnapshot = await getDocs(queryRef);
 
-      // build fetchedTweets array from tweet documents plus information needed from twitter user
-      const [docsToModify, docsToDelete, docsToAdd] =
-        await processTweetsQuerySnapshot(querySnapshot);
+    // if querySnapshot has no docs, most likely last tweet was seen
+    if (!querySnapshot.docs[0] && setSeenLastTweet) {
+      setSeenLastTweet(true);
+      return [];
+    }
 
-      // set last visible tweet
-      if (querySnapshot.docs.length > 0) {
-        // Sort the docs based on createdAt (oldest to newest)
-        const sortedDocs = querySnapshot.docs.sort((a, b) => {
-          const aCreatedAt = a.data().createdAt;
-          const bCreatedAt = b.data().createdAt;
+    const tweetIds = querySnapshot.docs.map((doc) => ({
+      originalTweetId: doc.data().tweetId,
+    }));
 
-          // Compare seconds first, then nanoseconds if seconds are equal
-          if (aCreatedAt.seconds !== bCreatedAt.seconds) {
-            return aCreatedAt.seconds - bCreatedAt.seconds;
-          }
-          return aCreatedAt.nanoseconds - bCreatedAt.nanoseconds;
-        });
-
-        // Select the first document (oldest)
-        const lastTweet = sortedDocs[0];
-
-        // eslint-disable-next-line no-param-reassign
-        setLastVisibleTweetRef(lastTweet);
-      }
-
-      // save tweets in state
-      // Check if the tweet is already present in the state and avoid duplication done in updateTweets
-      setHomeTweets((prevTweets) => {
-        // set loading to false only after state update
-        setLoading(false);
-        return updateTweets(prevTweets, docsToModify, docsToDelete, docsToAdd);
-      });
-    });
+    unsubscribe = attachListenersToTweets(
+      tweetIds,
+      setHomeTweets,
+      setLastVisibleTweetRef,
+      setLoading
+    );
   } catch (error) {
-    // ! implement error handling
-    console.error('Error fetching homeTweets:', error);
+    console.error(error);
   }
-  // returns unsubscriber promise
   return unsubscribe;
 };
 
-const attachListenersToTweets = async (
+export const attachListenersToTweets = async (
   tweets,
   setTweets,
   setLastVisibleTweetRef,
   setLoading
 ) => {
-  // set loading to true in case it is not already set
-  setLoading(true);
-
   // prepare query for tweets
   const tweetsCollectionRef = collection(firestore, 'tweets');
 
@@ -471,18 +292,15 @@ const attachListenersToTweets = async (
   const unsubscribers = [];
 
   // make array of tweet ids to attach listeners to
-  const tweetIds = tweets.map((tweet) => tweet.tweetId);
+  const tweetIds = tweets.map((tweet) => tweet.originalTweetId);
 
   // chunk array into multiple arrays with max length of 30 (firestore limitation)
   const chunks = chunkArray(tweetIds, 30);
 
-  // delete old tweets from state to avoid duplicating them
-  const tweetKeys = tweets.map((tweet) => tweet.key);
-  setTweets((prevTweets) => updateTweets(prevTweets, [], tweetKeys, []));
-
   // subcribe to each chunk of tweets separately and add unsubsriber function to unsubsribers array
   const promises = chunks.map(async (chunk) => {
     // looking for specific tweet IDs, so no need for separate queries depending on "isForYouSelected"
+
     const queryRef = query(
       tweetsCollectionRef,
       where('tweetId', 'in', chunk),
@@ -492,48 +310,47 @@ const attachListenersToTweets = async (
     // create listener for tweets and set tweets
     return new Promise((resolve, reject) => {
       const unsubscribe = onSnapshot(queryRef, async (querySnapshot) => {
+        const logDocs = querySnapshot.docs.map((doc) => doc.data());
+        console.log({ logDocs }, { chunk });
         try {
-          if (querySnapshot.docs.length > 0) {
-            // build fetchedTweets array from tweet documents plus information needed from tweeter user
-            const [docsToModify, docsToDelete, docsToAdd] =
-              await processTweetsQuerySnapshot(querySnapshot);
+          // build fetchedTweets array from tweet documents plus information needed from tweeter user
+          const [docsToModify, docsToDelete, docsToAdd] =
+            await processTweetsQuerySnapshot(querySnapshot);
 
-            // set tweets
-            setTweets((prevTweets) => {
-              // resolve promise
-              resolve();
-              return updateTweets(
-                prevTweets,
-                docsToModify,
-                docsToDelete,
-                docsToAdd
-              );
+          // set tweets
+          setTweets((prevTweets) =>
+            updateTweets(prevTweets, docsToModify, docsToDelete, docsToAdd)
+          );
+
+          // set last visible tweet ref  in last chunk
+          if (chunks.indexOf(chunk) === chunks.length - 1) {
+            // Sort the docs based on createdAt (oldest to newest)
+            const sortedDocs = querySnapshot.docs.sort((a, b) => {
+              const aCreatedAt = a.data().repostTime || a.data().createdAt;
+              const bCreatedAt = b.data().repostTime || b.data().createdAt;
+
+              // Compare seconds first, then nanoseconds if seconds are equal
+              if (aCreatedAt.seconds !== bCreatedAt.seconds) {
+                return aCreatedAt.seconds - bCreatedAt.seconds;
+              }
+              return aCreatedAt.nanoseconds - bCreatedAt.nanoseconds;
             });
 
-            // set last visible tweet ref  in last chunk
-            if (chunks.indexOf(chunk) === chunks.length - 1) {
-              // Sort the docs based on createdAt (oldest to newest)
-              const sortedDocs = querySnapshot.docs.sort((a, b) => {
-                const aCreatedAt = a.data().createdAt;
-                const bCreatedAt = b.data().createdAt;
-
-                // Compare seconds first, then nanoseconds if seconds are equal
-                if (aCreatedAt.seconds !== bCreatedAt.seconds) {
-                  return aCreatedAt.seconds - bCreatedAt.seconds;
-                }
-                return aCreatedAt.nanoseconds - bCreatedAt.nanoseconds;
-              });
-
+            if (querySnapshot.docs.length > 0) {
               // Select the first document (oldest)
               const lastTweet = sortedDocs[0];
 
               // eslint-disable-next-line no-param-reassign
-              setLastVisibleTweetRef(lastTweet);
+              if (setLastVisibleTweetRef) {
+                setLastVisibleTweetRef(lastTweet);
+              }
             }
           }
+
+          resolve();
         } catch (error) {
           // ! implement error handling
-          console.log('error => ', { error });
+          console.error('error => ', { error });
           reject(error);
         }
       });
@@ -541,26 +358,13 @@ const attachListenersToTweets = async (
       unsubscribers.push(unsubscribe);
     });
   });
-
   // wait for all promises to be resolved to assure isLoading set to false only after all tweets loaded
   await Promise.all(promises);
-
   // set loading to false
-  setLoading(false);
-
-  return unsubscribers || null;
-};
-
-const getUserData = async (userDataRef) => {
-  // function to get a user's data according to tag
-  const usersCollectionRef = collection(firestore, 'users');
-  const usersQueryRef = query(
-    usersCollectionRef,
-    where('uid', '==', userDataRef)
-  );
-  const userDataSnapshot = await getDocs(usersQueryRef);
-
-  return userDataSnapshot.docs[0]?.data() || {};
+  if (setLoading) {
+    setLoading(false);
+  }
+  return unsubscribers;
 };
 
 const processTweetsQuerySnapshot = async (querySnapshot) => {
@@ -571,15 +375,12 @@ const processTweetsQuerySnapshot = async (querySnapshot) => {
   querySnapshot.docChanges().forEach((change) => {
     switch (change.type) {
       case 'removed':
-        console.log(`Document with ID ${change.doc.id} was deleted`);
         docsToDeleteIds.push(change.doc.id);
         break;
       case 'added':
-        console.log(`Document with ID ${change.doc.id} was added`);
         docsToAddIds.push(change.doc.id);
         break;
       case 'modified':
-        console.log(`Document with ID ${change.doc.id} was modified`);
         docsToModifyIds.push(change.doc.id);
         break;
       default:
@@ -598,24 +399,25 @@ const processTweetsQuerySnapshot = async (querySnapshot) => {
       // ? also, this should be slower than if you could find a way to get batches of data
       // ? e.g. for tweetinteractions do batch queries (where, in, tweetIds)
       // ? no idea for user data right now though
-      console.log({ docsToDeleteIds });
 
       if (!docsToDeleteIds?.includes(document.id)) {
         // if doc has to be deleted, no point in getting data for it
         let tweetData = document.data();
-        let reposterId = null;
+        let reposterData = null;
         let tweetDocRef = document.id;
+        let docRef = document.ref;
         let repostTime = null;
+        const originalTweetId = tweetData.tweetId;
 
         if (tweetData.type === 'retweet') {
           // if retweet, get original tweet data and set reposterId, repostTime and tweetDocRef
-          // ! this step creates multiple objects with the same tweetId in state, not in the database
+          // ! this step creates multiple objects with the same tweetId in context, not in the database
           if (!tweetData.retweetId) {
             // error in tweet data so return empty object
             return {};
           }
 
-          reposterId = tweetData.userId;
+          reposterData = await getUserData(tweetData.userId);
           repostTime = tweetData.createdAt;
 
           const tweetsCollection = collection(firestore, 'tweets');
@@ -626,6 +428,7 @@ const processTweetsQuerySnapshot = async (querySnapshot) => {
           const tweetSnapshot = await getDocs(tweetQuery);
           tweetData = tweetSnapshot.docs[0]?.data() || {};
           tweetDocRef = tweetSnapshot.docs[0].id;
+          docRef = tweetSnapshot.docs[0].ref;
         }
         // get the user who posted the tweet's data
         const userDataRef = tweetData.userId;
@@ -633,7 +436,10 @@ const processTweetsQuerySnapshot = async (querySnapshot) => {
 
         if (userData.uid) {
           // get interactions data
-          const interactionsData = await getInteractionsData(tweetData.tweetId);
+          const interactionsData = await getInteractionsData(
+            tweetData.tweetId,
+            docRef
+          );
 
           // return complete object
           const processedTweetDocument = {
@@ -644,8 +450,9 @@ const processTweetsQuerySnapshot = async (querySnapshot) => {
             userProfilePicture: userData.profileImg,
             userTag: userData.tag,
             ...interactionsData,
-            reposterId,
+            reposterData,
             repostTime,
+            originalTweetId,
           };
 
           if (docsToAddIds.includes(document.id)) {
@@ -659,12 +466,6 @@ const processTweetsQuerySnapshot = async (querySnapshot) => {
       }
       return {};
     })
-  );
-  console.log(
-    'in process => ',
-    { docsToAdd },
-    { docsToModify },
-    { docsToDeleteIds }
   );
   return [docsToModify, docsToDeleteIds, docsToAdd];
 };

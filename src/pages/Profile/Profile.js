@@ -24,7 +24,6 @@ const Profile = () => {
   // const { user } = useAppContext();
   const { user } = useUserContext();
   const { tag } = useParams();
-  console.log({ tag }, { user });
   const [profileVisited, setProfileVisited] = useState(null);
   const [isOwnProfile, setIsOwnProfile] = useState(false);
   const [isFollowed, setIsFollowed] = useState(false);
@@ -48,12 +47,7 @@ const Profile = () => {
       if (!querySnapshot.empty) {
         const profileVisitedDoc = querySnapshot.docs[0];
         const profileVisitedData = profileVisitedDoc.data();
-        console.log(
-          'in functie => ',
-          { querySnapshot },
-          { profileVisitedDoc },
-          { profileVisitedData }
-        );
+
         setProfileVisited(profileVisitedData);
         if (user.following && user.following.includes(profileVisitedData.uid)) {
           setIsFollowed(true);

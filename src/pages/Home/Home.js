@@ -266,7 +266,6 @@ export const tweetsLoader = async (
     const tweetIds = querySnapshot.docs.map((doc) => ({
       originalTweetId: doc.data().tweetId,
     }));
-
     unsubscribe = attachListenersToTweets(
       tweetIds,
       setHomeTweets,
@@ -295,6 +294,7 @@ export const attachListenersToTweets = async (
   const tweetIds = tweets.map((tweet) => tweet.originalTweetId);
 
   // chunk array into multiple arrays with max length of 30 (firestore limitation)
+  // const chunks = chunkArray(tweetIds, 30);
   const chunks = chunkArray(tweetIds, 30);
 
   // subcribe to each chunk of tweets separately and add unsubsriber function to unsubsribers array
@@ -346,7 +346,6 @@ export const attachListenersToTweets = async (
               }
             }
           }
-
           resolve();
         } catch (error) {
           // ! implement error handling

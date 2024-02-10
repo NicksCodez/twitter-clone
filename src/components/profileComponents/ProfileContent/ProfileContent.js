@@ -109,8 +109,8 @@ const ProfileContent = ({ profileVisited, isOwnProfile, isFollowed, tag }) => {
           'like',
           lastRetrievedTweetRef,
           seenLastTweetRef,
-          tweets,
-          setTweets
+          setTweets,
+          profileVisited.uid
         ).then((resolved) => {
           console.log({ resolved });
           pushUnsubscriber(resolved);
@@ -271,8 +271,8 @@ const ProfileContent = ({ profileVisited, isOwnProfile, isFollowed, tag }) => {
             'like',
             lastRetrievedTweetRef,
             seenLastTweetRef,
-            tweets,
-            setTweets
+            setTweets,
+            profileVisited.uid
           ).then((resolved) => pushUnsubscriber(resolved));
           break;
         default:
@@ -526,8 +526,8 @@ export const getLikesBookmarks = async (
   type,
   lastRetrievedTweetRef,
   seenLastTweetRef,
-  tweets,
-  setTweets
+  setTweets,
+  uid
 ) => {
   // type can be 'like' or 'bookmark'
   console.log('sunt in getLikesBookmarks');
@@ -537,18 +537,18 @@ export const getLikesBookmarks = async (
     console.log('nu am seenLastTweetRef');
     // make collection group of 'likes' or 'bookmarks' collection
     // const colGroup = collectionGroup(firestore, `${type}s`);
-    const colGroup = collectionGroup(firestore, 'likes');
+    const colGroup = collectionGroup(firestore, `${type}s`);
     // query for first or following 25 documents
     const colQuery = !lastRetrievedTweetRef.current
       ? query(
           colGroup,
-          where('userId', '==', auth.currentUser?.uid),
+          where('userId', '==', uid),
           orderBy('createdAt', 'desc'),
           limit(25)
         )
       : query(
           colGroup,
-          where('userId', '==', auth.currentUser?.uid),
+          where('userId', '==', uid),
           orderBy('createdAt', 'desc'),
           startAfter(lastRetrievedTweetRef.current),
           limit(25)
@@ -570,14 +570,14 @@ export const getLikesBookmarks = async (
       const listenersQuery = !lastRetrievedTweetRef.current
         ? query(
             colGroup,
-            where('userId', '==', auth.currentUser?.uid),
+            where('userId', '==', uid),
             where('createdAt', 'in', timestamps),
             orderBy('createdAt', 'desc'),
             limit(25)
           )
         : query(
             colGroup,
-            where('userId', '==', auth.currentUser?.uid),
+            where('userId', '==', uid),
             where('createdAt', 'in', timestamps),
             orderBy('createdAt', 'desc'),
             startAfter(lastRetrievedTweetRef.current),

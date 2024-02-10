@@ -1,0 +1,45 @@
+#bookmarks {
+  word-wrap: break-word;
+  position: fixed;
+  top: 0;
+  left: 0;
+  bottom: 54.5px;
+  width: 100%;
+  overflow-y: scroll;
+}
+
+#bookmarks-header {
+  z-index: 3;
+}
+
+#bookmarks-header svg {
+  width: 20px;
+  height: 20px;
+  display: block;
+}
+
+#bookmarks-header span {
+  display: block;
+}
+
+#bookmarks-header .minW {
+  min-width: 56px;
+}
+
+#bookmarks-header span:last-child {
+  font-size: var(--fs-mili);
+  line-height: var(--lh-mili);
+  font-weight: 400;
+  color: var(--clr-font-secondary);
+}
+
+#bookmarks-header span:first-child {
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--clr-font-primary);
+  line-height: var(--lh-base);
+}
+
+#bookmarks .padded-container {
+  padding: 0px 16px;
+}

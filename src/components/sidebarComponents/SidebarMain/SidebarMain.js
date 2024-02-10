@@ -72,7 +72,7 @@ const SidebarMain = () => {
       <SidebarElement
         svg={svgs.bookmarks}
         name="Bookmarks"
-        link="not-implemented"
+        link="/i/bookmarks"
       />
       <div className="separator-wrapper">
         <div className="separator" />

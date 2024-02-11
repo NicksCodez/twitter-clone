@@ -5,12 +5,16 @@ import { Link } from 'react-router-dom';
 import {
   collection,
   collectionGroup,
+  deleteDoc,
+  doc,
   getDoc,
   getDocs,
   limit,
   onSnapshot,
   orderBy,
   query,
+  serverTimestamp,
+  setDoc,
   startAfter,
   where,
 } from 'firebase/firestore';
@@ -27,12 +31,16 @@ import {
   tweetsLoader,
 } from '../../../pages/Home/Home';
 
+// context providers
+import { useUserContext } from '../../../contextProvider/ContextProvider';
+
 // utils
 import svgs from '../../../utils/svgs';
 
 // images
 import DefaultProfile from '../../../assets/images/default_profile.png';
 import {
+  debounce,
   getInteractionsData,
   getUserData,
   updateTweets,
@@ -48,13 +56,15 @@ const ProfileContent = ({ profileVisited, isOwnProfile, isFollowed, tag }) => {
   const [isScrollableLoading, setIsScrollableLoading] = useState(true);
   const [tabSelected, setTabSelected] = useState('tweets');
 
+  // logged in user
+  const { user } = useUserContext();
+
   // refs for scroll functionality
   const seenLastTweetRef = useRef(false);
   const lastRetrievedTweetRef = useRef(null);
 
-  // // refs to show likes by user
-  // const lastLikedTweetRetrievedRef = useRef(null);
-  // const seenLastLikedTweetRef = useRef(false);
+  // refs for last follow button click
+  const lastFollowButtonClickRef = useRef(Date.now());
 
   // ref to store unsubscribe functions
   const unsubscribersRef = useRef([]);
@@ -103,8 +113,6 @@ const ProfileContent = ({ profileVisited, isOwnProfile, isFollowed, tag }) => {
         setLoaderInfo((prevLoaderInfo) => ({ ...prevLoaderInfo, queryRef }));
         break;
       case 'likes':
-        // queryRef = await getLikesQuery();
-        // setLoaderInfo((prevLoaderInfo) => ({ ...prevLoaderInfo, queryRef }));
         getLikesBookmarks(
           'like',
           lastRetrievedTweetRef,
@@ -112,7 +120,6 @@ const ProfileContent = ({ profileVisited, isOwnProfile, isFollowed, tag }) => {
           setTweets,
           profileVisited.uid
         ).then((resolved) => {
-          console.log({ resolved });
           pushUnsubscriber(resolved);
         });
         break;
@@ -155,69 +162,6 @@ const ProfileContent = ({ profileVisited, isOwnProfile, isFollowed, tag }) => {
       });
     };
   }, [tabSelected]);
-
-  const getLikesQuery = async () => {
-    // testing collectionGroups
-    const interactionCollectionGrooup = collectionGroup(firestore, 'likes');
-    const groupQuery = query(
-      interactionCollectionGrooup,
-      where('userId', '==', auth.currentUser.uid)
-    );
-    const groupSnapshot = await getDocs(groupQuery);
-    await groupSnapshot.docs.forEach(async (doc) => {
-      const groupDocument = await getDoc(doc.ref.parent.parent);
-
-      // console.log(
-      //   'collection -> ',
-      //   { doc },
-      //   doc.ref.parent.parent.id,
-      //   doc.ref,
-      //   doc.ref.parent,
-      //   doc.ref.parent.parent,
-      //   groupDocument,
-      //   groupDocument.data()
-      // );
-    });
-
-    // create query for liked tweets
-    const interactionsCollectionRef = collection(
-      firestore,
-      'tweetInteractions'
-    );
-    const tweetsCollectionRef = collection(firestore, 'tweets');
-
-    const likedTweetsQueryRef = lastRetrievedTweetRef.current
-      ? query(
-          interactionsCollectionRef,
-          where('type', '==', 'like'),
-          where('userId', '==', profileVisited.uid),
-          orderBy('createdAt', 'desc'),
-          startAfter(lastRetrievedTweetRef.current),
-          limit(25)
-        )
-      : query(
-          interactionsCollectionRef,
-          where('type', '==', 'like'),
-          where('userId', '==', profileVisited.uid),
-          orderBy('createdAt', 'desc'),
-          limit(25)
-        );
-    const likedTweetsSnapshot = await getDocs(likedTweetsQueryRef);
-    const documents = likedTweetsSnapshot.docs;
-    if (documents.length > 0) {
-      const tweetIds = documents.map((doc) => doc.data().tweetId);
-      const queryRef = query(
-        tweetsCollectionRef,
-        where('tweetId', 'in', tweetIds)
-        // orderBy('createdAt', 'desc')
-      );
-      console.log(lastRetrievedTweetRef.current, { tweetIds }, { queryRef });
-      return queryRef;
-    }
-
-    // if no documents, return query which finds nothing
-    return query(tweetsCollectionRef, where('tweetId', '==', -9999));
-  };
 
   // function to handleIntersection
   const handleIntersection = (entries) => {
@@ -262,11 +206,6 @@ const ProfileContent = ({ profileVisited, isOwnProfile, isFollowed, tag }) => {
           setLoaderInfo({ queryRef, attach: false });
           break;
         case 'likes':
-          // getLikesQuery().then((r) => {
-          //   console.log('intersection handled');
-          //   queryRef = r;
-          //   setLoaderInfo({ queryRef, attach: false });
-          // });
           getLikesBookmarks(
             'like',
             lastRetrievedTweetRef,
@@ -310,7 +249,20 @@ const ProfileContent = ({ profileVisited, isOwnProfile, isFollowed, tag }) => {
           <div>
             <div className="button-wrapper">
               {!isOwnProfile && (
-                <button type="button" className="u-round">
+                <button
+                  type="button"
+                  className={`u-round ${!isFollowed ? 'unfollowed' : ''}`}
+                  onClick={debounce(
+                    () => {
+                      followClickHandler(user, profileVisited);
+                    },
+                    500,
+                    lastFollowButtonClickRef.current,
+                    (date) => {
+                      lastFollowButtonClickRef.current = date;
+                    }
+                  )}
+                >
                   <span>{isFollowed ? 'Following' : 'Follow'}</span>
                 </button>
               )}
@@ -383,7 +335,7 @@ const ProfileContent = ({ profileVisited, isOwnProfile, isFollowed, tag }) => {
             <div id="profile-page-follower-details">
               <Link to="/profile/following">
                 <div className="primary">
-                  <span>{profileVisited.following.length}</span>
+                  <span>{profileVisited.following?.length}</span>
                 </div>
                 <div className="secondary">
                   <span>Following</span>
@@ -391,7 +343,7 @@ const ProfileContent = ({ profileVisited, isOwnProfile, isFollowed, tag }) => {
               </Link>
               <Link to="/profile/followers">
                 <div className="primary">
-                  <span>{profileVisited.followers.length}</span>
+                  <span>{profileVisited.followers?.length}</span>
                 </div>
                 <div className="secondary">
                   <span>Followers</span>
@@ -530,11 +482,9 @@ export const getLikesBookmarks = async (
   uid
 ) => {
   // type can be 'like' or 'bookmark'
-  console.log('sunt in getLikesBookmarks');
   const unsubscribe = [];
   // if already seen last possible tweet, no need to run
   if (!seenLastTweetRef.current) {
-    console.log('nu am seenLastTweetRef');
     // make collection group of 'likes' or 'bookmarks' collection
     // const colGroup = collectionGroup(firestore, `${type}s`);
     const colGroup = collectionGroup(firestore, `${type}s`);
@@ -554,13 +504,10 @@ export const getLikesBookmarks = async (
           limit(25)
         );
     const colSnapshot = await getDocs(colQuery);
-    console.log({ colSnapshot }, { colQuery }, lastRetrievedTweetRef.current);
     if (colSnapshot.empty) {
-      console.log('sunt in if');
       // no documents, reached end of collection, nothing else to retrieve
       seenLastTweetRef.current = true;
     } else {
-      console.log('sunt in else');
       // got documents, get their timestamps
       // these will be used to attach listeners to these specific tweets
       // the reason onSnapshot is not used directly with colQuery is that if tweets are added or deleted it breaks tweet update functionality
@@ -592,8 +539,6 @@ export const getLikesBookmarks = async (
             listenersSnapshot
           );
 
-          console.log('after processing -> ', { docsToDelete });
-
           // set tweets
           setTweets((prevTweets) =>
             updateTweets(
@@ -613,7 +558,6 @@ export const getLikesBookmarks = async (
       unsubscribe.push(unsubscriber);
     }
   }
-  console.log('returning unsubscribe: -> ', { unsubscribe });
   return unsubscribe;
 };
 
@@ -625,7 +569,6 @@ const processTweets = async (querySnapshot) => {
   querySnapshot.docChanges().forEach((change) => {
     switch (change.type) {
       case 'removed':
-        console.log({ change });
         docsToDeleteIds.push(change.doc.id);
         break;
       case 'added':
@@ -701,6 +644,36 @@ const processTweets = async (querySnapshot) => {
     })
   );
   return [docsToModify, docsToDeleteIds, docsToAdd];
+};
+
+const followClickHandler = async (loggedUser, profileVisited) => {
+  console.log('called follow click handler', { loggedUser });
+  // check if loggedUser already follows profileVisited
+  // if not, follow profileVisited
+  // if yes, unfollowProfileVisited
+
+  // first, get loggedUser doc ref
+  const usersCollection = collection(firestore, 'users');
+  const userQuery = query(
+    usersCollection,
+    where('uid', '==', auth.currentUser.uid)
+  );
+  const userSnapshot = await getDocs(userQuery);
+  const userDocRef = userSnapshot.docs[0].ref;
+
+  // define following collection inside user doc
+  const followingCollection = collection(userDocRef, 'following');
+
+  if (loggedUser.following.includes(profileVisited.uid)) {
+    // to unfollow, delete doc with same id as profileVisited uid
+    deleteDoc(doc(followingCollection, profileVisited.uid));
+  } else {
+    console.log('before setDoc ', { followingCollection });
+    // to follow, create doc with same id as profileVisited uid
+    setDoc(doc(followingCollection, profileVisited.uid), {
+      createdAt: serverTimestamp(),
+    });
+  }
 };
 
 export default ProfileContent;

@@ -32,7 +32,6 @@ import {
   chunkArray,
   getInteractionsData,
   getUserData,
-  sortDocsCreatedAtDesc,
   updateTweets,
 } from '../../utils/functions';
 import ScrollableElementsLoader from '../../components/ScrollableElementsLoader/ScrollableElementsLoader';

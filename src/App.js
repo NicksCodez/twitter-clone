@@ -1,5 +1,5 @@
 // react
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   createBrowserRouter,
   createRoutesFromElements,
@@ -9,7 +9,14 @@ import {
 } from 'react-router-dom';
 
 // layouts
-import { collection, onSnapshot, query, where } from 'firebase/firestore';
+import {
+  collection,
+  getDocs,
+  onSnapshot,
+  query,
+  where,
+} from 'firebase/firestore';
+import { onAuthStateChanged } from 'firebase/auth';
 import RootLayout from './layouts/RootLayout/RootLayout';
 
 // firebase
@@ -42,6 +49,13 @@ const App = () => {
   const { setViewportWidth } = useViewportContext();
   const { setUser } = useUserContext();
 
+  // ref to store unsubscribers
+  const unsubscribersRef = useRef([]);
+
+  // state to help with keeping track of changed user
+  // tried auth.currentUser but that does not always trigger the useEffect which changes the user context
+  const [currentUser, setCurrentUser] = useState(null);
+
   useEffect(() => {
     // window event listeners
     const resizeFunc = () => {
@@ -49,70 +63,90 @@ const App = () => {
     };
     window.addEventListener('resize', resizeFunc);
 
-    // define unsubscribe here to call it in return and free resources
-    // set the user in context whenever authentication changes to have easy access
-    let unsubscribe = () => null;
-    let prevUserData = {
-      name: '',
-      tag: '',
-      profileImg: '',
-      followers: [],
-      following: [],
-    };
-    auth.onAuthStateChanged((authUser) => {
-      // use setTimeout because changing the context on e.g. sign up causes a rerender which somehow breaks redirect functionality
-      // making the rerender happen at a later point is fine, redirect has already happenned
-      // gonna have to check it out in more detail sometime and find a proper fix
-      if (authUser) {
-        setTimeout(async () => {
-          const usersCollectionRef = collection(firestore, 'users');
-          const queryRef = query(
-            usersCollectionRef,
-            where('uid', '==', authUser.uid)
-          );
-          // use onSnapshot to be notified of changes to user data
-          // ! wrap in try catch
-          unsubscribe = onSnapshot(queryRef, (snapshot) => {
-            let userData = {};
-            if (snapshot.docs) {
-              const data = snapshot.docs[0].data();
-              userData = {
-                name: data.name,
-                tag: data.tag,
-                profileImg: data.profileImg,
-                followers: data.followers,
-                following: data.following,
-              };
-              // * keep only profile pic, tag, display name, following count, followers count as this information is needed more often
-              // prevent useless rerenders
-              if (
-                prevUserData.name !== userData.name ||
-                prevUserData.tag !== userData.tag ||
-                prevUserData.profileImg !== userData.profileImg ||
-                prevUserData.followers.length !== userData.followers.length ||
-                prevUserData.following.length !== userData.following.length
-              ) {
-                setUser(userData);
-                prevUserData = userData;
-              }
-            }
-          });
-        }, 2000);
-      } else {
-        // user logs out, stop sending user data to client
-        unsubscribe();
-        // setUser({});
-        setTimeout(() => {
-          setUser({});
-        }, 2000);
-      }
+    const listener = onAuthStateChanged(auth, async (user) => {
+      // change user in state so effect that updates context runs
+      //! this breaks sign up redirect for some reason
+      setCurrentUser(user);
     });
 
     // remove event listeners
     return () => {
       window.removeEventListener('resize', resizeFunc);
+      listener();
     };
   }, []);
+
+  useEffect(() => {
+    // function to set user Context whenever logged in user changes
+    const setUserContext = async () => {
+      if (auth.currentUser) {
+        // prepare user data query
+        const usersCollectionRef = collection(firestore, 'users');
+        const queryRef = query(
+          usersCollectionRef,
+          where('uid', '==', auth.currentUser.uid)
+        );
+
+        // get user data
+        // ! wrap in try catch
+        const unsubscribe = onSnapshot(queryRef, async (snapshot) => {
+          if (snapshot.docs) {
+            const userDoc = snapshot.docs[0];
+            const data = userDoc.data();
+
+            // * keep only profile pic, tag, display name, following count, followers count as this information is needed more often
+            const userData = {
+              name: data.name,
+              tag: data.tag,
+              profileImg: data.profileImg,
+            };
+
+            setUser((prevData) => ({
+              ...prevData,
+              ...userData,
+              following: prevData.following || [],
+              followers: prevData.followers || [],
+            }));
+          }
+        });
+        // add to unsubscribers
+        unsubscribersRef.current.push(unsubscribe);
+
+        const userSnapshot = await getDocs(queryRef);
+        const userDocRef = userSnapshot.docs[0].ref;
+        // prepare user following and followers data queries
+        const userFollowingCollection = collection(userDocRef, 'following');
+        const userFollowersCollection = collection(userDocRef, 'followers');
+
+        const userFollowingQuery = query(userFollowingCollection);
+        const userFollowersQuery = query(userFollowersCollection);
+
+        // attach listeners to user following and followers data
+        const followingUnsub = onSnapshot(userFollowingQuery, (snapshot) => {
+          const followingIds = snapshot.docs.map((document) => document.id);
+          console.log({ followingIds });
+          setUser((prevData) => ({ ...prevData, following: followingIds }));
+        });
+
+        const followersUnsub = onSnapshot(userFollowersQuery, (snapshot) => {
+          const followersIds = snapshot.docs.map((document) => document.id);
+          setUser((prevData) => ({ ...prevData, followers: followersIds }));
+        });
+
+        // add unsubscribers to unsubbers
+        unsubscribersRef.current.push(followingUnsub);
+        unsubscribersRef.current.push(followersUnsub);
+      } else {
+        setUser({});
+      }
+    };
+
+    setUserContext();
+    return () => {
+      unsubscribersRef.current.forEach((unsubscribeFunc) => unsubscribeFunc());
+      unsubscribersRef.current = [];
+    };
+  }, [currentUser]);
 
   const router = createBrowserRouter(
     createRoutesFromElements(

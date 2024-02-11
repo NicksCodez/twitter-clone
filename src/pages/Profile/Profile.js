@@ -46,11 +46,42 @@ const Profile = () => {
       const querySnapshot = await getDocs(queryRef);
       if (!querySnapshot.empty) {
         const profileVisitedDoc = querySnapshot.docs[0];
+        const profileVisitedDocRef = profileVisitedDoc.ref;
         const profileVisitedData = profileVisitedDoc.data();
 
+        // get the following and followers collections snapshots from the doc
+        const profileVisitedFollowingCollection = collection(
+          profileVisitedDocRef,
+          'following'
+        );
+        const profileVisitedFollowersCollection = collection(
+          profileVisitedDocRef,
+          'followers'
+        );
+
+        const profVisFollowingQuery = query(profileVisitedFollowingCollection);
+        const profVisFollowersQuery = query(profileVisitedFollowersCollection);
+
+        const profVisFollowingSnap = getDocs(profVisFollowingQuery);
+        const profVisFollowersSnap = getDocs(profVisFollowersQuery);
+
+        const [following, followers] = await Promise.all([
+          profVisFollowingSnap,
+          profVisFollowersSnap,
+        ]);
+
+        const followingIds = following.docs.map((document) => document.id);
+        const followersIds = followers.docs.map((document) => document.id);
+
+        profileVisitedData.following = followingIds || [];
+        profileVisitedData.followers = followersIds || [];
+
+        // set Profile Visited to both profile document data and following and followers subcollections docs
         setProfileVisited(profileVisitedData);
         if (user.following && user.following.includes(profileVisitedData.uid)) {
           setIsFollowed(true);
+        } else {
+          setIsFollowed(false);
         }
       }
       setIsLoading(false);

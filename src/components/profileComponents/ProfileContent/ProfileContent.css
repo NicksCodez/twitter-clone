@@ -35,6 +35,11 @@
   justify-content: center;
 }
 
+#profile-page-buttons button.unfollowed {
+  background-color: var(--clr-bg-follow);
+  color: var(--clr-font-follow);
+}
+
 #profile-page-buttons button.svg-wrapper {
   min-height: 34px;
   min-width: 34px;

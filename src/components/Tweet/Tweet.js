@@ -51,6 +51,7 @@ const Tweet = forwardRef(({ element }, ref) => {
   const [retweetInProgress, setRetweetInProgress] = useState(false);
 
   // states used for debounce
+  // ! change to refs, states don't make sense here
   const [lastLikeAction, setLastLikeAction] = useState(Date.now());
   const [lastBookmarkAction, setLastBookmarkAction] = useState(Date.now());
   const [lastRetweetAction, setLastRetweetAction] = useState(Date.now());

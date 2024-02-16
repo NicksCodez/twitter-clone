@@ -48,6 +48,8 @@ const Profile = () => {
         const profileVisitedDoc = querySnapshot.docs[0];
         const profileVisitedDocRef = profileVisitedDoc.ref;
         const profileVisitedData = profileVisitedDoc.data();
+        // add documentId
+        profileVisitedData.docId = profileVisitedDoc.id;
 
         // get the following and followers collections snapshots from the doc
         const profileVisitedFollowingCollection = collection(
@@ -78,7 +80,10 @@ const Profile = () => {
 
         // set Profile Visited to both profile document data and following and followers subcollections docs
         setProfileVisited(profileVisitedData);
-        if (user.following && user.following.includes(profileVisitedData.uid)) {
+        if (
+          user.following &&
+          user.following.includes(profileVisitedData.docId)
+        ) {
           setIsFollowed(true);
         } else {
           setIsFollowed(false);

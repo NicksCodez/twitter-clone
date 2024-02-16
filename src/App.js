@@ -34,6 +34,7 @@ import SetupProfile from './pages/SetupProfile/SetupProfile';
 import EditProfile from './pages/EditProfile/EditProfile';
 import Logout from './pages/Logout/Logout';
 import Bookmarks from './pages/Bookmarks/Bookmarks';
+import ProfileFollowing from './pages/ProfileFollowing/ProfileFollowing';
 
 // context providers
 // import { useAppContext } from './contextProvider/ContextProvider';
@@ -46,6 +47,7 @@ import {
 import { resizeHandler } from './utils/functions';
 
 const App = () => {
+  // context
   const { setViewportWidth } = useViewportContext();
   const { setUser } = useUserContext();
 
@@ -156,6 +158,7 @@ const App = () => {
           <Route path="/home" element={<Home />} />
           <Route path="/explore" element={<Explore />} />
           <Route path="/:tag" element={<Profile />} />
+          <Route path="/:tag/:mode" element={<ProfileFollowing />} />
           <Route path="/compose/tweet" element={<ComposeTweet />} />
           <Route path="/settings/profile" element={<EditProfile />} />
           <Route path="/i/bookmarks" element={<Bookmarks />} />

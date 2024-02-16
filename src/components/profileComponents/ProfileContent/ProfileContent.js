@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 // firestore
 import {
@@ -55,6 +55,7 @@ const ProfileContent = ({ profileVisited, isOwnProfile, isFollowed, tag }) => {
   });
   const [isScrollableLoading, setIsScrollableLoading] = useState(true);
   const [tabSelected, setTabSelected] = useState('tweets');
+  const navigate = useNavigate();
 
   // logged in user
   const { user } = useUserContext();
@@ -254,7 +255,7 @@ const ProfileContent = ({ profileVisited, isOwnProfile, isFollowed, tag }) => {
                   className={`u-round ${!isFollowed ? 'unfollowed' : ''}`}
                   onClick={debounce(
                     () => {
-                      followClickHandler(user, profileVisited);
+                      followClickHandler(user, profileVisited, navigate);
                     },
                     500,
                     lastFollowButtonClickRef.current,
@@ -646,33 +647,64 @@ const processTweets = async (querySnapshot) => {
   return [docsToModify, docsToDeleteIds, docsToAdd];
 };
 
-const followClickHandler = async (loggedUser, profileVisited) => {
-  console.log('called follow click handler', { loggedUser });
-  // check if loggedUser already follows profileVisited
-  // if not, follow profileVisited
-  // if yes, unfollowProfileVisited
+export const followClickHandler = async (
+  loggedUser,
+  profileVisited,
+  navigate
+) => {
+  if (auth.currentUser) {
+    // only run if user is logged in
+    console.log('called follow click handler', { loggedUser });
+    // check if loggedUser already follows profileVisited
+    // if not, follow profileVisited
+    // if yes, unfollowProfileVisited
 
-  // first, get loggedUser doc ref
-  const usersCollection = collection(firestore, 'users');
-  const userQuery = query(
-    usersCollection,
-    where('uid', '==', auth.currentUser.uid)
-  );
-  const userSnapshot = await getDocs(userQuery);
-  const userDocRef = userSnapshot.docs[0].ref;
+    // first, get loggedUser doc ref
+    const usersCollection = collection(firestore, 'users');
+    const userQuery = query(
+      usersCollection,
+      where('uid', '==', auth.currentUser.uid)
+    );
+    const userSnapshot = await getDocs(userQuery);
+    const userDocRef = userSnapshot.docs[0].ref;
 
-  // define following collection inside user doc
-  const followingCollection = collection(userDocRef, 'following');
+    // define following collection inside user doc
+    const followingCollection = collection(userDocRef, 'following');
 
-  if (loggedUser.following.includes(profileVisited.uid)) {
-    // to unfollow, delete doc with same id as profileVisited uid
-    deleteDoc(doc(followingCollection, profileVisited.uid));
+    if (loggedUser.following.includes(profileVisited.docId)) {
+      // to unfollow, delete doc with same id as profileVisited uid
+      deleteDoc(doc(followingCollection, profileVisited.docId));
+      // also delete follower doc from profileVisited
+      deleteDoc(
+        doc(
+          firestore,
+          `users/${profileVisited.docId}/followers/${userSnapshot.docs[0].id}`
+        )
+      );
+    } else {
+      console.log(
+        'before setDoc ',
+        { followingCollection },
+        { profileVisited }
+      );
+      // to follow, create doc with same id as profileVisited uid
+      setDoc(doc(followingCollection, profileVisited.docId), {
+        createdAt: serverTimestamp(),
+      });
+      // also create doc in profileVisited followers
+      setDoc(
+        doc(
+          firestore,
+          `users/${profileVisited.docId}/followers/${userSnapshot.docs[0].id}`
+        ),
+        {
+          createdAt: serverTimestamp(),
+        }
+      );
+    }
   } else {
-    console.log('before setDoc ', { followingCollection });
-    // to follow, create doc with same id as profileVisited uid
-    setDoc(doc(followingCollection, profileVisited.uid), {
-      createdAt: serverTimestamp(),
-    });
+    // no user logged in, redirect to log in page
+    navigate('/i/flow/login');
   }
 };
 

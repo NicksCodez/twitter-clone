@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Form, Link, Navigate, redirect, useNavigate } from 'react-router-dom';
+import { Form, Link, redirect, useNavigate } from 'react-router-dom';
 
 // css
 import './SignUp.css';
@@ -296,7 +296,7 @@ const SignUp = () => {
 };
 
 // form action
-export const signUpFormAction = async ({ request, navigate }) => {
+export const signUpFormAction = async ({ request }) => {
   const data = await request.formData();
 
   const name = data.get('name');
@@ -326,8 +326,6 @@ export const signUpFormAction = async ({ request, navigate }) => {
       bio: '',
       createdAt: serverTimestamp(),
       externalLink: '',
-      followers: [],
-      following: [],
       headerImg: '',
       location: '',
       pinnedTweetId: -1,

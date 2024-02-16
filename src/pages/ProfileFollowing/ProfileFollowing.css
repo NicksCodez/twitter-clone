@@ -1,0 +1,38 @@
+.profile-following {
+  position: fixed;
+  top: 0px;
+  bottom: 54.5px;
+  width: 100%;
+}
+
+.profile-following-header svg {
+  width: 20px;
+  height: 20px;
+  display: block;
+}
+
+.profile-following-header span {
+  display: block;
+}
+
+.profile-following-header .minW {
+  min-width: 56px;
+}
+
+.profile-following-header span:last-child {
+  font-size: var(--fs-mili);
+  line-height: var(--lh-mili);
+  font-weight: 400;
+  color: var(--clr-font-secondary);
+}
+
+.profile-following-header span:first-child {
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--clr-font-primary);
+  line-height: var(--lh-base);
+}
+
+.profile-following > .wrapper {
+  height: calc(100% - 106px);
+}

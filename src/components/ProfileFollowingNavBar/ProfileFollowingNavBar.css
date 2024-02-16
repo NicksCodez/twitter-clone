@@ -1,0 +1,42 @@
+.profile-following-navbar {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: var(--clr-font-secondary);
+  font-weight: 700;
+  height: 53px;
+  overflow-x: scroll;
+}
+
+.profile-following-navbar .button-wrapper a {
+  width: max-content;
+  display: flex;
+  justify-content: center;
+  padding: 0px 16px;
+}
+
+.profile-following-navbar a > div {
+  width: fit-content;
+  padding: 16px 0;
+  position: relative;
+}
+
+.profile-following-navbar a div span {
+  display: block;
+  pointer-events: none;
+}
+
+.profile-following-navbar .blue-underscore {
+  height: 4px;
+  width: 100%;
+  background-color: var(--clr-bg-blue);
+  visibility: hidden;
+  position: absolute;
+  bottom: 0px;
+}
+
+.profile-following-navbar .active * {
+  visibility: visible;
+  color: var(--clr-font-primary);
+}

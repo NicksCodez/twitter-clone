@@ -1,5 +1,5 @@
-import React, { forwardRef, useEffect, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import React, { forwardRef, useContext, useEffect, useState } from 'react';
+import { Link, Navigate, useNavigate } from 'react-router-dom';
 
 // css
 import './Tweet.css';
@@ -23,6 +23,8 @@ import { auth, firestore } from '../../firebase';
 // utils
 import svgs from '../../utils/svgs';
 import { debounce, formatTimeAgo } from '../../utils/functions';
+import { useUserContext } from '../../contextProvider/ContextProvider';
+import { followClickHandler } from '../profileComponents/ProfileContent/ProfileContent';
 
 const Tweet = forwardRef(({ element }, ref) => {
   const {
@@ -31,6 +33,7 @@ const Tweet = forwardRef(({ element }, ref) => {
     userProfilePicture: profileImg,
     userName: name,
     userTag: tag,
+    userDocId,
     createdAt,
     text,
     repliesCounte: replies,
@@ -44,6 +47,13 @@ const Tweet = forwardRef(({ element }, ref) => {
     isRetweeted,
   } = element;
   const navigate = useNavigate();
+
+  // logged in user tag and following, if it exists
+  const loggedUserTag = useUserContext().user?.tag;
+  const loggedUserFollowing = useUserContext().user?.following;
+
+  // state to show or hide options div
+  const [isOptionsDivVisible, setIsOptionsDivVisible] = useState(false);
 
   // states used to keep track of action in progress
   const [likeInProgress, setLikeInProgress] = useState(false);
@@ -173,7 +183,7 @@ const Tweet = forwardRef(({ element }, ref) => {
                 <span>{formatTimeAgo(createdAt)}</span>
               </div>
             </div>
-            <button type="button">
+            <button type="button" onClick={() => setIsOptionsDivVisible(true)}>
               <svg viewBox="0 0 24 24">
                 <path d={svgs.moreNoOutline} />
               </svg>
@@ -255,6 +265,77 @@ const Tweet = forwardRef(({ element }, ref) => {
           </div>
         </div>
       </div>
+
+      {
+        // eslint-disable-next-line no-nested-ternary
+        isOptionsDivVisible ? (
+          auth.currentUser?.uid ? (
+            <div className="tweet-options">
+              <button
+                type="button"
+                className="close-options"
+                aria-label="close-options"
+                onClick={() => setIsOptionsDivVisible(false)}
+              />
+              <div className="wrapper">
+                <div className="buttons">
+                  {loggedUserTag && loggedUserTag === tag && (
+                    <div>
+                      <button
+                        type="button"
+                        className="delete"
+                        onClick={() => deleteClickHandler(docRef)}
+                      >
+                        <svg viewBox="0 0 24 24">
+                          <path d={svgs.delete} />
+                        </svg>
+                        <span>Delete</span>
+                      </button>
+                    </div>
+                  )}
+                  {(!loggedUserTag || loggedUserTag !== tag) && (
+                    <div>
+                      <button
+                        type="button"
+                        onClick={() =>
+                          followClickHandler(
+                            { following: loggedUserFollowing },
+                            { docId: userDocId },
+                            navigate
+                          )
+                        }
+                      >
+                        <svg viewBox="0 0 24 24">
+                          <path d={svgs.follow} />
+                        </svg>
+                        <span>
+                          {`${
+                            loggedUserFollowing?.includes(userDocId)
+                              ? 'Unfollow'
+                              : 'Follow'
+                          }`}{' '}
+                          @{tag}
+                        </span>
+                      </button>
+                    </div>
+                  )}
+                  <div>
+                    <button
+                      type="button"
+                      className="cancel"
+                      onClick={() => setIsOptionsDivVisible(false)}
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          ) : (
+            <Navigate to="/i/flow/login" />
+          )
+        ) : null
+      }
     </div>
   );
 });
@@ -457,6 +538,12 @@ const mockTweetInteraction = (event, type) => {
     spanElement.textContent = parseInt(spanElement.textContent, 10) - 1;
     svgPath.setAttribute('d', oldPath);
   }
+};
+
+const deleteClickHandler = (docRef) => {
+  // ? maybe add some visual feedback while doc is deleting
+  const docToDelete = doc(firestore, `tweets/${docRef}`);
+  deleteDoc(docToDelete);
 };
 
 export default Tweet;

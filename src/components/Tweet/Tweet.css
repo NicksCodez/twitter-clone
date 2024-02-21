@@ -158,3 +158,55 @@ svg {
 .tweet-action.retweet.active {
   color: rgb(0, 186, 124);
 }
+
+.tweet-options {
+  position: fixed;
+  top: 0px;
+  bottom: 0px;
+  left: 0px;
+  right: 0px;
+  background-color: var(--clr-bg-sidebar-blur);
+  z-index: 4;
+  display: flex;
+  flex-direction: column;
+}
+
+.tweet-options > button {
+  flex-grow: 1;
+}
+
+.tweet-options > .wrapper {
+  background-color: inherit;
+}
+
+.tweet-options .buttons {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  background-color: var(--clr-bg-base);
+  border-top-left-radius: 16px;
+  border-top-right-radius: 16px;
+}
+
+.tweet-options .buttons div {
+  padding: 16px 12px;
+}
+
+.tweet-options .buttons div button {
+  display: flex;
+  gap: 12px;
+  font-weight: 700;
+}
+
+.tweet-options .buttons div button.cancel {
+  border: 1px solid var(--clr-bg-profile-header-pic);
+  border-radius: 9999px;
+  width: 100%;
+  height: 42px;
+  justify-content: center;
+  align-items: center;
+}
+
+.tweet-options .buttons div button.delete {
+  color: #f4212e;
+}

@@ -102,6 +102,7 @@ const updateTweets = (
           tweetId: tweet.tweetId,
           type: tweet.type,
           userId: tweet.userId,
+          userDocId: tweet.userDocId,
           bookmarksCount: docInMap.bookmarksCount,
           imageLink: docInMap.imageLink,
           isBookmarked: docInMap.isBookmarked,
@@ -145,6 +146,7 @@ const updateTweets = (
           tweetId: updatedTweets[index].tweetId,
           type: updatedTweets[index].type,
           userId: updatedTweets[index].userId,
+          userDocId: updatedTweets[index].userDocId,
           bookmarksCount: doc.bookmarksCount,
           imageLink: doc.imageLink,
           isBookmarked: doc.isBookmarked,
@@ -256,7 +258,10 @@ const getUserData = async (userDataRef) => {
   );
   const userDataSnapshot = await getDocs(usersQueryRef);
 
-  return userDataSnapshot.docs[0]?.data() || {};
+  return {
+    ...userDataSnapshot.docs[0]?.data(),
+    userDocId: userDataSnapshot.docs[0]?.id,
+  };
 };
 
 // Function to format timestamp

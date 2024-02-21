@@ -447,6 +447,7 @@ const processTweetsQuerySnapshot = async (querySnapshot) => {
             userName: userData.name,
             userProfilePicture: userData.profileImg,
             userTag: userData.tag,
+            userDocId: userData.userDocId,
             ...interactionsData,
             reposterData,
             repostTime,

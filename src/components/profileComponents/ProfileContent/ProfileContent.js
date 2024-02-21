@@ -45,6 +45,7 @@ import {
   getUserData,
   updateTweets,
 } from '../../../utils/functions';
+import CommonFollowers from '../../CommonFollowers/CommonFollowers';
 
 const ProfileContent = ({ profileVisited, isOwnProfile, isFollowed, tag }) => {
   const [tweets, setTweets] = useState([]);
@@ -352,18 +353,11 @@ const ProfileContent = ({ profileVisited, isOwnProfile, isFollowed, tag }) => {
               </Link>
             </div>
             {!isOwnProfile && (
-              <div id="profile-page-common-followers">
-                <div>
-                  <img src={DefaultProfile} alt="profile" className="u-round" />
-                  <img src={DefaultProfile} alt="profile" className="u-round" />
-                  <img src={DefaultProfile} alt="profile" className="u-round" />
-                </div>
-                <div>
-                  <span>
-                    Followed by this dude, this dude and 24 others you follow
-                  </span>
-                </div>
-              </div>
+              <CommonFollowers
+                tag={tag}
+                profileVisited={{ ref: profileVisited.docRef }}
+                user={user}
+              />
             )}
             <div id="profile-page-tweet-filters">
               <div className="button-wrapper">

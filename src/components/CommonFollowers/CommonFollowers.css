@@ -1,0 +1,40 @@
+#profile-page-common-followers > a {
+  display: flex;
+  align-items: center;
+}
+
+#profile-page-common-followers > a > div:first-child {
+  position: relative;
+  display: flex;
+}
+
+#profile-page-common-followers img {
+  width: 18px;
+  height: 18px;
+  position: relative;
+}
+
+#profile-page-common-followers img {
+  margin-left: -12px;
+  border: 1px solid var(--clr-bg-base);
+}
+
+#profile-page-common-followers img:first-child {
+  margin-left: 0px;
+  z-index: 3;
+}
+
+#profile-page-common-followers img:nth-child(2) {
+  z-index: 2;
+}
+
+#profile-page-common-followers img:last-child {
+  z-index: 1;
+}
+
+#profile-page-common-followers > a > div:last-child {
+  margin-left: 12px;
+  color: var(--clr-font-secondary);
+  font-size: var(--fs-mili);
+  line-height: var(--lh-mili);
+}

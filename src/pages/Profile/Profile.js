@@ -77,6 +77,7 @@ const Profile = () => {
 
         profileVisitedData.following = followingIds || [];
         profileVisitedData.followers = followersIds || [];
+        profileVisitedData.docRef = profileVisitedDocRef;
 
         // set Profile Visited to both profile document data and following and followers subcollections docs
         setProfileVisited(profileVisitedData);

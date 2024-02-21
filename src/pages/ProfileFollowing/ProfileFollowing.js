@@ -285,7 +285,7 @@ const getUsersData = async (
   }
 };
 
-const getCommonFollowers = async (
+export const getCommonFollowers = async (
   user,
   profileVisited,
   lastRetrievedUser,

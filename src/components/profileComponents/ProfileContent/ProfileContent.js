@@ -247,7 +247,7 @@ const ProfileContent = ({ profileVisited, isOwnProfile, isFollowed, tag }) => {
       </div>
 
       <div id="profile-page-buttons">
-        {profileVisited && (
+        {profileVisited.uid && (
           <div>
             <div className="button-wrapper">
               {!isOwnProfile && (
@@ -285,25 +285,27 @@ const ProfileContent = ({ profileVisited, isOwnProfile, isFollowed, tag }) => {
           </div>
         )}
         <div className="profile-picture-wrapper u-round">
-          {profileVisited && (
+          {profileVisited.profileImg ? (
             <img
               src={profileVisited.profileImg}
               alt="profile"
               className="u-round"
             />
+          ) : (
+            <div className="u-round img-placeholder" />
           )}
         </div>
       </div>
       <div className="wrapper-padded">
         <div>
           <div id="profile-page-name">
-            {profileVisited ? profileVisited.name : `@${tag}`}
+            {profileVisited.name ? profileVisited.name : `@${tag}`}
           </div>
           <div id="profile-page-tag">
-            {profileVisited && `@${profileVisited.tag}`}
+            {profileVisited.uid && `@${profileVisited.tag}`}
           </div>
         </div>
-        {profileVisited ? (
+        {profileVisited.uid ? (
           <div className="wrapper">
             <div id="profile-page-description">
               {profileVisited.bio.length > 0 && profileVisited.bio}

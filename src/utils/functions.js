@@ -46,6 +46,28 @@ const processTweetText = (text) => {
   return processedText;
 };
 
+// function to get trends mentioned in a tweet formatted text string
+const getTrendsMentioned = (text) => {
+  // regular expression that matches hashtags (#...) starting with < and ending with >
+  // match this pattern because they are wrapped in <a> tags
+  const hashtagRegex = /(>)([#][A-Za-z0-9_]+)(<)/g;
+  return (
+    text.match(hashtagRegex)?.map((tag) => tag.substring(2, tag.length - 1)) ||
+    []
+  );
+};
+
+// function to get users mentioned in a tweet formatted text string
+const getUsersMentioned = (text) => {
+  // regular expression that matches users (@...) starting with < and ending with >
+  // match this pattern because they are wrapped in <a> tags
+  const usersRegex = /(>)([@][A-Za-z0-9_]+)(<)/g;
+  return (
+    text.match(usersRegex)?.map((user) => user.substring(2, user.length - 1)) ||
+    []
+  );
+};
+
 const chunkArray = (array, chunkSize) => {
   // function to chunk array into multiple arrays of smaller size
   const chunks = [];
@@ -296,4 +318,6 @@ export {
   getUserData,
   formatTimeAgo,
   sortDocsCreatedAtDesc,
+  getTrendsMentioned,
+  getUsersMentioned,
 };

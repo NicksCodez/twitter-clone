@@ -24,7 +24,7 @@ const Profile = () => {
   // const { user } = useAppContext();
   const { user } = useUserContext();
   const { tag } = useParams();
-  const [profileVisited, setProfileVisited] = useState(null);
+  const [profileVisited, setProfileVisited] = useState({});
   const [isOwnProfile, setIsOwnProfile] = useState(false);
   const [isFollowed, setIsFollowed] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
@@ -113,9 +113,9 @@ const Profile = () => {
   // build middle element
   const middleElement = (
     <div className="wrapper-col">
-      {!profileVisited && <span>Profile</span>}
-      {profileVisited && <span>{profileVisited.name}</span>}
-      {profileVisited && <span>{profileVisited.tweetCount} Tweets</span>}
+      {!profileVisited.uid && <span>Profile</span>}
+      {profileVisited.name && <span>{profileVisited.name}</span>}
+      {profileVisited.uid && <span>{profileVisited.tweetCount} Tweets</span>}
     </div>
   );
 

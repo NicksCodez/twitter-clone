@@ -1,11 +1,12 @@
 // react
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 
 // css
 import './Explore.css';
 
 // components
 import { Link } from 'react-router-dom';
+import { collection, getDocs, limit, orderBy, query } from 'firebase/firestore';
 import Sidebar from '../../components/Sidebar/Sidebar';
 import FeatherButton from '../../components/FeatherButton/FeatherButton';
 import Trends from '../../components/Trends/Trends';
@@ -23,10 +24,16 @@ import { clickHandlerAccount } from '../../utils/functions';
 // images
 import DefaultProfile from '../../assets/images/default_profile.png';
 import PageHeader from '../../components/PageHeader/PageHeader';
+import { firestore } from '../../firebase';
+import TrendingItem from '../../components/TrendingItem/TrendingItem';
 
 const Explore = () => {
   // const { viewportWidth } = useAppContext();
   const { viewportWidth } = useViewportContext();
+
+  // store trends
+  const [trends, setTrends] = useState([]);
+  const [trendsLoading, setTrendsLoading] = useState(true);
 
   useEffect(() => {
     // search input events
@@ -37,6 +44,9 @@ const Explore = () => {
     // back button events
     const back = document.getElementById('explore-header-back');
     back.addEventListener('click', clickHandlerBack);
+
+    // load trends
+    loadTrending(setTrends, setTrendsLoading);
 
     return () => {
       search.removeEventListener('click', clickHandlerSearch);
@@ -83,7 +93,6 @@ const Explore = () => {
 
   return (
     <div id="explore">
-      {/* <ExploreHeader /> */}
       <div id="explore-header">
         <PageHeader
           leftElements={[backButtonElement, profilePictureElement]}
@@ -93,7 +102,27 @@ const Explore = () => {
       </div>
       <Sidebar />
       {viewportWidth < 500 ? <FeatherButton /> : null}
-      <Trends />
+      {trendsLoading ? (
+        <div>Loading</div>
+      ) : (
+        <div className="trends">
+          <h2>Trends for you</h2>
+          {trends.length > 0 ? (
+            trends.map((trend) => (
+              <TrendingItem
+                key={trend.id}
+                trend={trend.id}
+                tweetsNumber={trend.totalTweets}
+              />
+            ))
+          ) : (
+            <div>There seem to be no trends yet</div>
+          )}
+          <Link to="/trends" className="show-more">
+            <span>Show more</span>
+          </Link>
+        </div>
+      )}
       <div className="separator-wrapper">
         <div className="separator" />
       </div>
@@ -130,6 +159,27 @@ const clickHandlerBack = () => {
   // show feather icon
   const featherButton = document.getElementById('feather-button');
   featherButton.style.display = 'flex';
+};
+
+const loadTrending = async (setTrends, setTrendsLoading) => {
+  // set trends state to first 5 most tweeted trends
+  const trendsCollection = collection(firestore, 'trends');
+  const trendsQuery = query(trendsCollection, orderBy('totalTweets'), limit(5));
+
+  const trendsSnapshot = await getDocs(trendsQuery);
+
+  if (trendsSnapshot.empty) {
+    // no trends
+    setTrends([]);
+  } else {
+    const trends = trendsSnapshot.docs.map((doc) => ({
+      id: doc.id,
+      totalTweets: doc.data().totalTweets,
+    }));
+    setTrends(trends);
+  }
+
+  setTrendsLoading(false);
 };
 
 export default Explore;

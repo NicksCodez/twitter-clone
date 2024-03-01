@@ -10,8 +10,12 @@ import { v4 as uuidv4 } from 'uuid';
 import {
   collection,
   doc,
+  getDoc,
+  getDocs,
+  query,
   runTransaction,
   serverTimestamp,
+  where,
 } from 'firebase/firestore';
 import { auth, firestore, storage } from '../../firebase';
 
@@ -28,7 +32,11 @@ import { useViewportContext } from '../../contextProvider/ContextProvider';
 
 // utils
 import svgs from '../../utils/svgs';
-import { capitalize } from '../../utils/functions';
+import {
+  capitalize,
+  getTrendsMentioned,
+  getUsersMentioned,
+} from '../../utils/functions';
 
 // images
 import DefaultProfile from '../../assets/images/default_profile.png';
@@ -145,6 +153,11 @@ const handleTweetUpload = async (event, navigate, tweetContent, files) => {
       url = await getDownloadURL(fileRef);
     }
 
+    // add trends and users mentioned to the tweet document
+    console.log({ tweetContent });
+    const trendsMentioned = getTrendsMentioned(tweetContent);
+    const usersMentioned = getUsersMentioned(tweetContent);
+
     // tweets collection
     const tweetsCollectionRef = collection(firestore, 'tweets');
     try {
@@ -167,6 +180,8 @@ const handleTweetUpload = async (event, navigate, tweetContent, files) => {
           type: 'tweet',
           userId: auth.currentUser.uid,
           imageLink: `${url || ''}`,
+          trendsMentioned,
+          usersMentioned,
         };
 
         // update total tweets
@@ -176,6 +191,14 @@ const handleTweetUpload = async (event, navigate, tweetContent, files) => {
         const newTweetDocRef = doc(tweetsCollectionRef);
         transaction.set(newTweetDocRef, tweet);
       });
+
+      if (trendsMentioned.length > 0) {
+        // if there are trends, set docs in 'trends' collection
+        await updateTrends(trendsMentioned);
+      }
+
+      // update user total tweets
+      updateTotalTweets();
     } catch (error) {
       console.error(error);
     }
@@ -183,6 +206,64 @@ const handleTweetUpload = async (event, navigate, tweetContent, files) => {
     return navigate('/home');
   }
   return navigate('/i/flow/login');
+};
+
+const updateTrends = async (trendsMentioned) => {
+  // array of promises
+  const promises = trendsMentioned.map((trendMentioned) => {
+    // reference to trend document
+    const trendDocRef = doc(firestore, `trends/${trendMentioned}`);
+
+    return new Promise((resolve, reject) => {
+      try {
+        runTransaction(firestore, async (transaction) => {
+          // get the trend doc data
+          const trendDoc = await transaction.get(trendDocRef);
+
+          if (!trendDoc.exists()) {
+            // no doc, make new one
+            transaction.set(trendDocRef, {
+              totalTweets: 1,
+              lastTweeted: serverTimestamp(),
+            });
+          } else {
+            // doc exists, get its data and update
+            const newTotalTweets = trendDoc.data().totalTweets + 1;
+            transaction.update(trendDocRef, {
+              totalTweets: newTotalTweets,
+              lastTweeted: serverTimestamp(),
+            });
+          }
+        }).then((resolved) => {
+          resolve();
+        });
+      } catch (error) {
+        console.error({ error });
+        reject();
+      }
+    });
+  });
+
+  await Promise.all(promises);
+};
+
+const updateTotalTweets = async () => {
+  // get ref to user doc
+  const { uid } = auth.currentUser;
+
+  const usersCollection = collection(firestore, 'users');
+  const userQueryRef = query(usersCollection, where('uid', '==', uid));
+  const userDocSnap = await getDocs(userQueryRef);
+  const userDocRef = userDocSnap.docs[0].ref;
+
+  // update user total tweets in transaction
+  await runTransaction(firestore, async (transaction) => {
+    const userDoc = await transaction.get(userDocRef);
+    const userData = userDoc.data();
+    const { tweetCount } = userData;
+
+    await transaction.update(userDocRef, { tweetCount: tweetCount + 1 });
+  });
 };
 
 export default ComposeTweet;

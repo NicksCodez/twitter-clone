@@ -127,7 +127,6 @@ const App = () => {
         // attach listeners to user following and followers data
         const followingUnsub = onSnapshot(userFollowingQuery, (snapshot) => {
           const followingIds = snapshot.docs.map((document) => document.id);
-          console.log({ followingIds });
           setUser((prevData) => ({ ...prevData, following: followingIds }));
         });
 

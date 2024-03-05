@@ -1,5 +1,5 @@
 import React, { forwardRef } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 // context provider
 import { useUserContext } from '../../contextProvider/ContextProvider';
@@ -19,15 +19,19 @@ const UserCard = forwardRef(({ element }, ref) => {
 
   return (
     <div className="user-card" ref={ref}>
-      <div className="picture">
-        <img src={profileImg} alt="profile" />
-      </div>
+      <Link to={`/${tag}`}>
+        <div className="picture">
+          <img src={profileImg} alt="profile" />
+        </div>
+      </Link>
       <div className="content">
         <div>
-          <div>
-            <div className="title">{name}</div>
-            <div className="subtitle">@{tag}</div>
-          </div>
+          <Link to={`/${tag}`}>
+            <div>
+              <div className="title">{name}</div>
+              <div className="subtitle">@{tag}</div>
+            </div>
+          </Link>
           <div className="action">
             <button
               type="button"
@@ -42,7 +46,9 @@ const UserCard = forwardRef(({ element }, ref) => {
             </button>
           </div>
         </div>
-        <div className="details">{bio}</div>
+        <Link to={`/${tag}`}>
+          <div className="details">{bio}</div>
+        </Link>
       </div>
     </div>
   );

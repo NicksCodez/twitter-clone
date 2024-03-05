@@ -13,7 +13,7 @@ import {
   startAfter,
   where,
 } from 'firebase/firestore';
-import { auth, firestore } from '../../firebase';
+import { firestore } from '../../firebase';
 
 // context
 import { useUserContext } from '../../contextProvider/ContextProvider';

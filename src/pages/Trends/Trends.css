@@ -1,0 +1,28 @@
+#trends {
+  border-bottom: 1px solid var();
+}
+
+#trends-header {
+  z-index: 3;
+}
+
+#trends-header svg {
+  width: 20px;
+  height: 20px;
+  display: block;
+}
+
+#trends-header span {
+  display: block;
+}
+
+#trends-header .minW {
+  min-width: 56px;
+}
+
+#trends-header span {
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--clr-font-primary);
+  line-height: var(--lh-base);
+}

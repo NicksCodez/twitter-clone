@@ -6,12 +6,12 @@ import './Explore.css';
 
 // components
 import { Link } from 'react-router-dom';
-import { collection, getDocs, limit, orderBy, query } from 'firebase/firestore';
 import Sidebar from '../../components/Sidebar/Sidebar';
 import FeatherButton from '../../components/FeatherButton/FeatherButton';
-import Trends from '../../components/Trends/Trends';
 import People from '../../components/People/People';
 import Searchbar from '../../components/Searchbar/SearchBar';
+import PageHeader from '../../components/PageHeader/PageHeader';
+import TrendingItem from '../../components/TrendingItem/TrendingItem';
 
 // context provider
 // import { useAppContext } from '../../contextProvider/ContextProvider';
@@ -19,13 +19,10 @@ import { useViewportContext } from '../../contextProvider/ContextProvider';
 
 // utils
 import svgs from '../../utils/svgs';
-import { clickHandlerAccount } from '../../utils/functions';
+import { clickHandlerAccount, loadTrending } from '../../utils/functions';
 
 // images
 import DefaultProfile from '../../assets/images/default_profile.png';
-import PageHeader from '../../components/PageHeader/PageHeader';
-import { firestore } from '../../firebase';
-import TrendingItem from '../../components/TrendingItem/TrendingItem';
 
 const Explore = () => {
   // const { viewportWidth } = useAppContext();
@@ -46,7 +43,7 @@ const Explore = () => {
     back.addEventListener('click', clickHandlerBack);
 
     // load trends
-    loadTrending(setTrends, setTrendsLoading);
+    loadTrending(setTrends, setTrendsLoading, 5);
 
     return () => {
       search.removeEventListener('click', clickHandlerSearch);
@@ -118,7 +115,7 @@ const Explore = () => {
           ) : (
             <div>There seem to be no trends yet</div>
           )}
-          <Link to="/trends" className="show-more">
+          <Link to="/i/trends" className="show-more">
             <span>Show more</span>
           </Link>
         </div>
@@ -159,27 +156,6 @@ const clickHandlerBack = () => {
   // show feather icon
   const featherButton = document.getElementById('feather-button');
   featherButton.style.display = 'flex';
-};
-
-const loadTrending = async (setTrends, setTrendsLoading) => {
-  // set trends state to first 5 most tweeted trends
-  const trendsCollection = collection(firestore, 'trends');
-  const trendsQuery = query(trendsCollection, orderBy('totalTweets'), limit(5));
-
-  const trendsSnapshot = await getDocs(trendsQuery);
-
-  if (trendsSnapshot.empty) {
-    // no trends
-    setTrends([]);
-  } else {
-    const trends = trendsSnapshot.docs.map((doc) => ({
-      id: doc.id,
-      totalTweets: doc.data().totalTweets,
-    }));
-    setTrends(trends);
-  }
-
-  setTrendsLoading(false);
 };
 
 export default Explore;

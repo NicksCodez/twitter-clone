@@ -249,12 +249,13 @@ export const tweetsLoader = async (
 ) => {
   // variable to store unsubsribe function
   let unsubscribe = [];
-
+  console.log('tweetsLoader');
   // get id's of tweets, then attach listeners to them
   // this prevents tweet duplication, reordering, disappearance that would happen if querySnapshot was used directly with query
   // e.g. a query that gets the first 25 docs will return many changes if one or more of those docs is deleted or if docs are added to the beginning
   try {
     const querySnapshot = await getDocs(queryRef);
+    console.log('trecut de lin 257');
 
     // if querySnapshot has no docs, most likely last tweet was seen
     if (!querySnapshot.docs[0] && setSeenLastTweet) {
@@ -262,8 +263,8 @@ export const tweetsLoader = async (
       return [];
     }
 
-    const tweetIds = querySnapshot.docs.map((doc) => ({
-      originalTweetId: doc.data().tweetId,
+    const tweetIds = querySnapshot.docs.map((document) => ({
+      originalTweetId: document.data().tweetId,
     }));
     unsubscribe = attachListenersToTweets(
       tweetIds,

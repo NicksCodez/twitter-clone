@@ -1,4 +1,11 @@
-import { collection, getDocs, query, where } from 'firebase/firestore';
+import {
+  collection,
+  getDocs,
+  limit,
+  orderBy,
+  query,
+  where,
+} from 'firebase/firestore';
 import { auth, firestore } from '../firebase';
 
 // function to set width to viewport width
@@ -306,6 +313,32 @@ const formatTimeAgo = (timestamp) => {
   return timestamp.toDate().toLocaleDateString('en-US', options);
 };
 
+// function to load trending items
+const loadTrending = async (setTrends, setTrendsLoading, limitSize) => {
+  // set trends state to first 5 most tweeted trends
+  const trendsCollection = collection(firestore, 'trends');
+  const trendsQuery = query(
+    trendsCollection,
+    orderBy('totalTweets'),
+    limit(limitSize)
+  );
+
+  const trendsSnapshot = await getDocs(trendsQuery);
+
+  if (trendsSnapshot.empty) {
+    // no trends
+    setTrends([]);
+  } else {
+    const trends = trendsSnapshot.docs.map((doc) => ({
+      id: doc.id,
+      totalTweets: doc.data().totalTweets,
+    }));
+    setTrends(trends);
+  }
+
+  setTrendsLoading(false);
+};
+
 export {
   clickHandlerAccount,
   resizeHandler,
@@ -320,4 +353,5 @@ export {
   sortDocsCreatedAtDesc,
   getTrendsMentioned,
   getUsersMentioned,
+  loadTrending,
 };

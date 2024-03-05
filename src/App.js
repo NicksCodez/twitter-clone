@@ -35,6 +35,7 @@ import EditProfile from './pages/EditProfile/EditProfile';
 import Logout from './pages/Logout/Logout';
 import Bookmarks from './pages/Bookmarks/Bookmarks';
 import ProfileFollowing from './pages/ProfileFollowing/ProfileFollowing';
+import Trends from './pages/Trends/Trends';
 
 // context providers
 // import { useAppContext } from './contextProvider/ContextProvider';
@@ -157,11 +158,12 @@ const App = () => {
           <Route index element={<Navigate to="/home" replace />} />
           <Route path="/home" element={<Home />} />
           <Route path="/explore" element={<Explore />} />
-          <Route path="/:tag" element={<Profile />} />
-          <Route path="/:tag/:mode" element={<ProfileFollowing />} />
           <Route path="/compose/tweet" element={<ComposeTweet />} />
           <Route path="/settings/profile" element={<EditProfile />} />
           <Route path="/i/bookmarks" element={<Bookmarks />} />
+          <Route path="/i/trends" element={<Trends />} />
+          <Route path="/:tag" element={<Profile />} />
+          <Route path="/:tag/:mode" element={<ProfileFollowing />} />
         </Route>
 
         <Route

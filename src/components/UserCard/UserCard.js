@@ -6,7 +6,9 @@ import { useUserContext } from '../../contextProvider/ContextProvider';
 
 // css
 import './UserCard.css';
-import { followClickHandler } from '../profileComponents/ProfileContent/ProfileContent';
+
+// utils
+import { followClickHandler } from '../../utils/functions';
 
 const UserCard = forwardRef(({ element }, ref) => {
   const navigate = useNavigate();

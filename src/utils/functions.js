@@ -1,9 +1,13 @@
 import {
   collection,
+  deleteDoc,
+  doc,
   getDocs,
   limit,
   orderBy,
   query,
+  serverTimestamp,
+  setDoc,
   where,
 } from 'firebase/firestore';
 import { auth, firestore } from '../firebase';
@@ -111,7 +115,7 @@ const updateTweets = (
   if (docsToModify?.length > 0) {
     // make map for faster lookup
     const docsToModifyMap = new Map(
-      docsToModify.map((doc) => [doc.tweetId, doc])
+      docsToModify.map((document) => [document.tweetId, document])
     );
 
     // replace tweets where tweetId matches
@@ -152,16 +156,16 @@ const updateTweets = (
 
   // add new tweets
   if (docsToAdd?.length > 0) {
-    docsToAdd.forEach((doc) => {
-      // if doc with same key already exists, find it
+    docsToAdd.forEach((document) => {
+      // if document with same key already exists, find it
       const index = updatedTweets.findIndex(
-        (updatedTweet) => updatedTweet.key === doc.key
+        (updatedTweet) => updatedTweet.key === document.key
       );
       if (index === -1) {
-        // no doc with same key, can add
-        updatedTweets.push(doc);
+        // no document with same key, can add
+        updatedTweets.push(document);
       } else {
-        // doc with same key, need to replace it
+        // document with same key, need to replace it
         // ? this can happen when a document is deleted, causing the snapshot to retrieve one document from the following snapshot, which leads to duplication
         const newTweet = {
           createdAt: updatedTweets[index].createdAt,
@@ -176,18 +180,18 @@ const updateTweets = (
           type: updatedTweets[index].type,
           userId: updatedTweets[index].userId,
           userDocId: updatedTweets[index].userDocId,
-          bookmarksCount: doc.bookmarksCount,
-          imageLink: doc.imageLink,
-          isBookmarked: doc.isBookmarked,
-          isLiked: doc.isLiked,
-          isRetweeted: doc.isRetweeted,
-          likesCount: doc.likesCount,
-          repliesCount: doc.repliesCount,
-          retweetsCount: doc.retweetsCount,
-          text: doc.text,
-          userName: doc.userName,
-          userProfilePicture: doc.userProfilePicture,
-          userTag: doc.userTag,
+          bookmarksCount: document.bookmarksCount,
+          imageLink: document.imageLink,
+          isBookmarked: document.isBookmarked,
+          isLiked: document.isLiked,
+          isRetweeted: document.isRetweeted,
+          likesCount: document.likesCount,
+          repliesCount: document.repliesCount,
+          retweetsCount: document.retweetsCount,
+          text: document.text,
+          userName: document.userName,
+          userProfilePicture: document.userProfilePicture,
+          userTag: document.userTag,
         };
         updatedTweets[index] = newTweet;
       }
@@ -329,14 +333,72 @@ const loadTrending = async (setTrends, setTrendsLoading, limitSize) => {
     // no trends
     setTrends([]);
   } else {
-    const trends = trendsSnapshot.docs.map((doc) => ({
-      id: doc.id,
-      totalTweets: doc.data().totalTweets,
+    const trends = trendsSnapshot.docs.map((document) => ({
+      id: document.id,
+      totalTweets: document.data().totalTweets,
     }));
     setTrends(trends);
   }
 
   setTrendsLoading(false);
+};
+
+// click handler for 'follow button' click
+const followClickHandler = async (loggedUser, profileVisited, navigate) => {
+  if (auth.currentUser) {
+    // only run if user is logged in
+    console.log('called follow click handler', { loggedUser });
+    // check if loggedUser already follows profileVisited
+    // if not, follow profileVisited
+    // if yes, unfollowProfileVisited
+
+    // first, get loggedUser doc ref
+    const usersCollection = collection(firestore, 'users');
+    const userQuery = query(
+      usersCollection,
+      where('uid', '==', auth.currentUser.uid)
+    );
+    const userSnapshot = await getDocs(userQuery);
+    const userDocRef = userSnapshot.docs[0].ref;
+
+    // define following collection inside user doc
+    const followingCollection = collection(userDocRef, 'following');
+
+    if (loggedUser.following.includes(profileVisited.docId)) {
+      // to unfollow, delete doc with same id as profileVisited uid
+      deleteDoc(doc(followingCollection, profileVisited.docId));
+      // also delete follower doc from profileVisited
+      deleteDoc(
+        doc(
+          firestore,
+          `users/${profileVisited.docId}/followers/${userSnapshot.docs[0].id}`
+        )
+      );
+    } else {
+      console.log(
+        'before setDoc ',
+        { followingCollection },
+        { profileVisited }
+      );
+      // to follow, create doc with same id as profileVisited uid
+      setDoc(doc(followingCollection, profileVisited.docId), {
+        createdAt: serverTimestamp(),
+      });
+      // also create doc in profileVisited followers
+      setDoc(
+        doc(
+          firestore,
+          `users/${profileVisited.docId}/followers/${userSnapshot.docs[0].id}`
+        ),
+        {
+          createdAt: serverTimestamp(),
+        }
+      );
+    }
+  } else {
+    // no user logged in, redirect to log in page
+    navigate('/i/flow/login');
+  }
 };
 
 export {
@@ -354,4 +416,5 @@ export {
   getTrendsMentioned,
   getUsersMentioned,
   loadTrending,
+  followClickHandler,
 };

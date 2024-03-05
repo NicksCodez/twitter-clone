@@ -1,4 +1,4 @@
-import React, { forwardRef, useContext, useEffect, useState } from 'react';
+import React, { forwardRef, useEffect, useState } from 'react';
 import { Link, Navigate, useNavigate } from 'react-router-dom';
 
 // css
@@ -6,11 +6,9 @@ import './Tweet.css';
 
 // firebase
 import {
-  QuerySnapshot,
   collection,
   deleteDoc,
   doc,
-  getDoc,
   getDocs,
   query,
   runTransaction,
@@ -22,9 +20,12 @@ import { auth, firestore } from '../../firebase';
 
 // utils
 import svgs from '../../utils/svgs';
-import { debounce, formatTimeAgo } from '../../utils/functions';
+import {
+  debounce,
+  followClickHandler,
+  formatTimeAgo,
+} from '../../utils/functions';
 import { useUserContext } from '../../contextProvider/ContextProvider';
-import { followClickHandler } from '../profileComponents/ProfileContent/ProfileContent';
 
 const Tweet = forwardRef(({ element }, ref) => {
   const {

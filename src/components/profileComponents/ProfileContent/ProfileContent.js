@@ -5,20 +5,16 @@ import { Link, useNavigate } from 'react-router-dom';
 import {
   collection,
   collectionGroup,
-  deleteDoc,
-  doc,
   getDoc,
   getDocs,
   limit,
   onSnapshot,
   orderBy,
   query,
-  serverTimestamp,
-  setDoc,
   startAfter,
   where,
 } from 'firebase/firestore';
-import { auth, firestore } from '../../../firebase';
+import { firestore } from '../../../firebase';
 
 // css
 import './ProfileContent.css';
@@ -30,6 +26,7 @@ import {
   attachListenersToTweets,
   tweetsLoader,
 } from '../../../pages/Home/Home';
+import CommonFollowers from '../../CommonFollowers/CommonFollowers';
 
 // context providers
 import { useUserContext } from '../../../contextProvider/ContextProvider';
@@ -37,15 +34,14 @@ import { useUserContext } from '../../../contextProvider/ContextProvider';
 // utils
 import svgs from '../../../utils/svgs';
 
-// images
-import DefaultProfile from '../../../assets/images/default_profile.png';
+// utils
 import {
   debounce,
+  followClickHandler,
   getInteractionsData,
   getUserData,
   updateTweets,
 } from '../../../utils/functions';
-import CommonFollowers from '../../CommonFollowers/CommonFollowers';
 
 const ProfileContent = ({ profileVisited, isOwnProfile, isFollowed, tag }) => {
   const [tweets, setTweets] = useState([]);
@@ -641,67 +637,6 @@ const processTweets = async (querySnapshot) => {
     })
   );
   return [docsToModify, docsToDeleteIds, docsToAdd];
-};
-
-export const followClickHandler = async (
-  loggedUser,
-  profileVisited,
-  navigate
-) => {
-  if (auth.currentUser) {
-    // only run if user is logged in
-    console.log('called follow click handler', { loggedUser });
-    // check if loggedUser already follows profileVisited
-    // if not, follow profileVisited
-    // if yes, unfollowProfileVisited
-
-    // first, get loggedUser doc ref
-    const usersCollection = collection(firestore, 'users');
-    const userQuery = query(
-      usersCollection,
-      where('uid', '==', auth.currentUser.uid)
-    );
-    const userSnapshot = await getDocs(userQuery);
-    const userDocRef = userSnapshot.docs[0].ref;
-
-    // define following collection inside user doc
-    const followingCollection = collection(userDocRef, 'following');
-
-    if (loggedUser.following.includes(profileVisited.docId)) {
-      // to unfollow, delete doc with same id as profileVisited uid
-      deleteDoc(doc(followingCollection, profileVisited.docId));
-      // also delete follower doc from profileVisited
-      deleteDoc(
-        doc(
-          firestore,
-          `users/${profileVisited.docId}/followers/${userSnapshot.docs[0].id}`
-        )
-      );
-    } else {
-      console.log(
-        'before setDoc ',
-        { followingCollection },
-        { profileVisited }
-      );
-      // to follow, create doc with same id as profileVisited uid
-      setDoc(doc(followingCollection, profileVisited.docId), {
-        createdAt: serverTimestamp(),
-      });
-      // also create doc in profileVisited followers
-      setDoc(
-        doc(
-          firestore,
-          `users/${profileVisited.docId}/followers/${userSnapshot.docs[0].id}`
-        ),
-        {
-          createdAt: serverTimestamp(),
-        }
-      );
-    }
-  } else {
-    // no user logged in, redirect to log in page
-    navigate('/i/flow/login');
-  }
 };
 
 export default ProfileContent;

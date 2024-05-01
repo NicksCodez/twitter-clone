@@ -160,7 +160,7 @@ const Tweet = forwardRef(({ element }, ref) => {
       <div className="tweet-wrapper">
         <div className="tweet-profile-picture">
           <div className="profile-picture-wrapper u-round">
-            <Link to="/profile">
+            <Link to={`/${tag}`}>
               <img src={profileImg} alt="profile" />
             </Link>
           </div>
@@ -172,10 +172,14 @@ const Tweet = forwardRef(({ element }, ref) => {
           <div className="tweet-row">
             <div className="profile-details">
               <div className="profile-name">
-                <span>{name}</span>
+                <Link to={`/${tag}`}>
+                  <span>{name}</span>
+                </Link>
               </div>
               <div className="profile-tag">
-                <span>@{tag}</span>
+                <Link to={`/${tag}`}>
+                  <span>@{tag}</span>
+                </Link>
               </div>
               <div className="separator">
                 <span>·</span>
@@ -191,17 +195,19 @@ const Tweet = forwardRef(({ element }, ref) => {
             </button>
           </div>
           <div className="tweet-row">
-            <div className="flex-column">
-              <div
-                className="tweet-text"
-                dangerouslySetInnerHTML={{ __html: text }}
-              />
-              {tweetImg ? (
-                <div className="tweet-image-wrapper">
-                  <img src={tweetImg} alt="tweet" />
-                </div>
-              ) : null}
-            </div>
+            <Link to={`/status/${idProp}`}>
+              <div className="flex-column">
+                <div
+                  className="tweet-text"
+                  dangerouslySetInnerHTML={{ __html: text }}
+                />
+                {tweetImg ? (
+                  <div className="tweet-image-wrapper">
+                    <img src={tweetImg} alt="tweet" />
+                  </div>
+                ) : null}
+              </div>
+            </Link>
           </div>
           <div className="tweet-row tweet-actions">
             <div className="tweet-action">

@@ -37,7 +37,7 @@ const Tweet = forwardRef(({ element }, ref) => {
     userDocId,
     createdAt,
     text,
-    repliesCounte: replies,
+    repliesCount: replies,
     retweetsCount: retweets,
     likesCount: likes,
     bookmarksCount: bookmarks,

@@ -401,6 +401,34 @@ const followClickHandler = async (loggedUser, profileVisited, navigate) => {
   }
 };
 
+const formatDate = (date) => {
+  const months = [
+    'January',
+    'February',
+    'March',
+    'April',
+    'May',
+    'June',
+    'July',
+    'August',
+    'September',
+    'October',
+    'November',
+    'December',
+  ];
+  const hours = date.getHours();
+  const minutes = date.getMinutes();
+  const ampm = hours >= 12 ? 'PM' : 'AM';
+  const month = months[date.getMonth()];
+  const day = date.getDate();
+  const year = date.getFullYear();
+
+  const formattedHours = hours % 12 || 12;
+  const formattedMinutes = minutes < 10 ? `0${minutes}` : minutes;
+
+  return `${formattedHours}:${formattedMinutes} ${ampm} · ${month} ${day}, ${year}`;
+};
+
 export {
   clickHandlerAccount,
   resizeHandler,
@@ -417,4 +445,5 @@ export {
   getUsersMentioned,
   loadTrending,
   followClickHandler,
+  formatDate,
 };

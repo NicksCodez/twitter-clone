@@ -36,6 +36,7 @@ import Logout from './pages/Logout/Logout';
 import Bookmarks from './pages/Bookmarks/Bookmarks';
 import ProfileFollowing from './pages/ProfileFollowing/ProfileFollowing';
 import Trends from './pages/Trends/Trends';
+import TweetPage from './pages/TweetPage/TweetPage';
 
 // context providers
 // import { useAppContext } from './contextProvider/ContextProvider';
@@ -161,6 +162,7 @@ const App = () => {
           <Route path="/settings/profile" element={<EditProfile />} />
           <Route path="/i/bookmarks" element={<Bookmarks />} />
           <Route path="/i/trends" element={<Trends />} />
+          <Route path="/status/:id" element={<TweetPage />} />
           <Route path="/:tag" element={<Profile />} />
           <Route path="/:tag/:mode" element={<ProfileFollowing />} />
         </Route>

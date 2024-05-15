@@ -1,0 +1,232 @@
+.focused-tweet {
+  border-bottom: 1px solid var(--clr-bg-search);
+  padding: 0px 16px;
+}
+
+.focused-tweet .focused-tweet-top-separator {
+  min-height: 12px;
+}
+
+.focused-tweet-repost {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: -4px 0px 4px;
+  color: var(--clr-font-secondary);
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 16px;
+}
+
+.focused-tweet-repost > div {
+  min-width: 40px;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.focused-tweet-wrapper {
+  /* display: flex;
+  align-items: stretch; */
+}
+
+img,
+svg {
+  display: block;
+}
+
+.focused-tweet img,
+.focused-tweet a,
+.focused-tweet button {
+  border-radius: inherit;
+  width: inherit;
+  height: inherit;
+}
+
+.focused-tweet svg {
+  min-width: 18.75px;
+  min-height: 18.75px;
+  max-width: 18.75px;
+  max-height: 18.75px;
+}
+
+.focused-tweet > button {
+  display: flex;
+  justify-content: stretch;
+  width: 100%;
+}
+
+.focused-tweet .focused-tweet-profile-picture {
+  display: flex;
+  margin-right: 12px;
+  flex-direction: column;
+  align-items: center;
+}
+
+.focused-tweet .profile-picture-wrapper {
+  width: 40px;
+  height: 40px;
+}
+
+.focused-tweet .gray-line {
+  display: none;
+  width: 2px;
+  background-color: var(--clr-bg-profile-header-pic);
+  margin-top: 4px;
+  flex-grow: 1;
+}
+
+.focused-tweet .gray-line.active {
+  display: flex;
+}
+
+.focused-tweet .focused-tweet-content {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  flex-grow: 1;
+  padding-bottom: 12px;
+  min-width: 100%;
+  max-width: 100%;
+}
+
+.focused-tweet .focused-tweet-row {
+  display: flex;
+  justify-content: space-between;
+  overflow-x: scroll;
+}
+
+.focused-tweet .focused-tweet-user-row {
+  display: flex;
+  margin-bottom: 12px;
+}
+
+.focused-tweet .flex-right {
+  display: flex;
+  justify-content: flex-end;
+  flex-grow: 1;
+}
+
+.focused-tweet .focused-tweet-text a {
+  display: inline;
+  color: var(--clr-bg-blue);
+}
+
+.focused-tweet .profile-details {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  margin-bottom: 2px;
+  color: var(--clr-font-secondary);
+}
+
+.focused-tweet .profile-name {
+  font-weight: 700;
+  color: var(--clr-font-primary);
+}
+
+.focused-tweet .focused-tweet-row.focused-tweet-actions {
+  display: flex;
+  margin-top: 12px;
+  color: var(--clr-font-secondary);
+  font-size: var(--fs-mili);
+  line-height: var(--lh-mili);
+  max-width: 425px;
+  align-items: stretch;
+}
+
+.focused-tweet .focused-tweet-action > button {
+  display: flex;
+  justify-content: flex-start;
+}
+.focused-tweet .focused-tweet-action > button > span {
+  display: flex;
+  padding-left: 4px;
+  min-height: 20px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.focused-tweet .flex-column {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+}
+
+.focused-tweet .flex-column img {
+  width: 100%;
+  border-radius: 20px;
+  margin-top: 12px;
+}
+
+.focused-tweet .focused-tweet-row.time-posted {
+  margin: 12px 0px;
+  color: rgb(83, 100, 113);
+  font-size: 15px;
+  font-weight: 400;
+}
+
+.focused-tweet-action.like.active {
+  color: rgb(249, 24, 128);
+}
+
+.focused-tweet-action.bookmark.active {
+  color: var(--clr-bg-blue);
+}
+
+.focused-tweet-action.retweet.active {
+  color: rgb(0, 186, 124);
+}
+
+.focused-tweet-options {
+  position: fixed;
+  top: 0px;
+  bottom: 0px;
+  left: 0px;
+  right: 0px;
+  background-color: var(--clr-bg-sidebar-blur);
+  z-index: 4;
+  display: flex;
+  flex-direction: column;
+}
+
+.focused-tweet-options > button {
+  flex-grow: 1;
+}
+
+.focused-tweet-options > .wrapper {
+  background-color: inherit;
+}
+
+.focused-tweet-options .buttons {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  background-color: var(--clr-bg-base);
+  border-top-left-radius: 16px;
+  border-top-right-radius: 16px;
+}
+
+.focused-tweet-options .buttons div {
+  padding: 16px 12px;
+}
+
+.focused-tweet-options .buttons div button {
+  display: flex;
+  gap: 12px;
+  font-weight: 700;
+}
+
+.focused-tweet-options .buttons div button.cancel {
+  border: 1px solid var(--clr-bg-profile-header-pic);
+  border-radius: 9999px;
+  width: 100%;
+  height: 42px;
+  justify-content: center;
+  align-items: center;
+}
+
+.focused-tweet-options .buttons div button.delete {
+  color: #f4212e;
+}

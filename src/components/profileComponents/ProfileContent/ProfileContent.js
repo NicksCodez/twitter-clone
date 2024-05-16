@@ -333,7 +333,7 @@ const ProfileContent = ({ profileVisited, isOwnProfile, isFollowed, tag }) => {
               </div>
             </div>
             <div id="profile-page-follower-details">
-              <Link to="/profile/following">
+              <Link to={`/${tag}/following`}>
                 <div className="primary">
                   <span>{profileVisited.following?.length}</span>
                 </div>
@@ -341,7 +341,7 @@ const ProfileContent = ({ profileVisited, isOwnProfile, isFollowed, tag }) => {
                   <span>Following</span>
                 </div>
               </Link>
-              <Link to="/profile/followers">
+              <Link to={`/${tag}/followers`}>
                 <div className="primary">
                   <span>{profileVisited.followers?.length}</span>
                 </div>

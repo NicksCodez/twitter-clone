@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Form, useNavigate } from 'react-router-dom';
+import { Form, useLocation, useNavigate } from 'react-router-dom';
 
 // css
 import './ComposeTweet.css';
@@ -28,7 +28,10 @@ import NewTweetActions from '../../components/NewTweetComponents/NewTweetCounter
 
 // context provider
 // import { useAppContext } from '../../contextProvider/ContextProvider';
-import { useViewportContext } from '../../contextProvider/ContextProvider';
+import {
+  useUserContext,
+  useViewportContext,
+} from '../../contextProvider/ContextProvider';
 
 // utils
 import svgs from '../../utils/svgs';
@@ -40,13 +43,15 @@ import {
 
 // images
 import DefaultProfile from '../../assets/images/default_profile.png';
+import ReplyTopTweet from '../../components/ReplyTopTweet/ReplyTopTweet';
 
-const ComposeTweet = ({ type = 'tweet' }) => {
+const ComposeTweet = () => {
   const navigate = useNavigate();
+
+  const { user } = useUserContext();
 
   // const { viewportWidth } = useAppContext();
   const { viewportWidth } = useViewportContext();
-  const [buttonText, setButtonText] = useState(type); // gonna have to get me from the location and make default type tweet if nothing in location state
   const [previews, setPreviews] = useState([]);
   const [charsLeft, setCharsLeft] = useState(280);
   const [progressColor, setProgressColor] = useState('var(--clr-bg-blue)');
@@ -56,6 +61,11 @@ const ComposeTweet = ({ type = 'tweet' }) => {
   const [tweetContent, setTweetContent] = useState('');
 
   const loading = useRef(true);
+
+  const location = useLocation();
+
+  const data = location.state || {};
+  console.log('location state => ', location.state, '\ndata => ', data);
 
   useEffect(() => {
     loading.current = false;
@@ -93,9 +103,17 @@ const ComposeTweet = ({ type = 'tweet' }) => {
       type="submit"
       className="u-round"
       disabled={(charsLeft === 280 && files.length === 0) || charsLeft < 0}
-      onClick={() => handleTweetUpload(event, navigate, tweetContent, files)}
+      onClick={() =>
+        handleTweetUpload(
+          event,
+          navigate,
+          tweetContent,
+          files,
+          data.docRef || null
+        )
+      }
     >
-      {capitalize(buttonText)}
+      {data.docRef ? 'Reply' : 'Tweet'}
     </button>
   );
 
@@ -109,14 +127,15 @@ const ComposeTweet = ({ type = 'tweet' }) => {
             middleElements={[middleElement]}
             rightElements={[rightElement]}
           />
+          {data.docRef && <ReplyTopTweet element={data} />}
           {previews.length > 0 ? <div id="compose-tweet-previews" /> : null}
           <div id="compose-tweet-body">
             <div>
               <div id="compose-tweet-body-profile">
-                <img src={DefaultProfile} alt="profile" className="u-round" />
+                <img src={user.profileImg} alt="profile" className="u-round" />
               </div>
               <NewTweetBody
-                type={type}
+                type={data.docRef ? 'reply' : 'tweet'}
                 setCharsLeft={setCharsLeft}
                 files={files}
                 setFiles={setFiles}
@@ -140,7 +159,13 @@ const ComposeTweet = ({ type = 'tweet' }) => {
   );
 };
 
-const handleTweetUpload = async (event, navigate, tweetContent, files) => {
+const handleTweetUpload = async (
+  event,
+  navigate,
+  tweetContent,
+  files,
+  replyTweetId
+) => {
   if (auth.currentUser) {
     // prevent default redirect
     event.preventDefault();
@@ -177,11 +202,12 @@ const handleTweetUpload = async (event, navigate, tweetContent, files) => {
           createdAt: serverTimestamp(),
           repliesCount: 0,
           text: `${tweetContent}`,
-          type: 'tweet',
+          type: replyTweetId ? 'reply' : 'tweet',
           userId: auth.currentUser.uid,
           imageLink: `${url || ''}`,
           trendsMentioned,
           usersMentioned,
+          replyTo: replyTweetId,
         };
 
         // update total tweets
@@ -199,6 +225,20 @@ const handleTweetUpload = async (event, navigate, tweetContent, files) => {
 
       // update user total tweets
       updateTotalTweets();
+    } catch (error) {
+      console.error(error);
+    }
+
+    try {
+      await runTransaction(firestore, async (transaction) => {
+        // update parent tweet replies count
+        const replyTweetDoc = doc(tweetsCollectionRef, replyTweetId);
+        const replyTweetData = await transaction.get(replyTweetDoc);
+        const replyTweetReplyNum = replyTweetData.data().repliesCount;
+        transaction.update(replyTweetDoc, {
+          repliesCount: replyTweetReplyNum + 1,
+        });
+      });
     } catch (error) {
       console.error(error);
     }

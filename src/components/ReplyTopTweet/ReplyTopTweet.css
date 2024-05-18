@@ -1,12 +1,12 @@
-.tweet {
-  border-bottom: 1px solid var(--clr-bg-search);
+.reply-tweet {
+  padding: 0px 16px;
 }
 
-.tweet .tweet-top-separator {
+.reply-tweet .reply-tweet-top-separator {
   min-height: 12px;
 }
 
-.tweet-repost {
+.reply-tweet-repost {
   display: flex;
   align-items: center;
   gap: 12px;
@@ -17,13 +17,13 @@
   line-height: 16px;
 }
 
-.tweet-repost > div {
+.reply-tweet-repost > div {
   min-width: 40px;
   display: flex;
   justify-content: flex-end;
 }
 
-.tweet-wrapper {
+.reply-tweet-wrapper {
   display: flex;
   align-items: stretch;
 }
@@ -33,55 +33,47 @@ svg {
   display: block;
 }
 
-.tweet img,
-.tweet a,
-.tweet button {
+.reply-tweet img,
+.reply-tweet a,
+.reply-tweet button {
   border-radius: inherit;
   width: inherit;
   height: inherit;
 }
-.tweet a.width100 {
-  width: 100%;
-}
 
-.tweet svg {
+.reply-tweet svg {
   min-width: 18.75px;
   min-height: 18.75px;
   max-width: 18.75px;
   max-height: 18.75px;
 }
 
-.tweet > button {
+.reply-tweet > button {
   display: flex;
   justify-content: stretch;
   width: 100%;
 }
 
-.tweet .tweet-profile-picture {
+.reply-tweet .reply-tweet-profile-picture {
   display: flex;
   margin-right: 12px;
   flex-direction: column;
   align-items: center;
 }
 
-.tweet .profile-picture-wrapper {
+.reply-tweet .profile-picture-wrapper {
   width: 40px;
   height: 40px;
 }
 
-.tweet .gray-line {
-  display: none;
+.reply-tweet-gray-line {
   width: 2px;
   background-color: var(--clr-bg-profile-header-pic);
   margin-top: 4px;
   flex-grow: 1;
 }
 
-.tweet .gray-line.active {
-  display: flex;
-}
-
-.tweet .tweet-content {
+.reply-tweet .reply-tweet-content {
   display: flex;
   flex-direction: column;
   align-items: stretch;
@@ -90,18 +82,18 @@ svg {
   max-width: calc(100% - 52px);
 }
 
-.tweet .tweet-row {
+.reply-tweet .reply-tweet-row {
   display: flex;
   justify-content: space-between;
   overflow-x: scroll;
 }
 
-.tweet .tweet-text a {
+.reply-tweet .reply-tweet-text a {
   display: inline;
   color: var(--clr-bg-blue);
 }
 
-.tweet .profile-details {
+.reply-tweet .profile-details {
   display: flex;
   gap: 4px;
   align-items: baseline;
@@ -109,12 +101,12 @@ svg {
   color: var(--clr-font-secondary);
 }
 
-.tweet .profile-name {
+.reply-tweet .profile-name {
   font-weight: 700;
   color: var(--clr-font-primary);
 }
 
-.tweet .tweet-row.tweet-actions {
+.reply-tweet .reply-tweet-row.reply-tweet-actions {
   display: flex;
   margin-top: 12px;
   color: var(--clr-font-secondary);
@@ -124,14 +116,14 @@ svg {
   align-items: stretch;
 }
 
-.tweet .tweet-action > button,
-.tweet .tweet-action > a {
+.reply-tweet .reply-tweet-action > button,
+.reply-tweet .reply-tweet-action > a {
   display: flex;
   justify-content: flex-start;
   cursor: pointer;
 }
-.tweet .tweet-action > button > span,
-.tweet .tweet-action > a > span {
+.reply-tweet .reply-tweet-action > button > span,
+.reply-tweet .reply-tweet-action > a > span {
   display: flex;
   padding-left: 4px;
   min-height: 20px;
@@ -140,32 +132,32 @@ svg {
   align-items: center;
 }
 
-.tweet .flex-column {
+.reply-tweet .flex-column {
   width: 100%;
   display: flex;
   flex-direction: column;
   align-items: stretch;
 }
 
-.tweet .flex-column img {
+.reply-tweet .flex-column img {
   width: 100%;
   border-radius: 20px;
   margin-top: 4px;
 }
 
-.tweet-action.like.active {
+.reply-tweet-action.like.active {
   color: rgb(249, 24, 128);
 }
 
-.tweet-action.bookmark.active {
+.reply-tweet-action.bookmark.active {
   color: var(--clr-bg-blue);
 }
 
-.tweet-action.retweet.active {
+.reply-tweet-action.retweet.active {
   color: rgb(0, 186, 124);
 }
 
-.tweet-options {
+.reply-tweet-options {
   position: fixed;
   top: 0px;
   bottom: 0px;
@@ -177,15 +169,15 @@ svg {
   flex-direction: column;
 }
 
-.tweet-options > button {
+.reply-tweet-options > button {
   flex-grow: 1;
 }
 
-.tweet-options > .wrapper {
+.reply-tweet-options > .wrapper {
   background-color: inherit;
 }
 
-.tweet-options .buttons {
+.reply-reply-tweet-options .buttons {
   display: flex;
   flex-direction: column;
   align-items: stretch;
@@ -194,17 +186,17 @@ svg {
   border-top-right-radius: 16px;
 }
 
-.tweet-options .buttons div {
+.reply-tweet-options .buttons div {
   padding: 16px 12px;
 }
 
-.tweet-options .buttons div button {
+.reply-tweet-options .buttons div button {
   display: flex;
   gap: 12px;
   font-weight: 700;
 }
 
-.tweet-options .buttons div button.cancel {
+.reply-tweet-options .buttons div button.cancel {
   border: 1px solid var(--clr-bg-profile-header-pic);
   border-radius: 9999px;
   width: 100%;
@@ -213,6 +205,19 @@ svg {
   align-items: center;
 }
 
-.tweet-options .buttons div button.delete {
+.reply-tweet-options .buttons div button.delete {
   color: #f4212e;
+}
+
+.reply-tweet-image-wrapper {
+  margin-top: 5px;
+}
+.reply-tweet-information {
+  margin: 16px 0px;
+  display: flex;
+  color: var(--clr-font-secondary);
+}
+
+.reply-tweet-information > a {
+  color: var(--clr-bg-blue);
 }

@@ -195,7 +195,7 @@ const Tweet = forwardRef(({ element }, ref) => {
             </button>
           </div>
           <div className="tweet-row">
-            <Link to={`/status/${idProp}`}>
+            <Link to={`/status/${idProp}`} className="width100">
               <div className="flex-column">
                 <div
                   className="tweet-text"
@@ -211,12 +211,12 @@ const Tweet = forwardRef(({ element }, ref) => {
           </div>
           <div className="tweet-row tweet-actions">
             <div className="tweet-action">
-              <button type="button">
+              <Link to="/compose/tweet/" state={element}>
                 <svg viewBox="0 0 24 24">
                   <path d={svgs.comment} />
                 </svg>
                 <span>{replies}</span>
-              </button>
+              </Link>
             </div>
             <div
               className={`tweet-action retweet ${isRetweeted ? 'active' : ''}`}
@@ -552,5 +552,9 @@ const deleteClickHandler = (docRef) => {
   const docToDelete = doc(firestore, `tweets/${docRef}`);
   deleteDoc(docToDelete);
 };
+
+// const handleCommentClick = (element, navigate) => {
+//   navigate('/compose/tweet', { state: { data: element } });
+// };
 
 export default Tweet;

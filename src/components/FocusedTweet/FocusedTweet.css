@@ -24,11 +24,6 @@
   justify-content: flex-end;
 }
 
-.focused-tweet-wrapper {
-  /* display: flex;
-  align-items: stretch; */
-}
-
 img,
 svg {
   display: block;

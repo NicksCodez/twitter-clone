@@ -29,3 +29,7 @@
   color: var(--clr-font-primary);
   line-height: var(--lh-base);
 }
+
+#tweet-page .padded {
+  padding: 0px 16px;
+}

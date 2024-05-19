@@ -193,12 +193,12 @@ const FocusedTweet = forwardRef(({ element }, ref) => {
           </div>
           <div className="focused-tweet-row focused-tweet-actions">
             <div className="focused-tweet-action">
-              <button type="button">
+              <Link to="/compose/tweet/" state={element}>
                 <svg viewBox="0 0 24 24">
                   <path d={svgs.comment} />
                 </svg>
                 <span>{replies}</span>
-              </button>
+              </Link>
             </div>
             <div
               className={`focused-tweet-action retweet ${
@@ -497,7 +497,7 @@ const likeHandler = async (
 const mockTweetInteraction = (event, type) => {
   // make tweet visually seem liked/unliked/bookmarked/unbookmarked, etc
   // get DOM elements
-  const divElement = event.target.closest('.tweet-action');
+  const divElement = event.target.closest('.focused-tweet-action');
   const spanElement = event.target.closest('button').querySelector('span');
   const svgElement = event.target.closest('button').querySelector('svg');
   const svgPath = svgElement.querySelector('path');

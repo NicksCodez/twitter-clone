@@ -167,6 +167,11 @@ svg {
   font-weight: 400;
 }
 
+.focused-tweet-action > a {
+  display: flex;
+  gap: 4px;
+}
+
 .focused-tweet-action.like.active {
   color: rgb(249, 24, 128);
 }

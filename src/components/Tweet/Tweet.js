@@ -211,7 +211,10 @@ const Tweet = forwardRef(({ element }, ref) => {
           </div>
           <div className="tweet-row tweet-actions">
             <div className="tweet-action">
-              <Link to="/compose/tweet/" state={element}>
+              <Link
+                to={auth.currentUser ? '/compose/tweet/' : '/i/flow/login'}
+                state={element}
+              >
                 <svg viewBox="0 0 24 24">
                   <path d={svgs.comment} />
                 </svg>

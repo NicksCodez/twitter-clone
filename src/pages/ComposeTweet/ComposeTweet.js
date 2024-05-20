@@ -69,6 +69,9 @@ const ComposeTweet = () => {
 
   useEffect(() => {
     loading.current = false;
+    if (!auth.currentUser) {
+      navigate('/i/flow/login');
+    }
   }, []);
 
   useEffect(() => {

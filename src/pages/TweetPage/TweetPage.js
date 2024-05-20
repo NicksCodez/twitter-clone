@@ -83,10 +83,8 @@ const TweetPage = () => {
         setCurrentTweetData(tweetObject);
       });
     });
-  }, [id]);
 
-  useEffect(
-    () => () => {
+    return () => {
       // unsubscribe from tweets listeners
       // unsubsribersRef is an array, each element in it is an promise returned by tweetsLoader
       // each of these promises resolves to an array returned by attachListeners...
@@ -97,9 +95,10 @@ const TweetPage = () => {
           unsubber();
         });
       });
-    },
-    []
-  );
+      // empty replyTweets array
+      setReplyTweets([]);
+    };
+  }, [id]);
 
   useEffect(() => {
     // once tweet data is loaded, create query for ScrollableElementsLoader

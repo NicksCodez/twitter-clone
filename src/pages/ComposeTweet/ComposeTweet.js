@@ -246,7 +246,7 @@ const handleTweetUpload = async (
       console.error(error);
     }
 
-    return navigate('/home');
+    return navigate(-1);
   }
   return navigate('/i/flow/login');
 };

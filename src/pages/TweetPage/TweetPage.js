@@ -4,6 +4,8 @@ import { useNavigate, useParams } from 'react-router-dom';
 // firebase
 import {
   collection,
+  doc,
+  getDoc,
   getDocs,
   limit,
   orderBy,
@@ -33,8 +35,13 @@ const TweetPage = () => {
   // navigator function
   const navigate = useNavigate();
 
+  // ref to scroll to component FocusedTweet
+  const targetRef = useRef(null);
+
   // state to store tweet data
   const [currentTweetData, setCurrentTweetData] = useState(null);
+  const [parentTweets, setParentTweets] = useState([]);
+  const lastParentTweetRef = useRef(null);
 
   // state to store loader info for ScrollableElementsLoader
   const [loaderInfo, setLoaderInfo] = useState({});
@@ -43,6 +50,14 @@ const TweetPage = () => {
   const lastVisibleReplyRef = useRef(null);
   const [isScrollableLoading, seIsScrollableLoading] = useState(true);
   const unsubscribersRef = useRef([]);
+
+  useEffect(() => {
+    // debugging
+    if (targetRef.current) {
+      console.log('scrolling');
+      targetRef.current.scrollIntoView();
+    }
+  }, [lastParentTweetRef.current]);
 
   // get post data
   useEffect(() => {
@@ -57,8 +72,16 @@ const TweetPage = () => {
 
     const tweetSnapshot = getDocs(queryRef);
     tweetSnapshot.then((r) => {
-      // got tweet data, get user data
       const tweetData = r.docs[0].data();
+
+      // got tweet data, check if it is a reply to another tweet and store whole thread
+      const parentTweetRef = tweetData.replyTo;
+
+      getParentTweets(parentTweetRef).then((q) => {
+        setParentTweets(q);
+      });
+
+      // get user data
       const tweetPoster = tweetData.userId;
 
       const usersCollectionRef = collection(firestore, 'users');
@@ -172,8 +195,23 @@ const TweetPage = () => {
           rightElements={[rightElement]}
         />
       </div>
+      {parentTweets &&
+        parentTweets
+          .slice()
+          .reverse()
+          .map((tweet, index) => {
+            const isLastElement = index === parentTweets.length - 1;
+            return (
+              <div className="padded" key={tweet.docRef}>
+                <Tweet
+                  element={tweet}
+                  ref={isLastElement ? lastParentTweetRef : null}
+                />
+              </div>
+            );
+          })}
       {currentTweetData && (
-        <FocusedTweet element={currentTweetData} ref={null} />
+        <FocusedTweet element={currentTweetData} ref={targetRef} />
       )}
       <div className="padded">
         {loaderInfo.queryRef && (
@@ -199,6 +237,44 @@ const TweetPage = () => {
       </div>
     </div>
   );
+};
+
+const getParentTweets = async (tweetRef) => {
+  const threadTweets = [];
+  let parentTweetRef = tweetRef;
+  while (parentTweetRef) {
+    console.log({ parentTweetRef });
+    const parentTweetDoc = doc(firestore, 'tweets', parentTweetRef);
+    const parentTweet = await getDoc(parentTweetDoc);
+    const parentTweetData = parentTweet.data();
+    // get user data
+    const tweetPoster = parentTweetData.userId;
+
+    const usersCollectionRef = collection(firestore, 'users');
+    const userQueryRef = query(
+      usersCollectionRef,
+      where('uid', '==', tweetPoster)
+    );
+    const userSnapshot = await getDocs(userQueryRef);
+
+    const userData = userSnapshot.docs[0].data();
+    const tweetObject = {
+      docRef: parentTweetRef,
+      ...parentTweetData,
+      userName: userData.name,
+      userTag: userData.tag,
+      userProfilePicture: userData.profileImg,
+      activeGrayLine: true,
+    };
+
+    // push tweet object to threadTweets array
+    threadTweets.push(tweetObject);
+
+    // set new parentTweetRef
+    parentTweetRef = parentTweetData.replyTo;
+  }
+
+  return threadTweets;
 };
 
 export default TweetPage;

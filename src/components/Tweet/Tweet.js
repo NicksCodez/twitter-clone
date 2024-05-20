@@ -46,6 +46,7 @@ const Tweet = forwardRef(({ element }, ref) => {
     isLiked,
     isBookmarked,
     isRetweeted,
+    activeGrayLine,
   } = element;
   const navigate = useNavigate();
 
@@ -139,8 +140,16 @@ const Tweet = forwardRef(({ element }, ref) => {
     setLastRetweetAction
   );
 
+  useEffect(() => {
+    console.log('loading tweet');
+  }, []);
+
   return (
-    <div className="tweet" id={`tweet-${idProp}`} ref={ref}>
+    <div
+      className={`tweet ${activeGrayLine ? 'no-border' : ''}`}
+      id={`tweet-${idProp}`}
+      ref={ref}
+    >
       <div className="tweet-top-separator" />
       {reposterData && (
         <div className="tweet-repost">
@@ -164,9 +173,7 @@ const Tweet = forwardRef(({ element }, ref) => {
               <img src={profileImg} alt="profile" />
             </Link>
           </div>
-          <div className="gray-line">
-            <Link to="/status/123" />
-          </div>
+          <div className={`gray-line ${activeGrayLine ? 'active' : ''}`} />
         </div>
         <div className="tweet-content">
           <div className="tweet-row">

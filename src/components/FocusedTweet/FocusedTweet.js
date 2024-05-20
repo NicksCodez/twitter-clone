@@ -49,6 +49,10 @@ const FocusedTweet = forwardRef(({ element }, ref) => {
   } = element;
   const navigate = useNavigate();
 
+  useEffect(() => {
+    console.log('loaded focused tweet');
+  }, []);
+
   // logged in user tag and following, if it exists
   const loggedUserTag = useUserContext().user?.tag;
   const loggedUserFollowing = useUserContext().user?.following;

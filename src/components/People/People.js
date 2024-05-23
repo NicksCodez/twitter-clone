@@ -1,5 +1,5 @@
 /* eslint-disable no-nested-ternary */
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
 // css
 import './People.css';
@@ -16,17 +16,17 @@ const People = () => {
   const [recommendedAccounts, setRecommendedAccounts] = useState([]);
   const [areRecAccLoading, setAreRecAccLoading] = useState(true);
 
-  // ref to know if rec accs were loaded for user
-  const gotRecsForUser = useRef(auth.currentUser);
-
   const { user } = useUserContext();
 
   useEffect(() => {
-    loadRecAccs(setRecommendedAccounts, setAreRecAccLoading, user.following);
-  }, [gotRecsForUser.current]);
-
-  useEffect(() => {
-    gotRecsForUser.current = user.tag;
+    // only load recommendations when user context has loaded
+    if (user.loaded) {
+      loadRecAccs(
+        setRecommendedAccounts,
+        setAreRecAccLoading,
+        user.following || []
+      );
+    }
   }, [user]);
 
   return (

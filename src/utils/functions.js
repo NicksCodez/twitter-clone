@@ -323,7 +323,7 @@ const loadTrending = async (setTrends, setTrendsLoading, limitSize) => {
   const trendsCollection = collection(firestore, 'trends');
   const trendsQuery = query(
     trendsCollection,
-    orderBy('totalTweets'),
+    orderBy('totalTweets', 'desc'),
     limit(limitSize)
   );
 
@@ -429,6 +429,49 @@ const formatDate = (date) => {
   return `${formattedHours}:${formattedMinutes} ${ampm} · ${month} ${day}, ${year}`;
 };
 
+const userDataChanged = (dataA, dataB) => {
+  if (
+    typeof dataA !== 'object' ||
+    dataA === null ||
+    typeof dataB !== 'object' ||
+    dataB === null
+  ) {
+    return true;
+  }
+
+  if (
+    dataA.name !== dataB.name ||
+    dataA.tag !== dataB.tag ||
+    dataA.profileImg !== dataB.profileImg
+  ) {
+    return true;
+  }
+
+  return false;
+};
+
+function arraysEqual(arr1, arr2) {
+  // Check if both inputs are arrays
+  if (!Array.isArray(arr1) || !Array.isArray(arr2)) {
+    return false;
+  }
+
+  // Check if arrays have same length
+  if (arr1.length !== arr2.length) {
+    return false;
+  }
+
+  // Compare each element of the arrays
+  for (let i = 0; i < arr1.length; i++) {
+    if (arr1[i] !== arr2[i]) {
+      return false;
+    }
+  }
+
+  // If all elements are equal, return true
+  return true;
+}
+
 export {
   clickHandlerAccount,
   resizeHandler,
@@ -446,4 +489,6 @@ export {
   loadTrending,
   followClickHandler,
   formatDate,
+  userDataChanged,
+  arraysEqual,
 };

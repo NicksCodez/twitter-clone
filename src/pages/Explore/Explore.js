@@ -5,7 +5,7 @@ import React, { useEffect, useState } from 'react';
 import './Explore.css';
 
 // components
-import { Link } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import Sidebar from '../../components/Sidebar/Sidebar';
 import FeatherButton from '../../components/FeatherButton/FeatherButton';
 import People from '../../components/People/People';
@@ -15,7 +15,10 @@ import TrendingItem from '../../components/TrendingItem/TrendingItem';
 
 // context provider
 // import { useAppContext } from '../../contextProvider/ContextProvider';
-import { useViewportContext } from '../../contextProvider/ContextProvider';
+import {
+  useUserContext,
+  useViewportContext,
+} from '../../contextProvider/ContextProvider';
 
 // utils
 import svgs from '../../utils/svgs';
@@ -23,38 +26,37 @@ import { clickHandlerAccount, loadTrending } from '../../utils/functions';
 
 // images
 import DefaultProfile from '../../assets/images/default_profile.png';
+import SearchResults from '../../components/SearchResults/SearchResults';
 
 const Explore = () => {
   // const { viewportWidth } = useAppContext();
   const { viewportWidth } = useViewportContext();
+  const { user } = useUserContext();
+
+  const navigate = useNavigate();
+  // check if any query
+  const query = new URLSearchParams(useLocation().search);
+  const searchQuery = query.get('q');
 
   // store trends
   const [trends, setTrends] = useState([]);
   const [trendsLoading, setTrendsLoading] = useState(true);
 
   useEffect(() => {
-    // search input events
-    const search = document.getElementById('search');
-
-    search.addEventListener('click', clickHandlerSearch);
-
-    // back button events
-    const back = document.getElementById('explore-header-back');
-    back.addEventListener('click', clickHandlerBack);
-
     // load trends
     loadTrending(setTrends, setTrendsLoading, 5);
-
-    return () => {
-      search.removeEventListener('click', clickHandlerSearch);
-      back.removeEventListener('click', clickHandlerBack);
-    };
   }, []);
 
   // build left elements for page header
   const backButtonElement = (
-    <div id="explore-header-back">
-      <button type="button">
+    <div
+      id="explore-header-back"
+      style={{ display: searchQuery ? 'flex' : 'none' }}
+    >
+      <button
+        type="button"
+        onClick={() => clickHandlerBack(searchQuery, navigate)}
+      >
         <svg viewBox="0 0 24 24">
           <path d={svgs.back} />
         </svg>
@@ -63,9 +65,16 @@ const Explore = () => {
   );
 
   const profilePictureElement = (
-    <div id="explore-header-profile-picture">
+    <div
+      id="explore-header-profile-picture"
+      style={{ display: searchQuery ? 'none' : 'flex' }}
+    >
       <button type="button" onClick={clickHandlerAccount}>
-        <img src={DefaultProfile} alt="profile" className="u-round" />
+        <img
+          src={user?.profileImg || DefaultProfile}
+          alt="profile"
+          className="u-round"
+        />
       </button>
     </div>
   );
@@ -84,7 +93,7 @@ const Explore = () => {
   // build middle element for page header
   const middleElement = (
     <div className="middle-element">
-      <Searchbar />
+      <Searchbar searchQuery={searchQuery} />
     </div>
   );
 
@@ -97,51 +106,68 @@ const Explore = () => {
           rightElements={[rightElement]}
         />
       </div>
-      <Sidebar />
-      {viewportWidth < 500 ? <FeatherButton /> : null}
-      {trendsLoading ? (
-        <div>Loading</div>
-      ) : (
-        <div className="trends">
-          <h2>Trends for you</h2>
-          {trends.length > 0 ? (
-            trends.map((trend) => (
-              <TrendingItem
-                key={trend.id}
-                trend={trend.id}
-                tweetsNumber={trend.totalTweets}
-              />
-            ))
+      {!searchQuery && (
+        <div>
+          <Sidebar />
+          {viewportWidth < 500 ? <FeatherButton /> : null}
+          {trendsLoading ? (
+            <div>Loading</div>
           ) : (
-            <div>There seem to be no trends yet</div>
+            <div className="trends">
+              <h2>Trends for you</h2>
+              {trends.length > 0 ? (
+                trends.map((trend) => (
+                  <TrendingItem
+                    key={trend.id}
+                    trend={trend.id}
+                    tweetsNumber={trend.totalTweets}
+                  />
+                ))
+              ) : (
+                <div>There seem to be no trends yet</div>
+              )}
+              <Link to="/i/trends" className="show-more">
+                <span>Show more</span>
+              </Link>
+            </div>
           )}
-          <Link to="/i/trends" className="show-more">
-            <span>Show more</span>
-          </Link>
+          <div className="explore-separator-wrapper">
+            <div className="explore-separator" />
+          </div>
+          <People />
         </div>
       )}
-      <div className="separator-wrapper">
-        <div className="separator" />
-      </div>
-      <People />
+      {searchQuery && <SearchResults searchQuery={searchQuery} />}
     </div>
   );
 };
 
-const clickHandlerSearch = () => {
+const clickHandlerBack = (searchQuery, navigate) => {
+  const searchResultsDiv = document.getElementById('search-results');
+  const searchResultsActive = searchResultsDiv.classList.contains('active');
+  // if I have a search query, navigate to previous page
+  if (searchQuery) {
+    if (!searchResultsActive) {
+      // search results are not active, so navigate back
+      navigate(-1);
+    } else {
+      // search results are active, so hide them and associated styles
+      searchResultsDiv.classList.remove('active');
+      const clearButton = document.getElementById('searchbar-clear');
+      clearButton.classList.remove('active');
+
+      // enable explore page scroll
+      const explore = document.getElementById('explore');
+      explore.classList.remove('no-scroll');
+      return;
+    }
+  }
+
+  // no search query, change styles
   const account = document.getElementById('explore-header-profile-picture');
   const back = document.getElementById('explore-header-back');
 
-  // replace account picture with back bsutton
-  account.style.display = 'none';
-  back.style.display = 'flex';
-};
-
-const clickHandlerBack = () => {
-  const account = document.getElementById('explore-header-profile-picture');
-  const back = document.getElementById('explore-header-back');
-
-  // replace account picture with back button
+  // replace back button with account picture
   account.style.display = 'flex';
   back.style.display = 'none';
 
@@ -150,12 +176,13 @@ const clickHandlerBack = () => {
   clearButton.classList.remove('active');
 
   // hide search results div
-  const searchResultsDiv = document.getElementById('search-results');
   searchResultsDiv.classList.remove('active');
 
   // show feather icon
   const featherButton = document.getElementById('feather-button');
-  featherButton.style.display = 'flex';
+  if (featherButton) {
+    featherButton.style.display = 'flex';
+  }
 };
 
 export default Explore;

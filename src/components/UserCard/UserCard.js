@@ -15,7 +15,7 @@ const UserCard = forwardRef(({ element }, ref) => {
   const { user } = useUserContext();
 
   // destructure element object
-  const { profileDocId, tag, name, bio, profileImg } = element;
+  const { profileDocId, tag, name, bio, profileImg, hideFollow } = element;
 
   return (
     <div className="user-card" ref={ref}>
@@ -32,19 +32,23 @@ const UserCard = forwardRef(({ element }, ref) => {
               <div className="subtitle">@{tag}</div>
             </div>
           </Link>
-          <div className="action">
-            <button
-              type="button"
-              className={`${
-                !user.following?.includes(profileDocId) ? 'unfollowed' : ''
-              }`}
-              onClick={() =>
-                followClickHandler(user, { docId: profileDocId }, navigate)
-              }
-            >
-              {!user.following?.includes(profileDocId) ? 'Follow' : 'Following'}
-            </button>
-          </div>
+          {!hideFollow && (
+            <div className="action">
+              <button
+                type="button"
+                className={`${
+                  !user.following?.includes(profileDocId) ? 'unfollowed' : ''
+                }`}
+                onClick={() =>
+                  followClickHandler(user, { docId: profileDocId }, navigate)
+                }
+              >
+                {!user.following?.includes(profileDocId)
+                  ? 'Follow'
+                  : 'Following'}
+              </button>
+            </div>
+          )}
         </div>
         <Link to={`/${tag}`}>
           <div className="details">{bio}</div>

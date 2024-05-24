@@ -6,6 +6,10 @@
   overflow-y: scroll;
 }
 
+#explore.no-scroll {
+  overflow-y: hidden;
+}
+
 #explore .trends {
   border-bottom: 1px solid var();
 }
@@ -22,12 +26,12 @@
   color: var(--clr-bg-blue);
 }
 
-#explore .separator-wrapper {
+#explore .explore-separator-wrapper {
   display: flex;
   flex-direction: column;
 }
 
-#explore .separator {
+#explore .explore-separator {
   display: flex;
   margin-top: 2px;
   margin-bottom: 2px;
@@ -35,6 +39,11 @@
   height: 1px;
   width: 100%;
   align-self: center;
+}
+
+#explore-header {
+  position: relative;
+  z-index: 3;
 }
 
 #explore-header svg {
@@ -54,9 +63,9 @@
   min-width: 56px;
 }
 
-#explore-header-back {
+/* #explore-header-back {
   display: none;
-}
+} */
 
 #explore-header-profile-picture {
   justify-content: flex-start;

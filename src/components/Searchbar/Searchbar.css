@@ -95,6 +95,32 @@
   display: flex;
   flex-direction: column;
   justify-content: stretch;
-  align-items: center;
-  height: calc(100vh - 53px);
+  align-items: stretch;
+  height: calc(100vh - 106px);
+  overflow-y: scroll;
+}
+
+#search-results > span {
+  padding: 16px;
+}
+
+.searchbar-go-to-profile {
+  display: flex;
+}
+
+.searchbar-go-to-profile a {
+  color: var(--clr-bg-blue);
+}
+
+#search-results .results-found {
+  display: flex;
+  flex-direction: column;
+}
+
+#search-results .results-found > span {
+  padding: 16px;
+}
+
+#search-results .results-found > span:first-child {
+  border-bottom: 1px solid var(--clr-border-primary);
 }

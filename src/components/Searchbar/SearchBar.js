@@ -1,45 +1,69 @@
-import React, { useEffect, useState } from 'react';
-import { Form } from 'react-router-dom';
+import React, { useEffect, useRef, useState } from 'react';
+import { Form, Link, useNavigate } from 'react-router-dom';
+
+// firebase
+import {
+  collection,
+  getDocs,
+  limit,
+  orderBy,
+  query,
+  where,
+} from 'firebase/firestore';
 
 // css
 import './Searchbar.css';
 
 // utils
+import { v4 as uuidv4 } from 'uuid';
 import svgs from '../../utils/svgs';
+import { firestore } from '../../firebase';
+import UserCard from '../UserCard/UserCard';
 
-const Searchbar = () => {
-  const [searchQuery, setSearchQuery] = useState('');
+const Searchbar = ({ searchQuery }) => {
+  // state to store search input
+  const [searchInput, setSearchInput] = useState('');
+
+  // state to store search results
+  const [foundUsers, setFoundUsers] = useState([]);
+
+  // ref to search input
+  const searchRef = useRef(null);
+
+  // navigator
+  const navigate = useNavigate();
 
   useEffect(() => {
-    console.log({ searchQuery });
-  }, [searchQuery]);
+    if (searchQuery && searchRef) {
+      setSearchInput(searchQuery);
+      searchRef.current.value = searchQuery;
+    }
+  }, []);
 
-  // testing because going previous page => next page -> previous page in browser creates error
-  // useEffect(() => {
-  //   console.log('searchbar mounted');
-  //   // search input event listeners
-  //   const searchInput = document.getElementById('search');
-
-  //   const changeHandlerInputFunction = () => changeHandlerInput(setSearchQuery);
-
-  //   try {
-  //     searchInput.addEventListener('focus', focusHandler);
-  //     searchInput.addEventListener('blur', focusOutHandler);
-  //     searchInput.addEventListener('input', changeHandlerInputFunction);
-  //   } catch (error) {
-  //     console.log(error);
-  //   }
-
-  //   return () => {
-  //     searchInput.removeEventListener('focus', focusHandler);
-  //     searchInput.removeEventListener('blur', focusOutHandler);
-  //     searchInput.removeEventListener('input', changeHandlerInputFunction);
-  //   };
-  // }, []);
+  useEffect(() => {
+    // get users according to search input
+    const usersCollectionRef = collection(firestore, 'users');
+    const queryRef = query(
+      usersCollectionRef,
+      where('tagLowerCase', '>=', searchInput),
+      where('tagLowerCase', '<=', `${searchInput}\uf8ff`),
+      limit(10),
+      orderBy('tagLowerCase')
+    );
+    const usersQuerySnapshot = getDocs(queryRef);
+    usersQuerySnapshot.then((r) => {
+      const userDocs = r.docs.map((doc) => ({
+        ...doc.data(),
+        profileDocId: doc.ref,
+        hideFollow: true,
+      }));
+      setFoundUsers(userDocs);
+    });
+  }, [searchInput]);
 
   return (
     <div id="searchbar">
-      <Form>
+      <Form onSubmit={(event) => submitForm(event, searchInput, navigate)}>
         <label htmlFor="search">
           <div className="svg-search-wrapper">
             <svg
@@ -56,13 +80,14 @@ const Searchbar = () => {
             id="search"
             onFocus={focusHandler}
             onBlur={focusOutHandler}
-            onInput={() => changeHandlerInput(setSearchQuery)}
+            onInput={() => changeHandlerInput(setSearchInput)}
+            ref={searchRef}
           />
           <div className="btn-close-wrapper " id="searchbar-clear">
             <button
               type="button"
               className="u-round"
-              onClick={() => clickHandlerClear(setSearchQuery)}
+              onClick={() => clickHandlerClear(setSearchInput)}
             >
               <svg viewBox="0 0 15 15" className="svg-close">
                 <path d={svgs.xSearch} />
@@ -72,12 +97,24 @@ const Searchbar = () => {
         </label>
       </Form>
       <div id="search-results">
-        {searchQuery === '' ? (
+        {searchInput === '' ? (
           <span id="no-search">
             Try searching for people, topics, or keywords
           </span>
         ) : (
-          <span>{`You searched for ${searchQuery}`}</span>
+          <div className="results-found">
+            <span className="">
+              <Link to={`/search?q=${searchInput}`}>
+                Search for {searchInput}
+              </Link>
+            </span>
+            {foundUsers.map((foundUser) => (
+              <UserCard element={foundUser} key={uuidv4()} />
+            ))}
+            <span className="searchbar-go-to-profile">
+              Go to <Link to={`/${searchInput}`}>&nbsp;@{searchInput}</Link>
+            </span>
+          </div>
         )}
       </div>
     </div>
@@ -85,6 +122,17 @@ const Searchbar = () => {
 };
 
 const focusHandler = () => {
+  // stop explore page scroll
+  const explore = document.getElementById('explore');
+  explore.classList.add('no-scroll');
+
+  const account = document.getElementById('explore-header-profile-picture');
+  const back = document.getElementById('explore-header-back');
+
+  // replace account picture with back button
+  account.style.display = 'none';
+  back.style.display = 'flex';
+
   const searchbar = document.getElementById('searchbar');
   const search = document.getElementById('searchbar-svg-search');
 
@@ -105,7 +153,9 @@ const focusHandler = () => {
 
   // hide feather icon
   const featherButton = document.getElementById('feather-button');
-  featherButton.style.display = 'none';
+  if (featherButton) {
+    featherButton.style.display = 'none';
+  }
 };
 
 const focusOutHandler = () => {
@@ -140,6 +190,16 @@ const changeHandlerInput = (setSearchQuery) => {
   }
   // save input value in state
   setSearchQuery(text);
+};
+
+const submitForm = (event, formData, navigate) => {
+  event.preventDefault();
+  // enable explore page scroll
+  const explore = document.getElementById('explore');
+  explore.classList.remove('no-scroll');
+  if (formData !== '') {
+    navigate(`/search?q=${formData}`);
+  }
 };
 
 export default Searchbar;

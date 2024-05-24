@@ -1,0 +1,85 @@
+#search-categories {
+  width: 100%;
+  border-bottom: 1px solid var(--clr-border-primary);
+  backdrop-filter: blur(12px);
+  background-color: var(--clr-bg-second-row);
+  transition: top cubic-bezier(0, 0, 0, 1) 350ms;
+  color: var(--clr-font-secondary);
+  font-weight: 500;
+  display: flex;
+}
+
+#search-categories.scrolled {
+  top: -50px;
+  transition: top cubic-bezier(0, 0, 0, 1) 350ms;
+}
+
+#search-categories svg {
+  height: 24px;
+}
+
+#search-categories img {
+  width: 32px;
+  height: 32px;
+}
+
+#search-categories .image-wrapper {
+  width: fit-content;
+}
+
+#search-categories > div {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+#search-categories > div:first-child {
+  height: 53px;
+  padding: 0 16px;
+}
+
+#search-categories .fake {
+  width: 32px; /* to center the twitter logo, this is the width of the account image */
+}
+
+#search-categories .button-wrapper {
+  width: 50%;
+}
+
+#search-categories .button-wrapper button {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+#search-categories button {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+#search-categories button > div {
+  width: fit-content;
+  padding: 16px 0;
+  position: relative;
+}
+
+#search-categories button div span {
+  display: block;
+  pointer-events: none;
+}
+
+#search-categories .blue-underscore {
+  height: 4px;
+  width: 100%;
+  background-color: var(--clr-bg-blue);
+  visibility: hidden;
+  position: absolute;
+  bottom: 0px;
+}
+
+#search-categories .active * {
+  font-weight: 700;
+  visibility: visible;
+  color: var(--clr-font-primary);
+}

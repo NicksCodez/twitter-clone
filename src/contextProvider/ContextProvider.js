@@ -20,7 +20,7 @@ const AppContextProvider = ({ children }) => {
   // keep track of selected tab in the homepage
   const [isForYouSelected, setIsForYouSelected] = useState(true);
   // Width of the viewport for conditional rendering (mobile/tablet/desktop)
-  const [viewportWidth, setViewportWidth] = useState([]);
+  const [viewportWidth, setViewportWidth] = useState(window.innerWidth);
   // in the homepage, ref to whether the last tweet (meaning first ever tweet) in 'For You' tab has been seen
   const seenLastForYouTweetRef = useRef(false);
   // in the homepage, ref to whether the last tweet (meaning first ever tweet) in 'Following' tab has been seen

@@ -1,7 +1,5 @@
 .profile-following {
-  position: fixed;
-  top: 0px;
-  bottom: 54.5px;
+  height: 100%;
   width: 100%;
 }
 

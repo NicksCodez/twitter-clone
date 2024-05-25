@@ -1,9 +1,5 @@
 #profile-page {
-  word-wrap: break-word;
-  position: fixed;
-  top: 0;
-  left: 0;
-  bottom: 54.5px;
+  height: 100%;
   width: 100%;
   overflow-y: scroll;
 }

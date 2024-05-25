@@ -8,7 +8,7 @@ import './Footer.css';
 import svgs from '../../utils/svgs';
 
 const Footer = () => (
-  <header>
+  <header id="root-navbar">
     <nav>
       <NavLink to="/home" aria-label="home" role="link">
         <svg viewBox="0 0 24 24" aria-hidden="true" className="home-icon">

@@ -58,26 +58,28 @@ const Home = () => {
 
   useEffect(() => {
     // home event listeners
-    const home = document.getElementById('home');
+    const main = document.getElementById('main');
 
     // attach scroll handler to home
     const scrollHandlerFunc = () => {
       scrollHandler(tweetsContext.scroll, tweetsContext.setScroll, time);
     };
-    home.addEventListener('scroll', scrollHandlerFunc);
+    main.addEventListener('scroll', scrollHandlerFunc);
+
+    console.log('scroll -> ', tweetsContext.scroll);
 
     // remove event listeners
     return () => {
-      home.removeEventListener('scroll', scrollHandlerFunc);
+      main.removeEventListener('scroll', scrollHandlerFunc);
     };
   }, [tweetsContext.scroll, tweetsContext.isForYouSelected]);
 
   useEffect(() => {
     // scroll to where user left off in For You or Following tab accordingly
-    const home = document.getElementById('home');
+    const main = document.getElementById('main');
 
     if (!isLoading) {
-      home.scrollTo({
+      main.scrollTo({
         top: tweetsContext.scroll,
         behavior: 'auto',
       });
@@ -213,9 +215,10 @@ const scrollHandler = (lastScrollTop, setScrollTop, time) => {
   // function is throttled so it doesn't run a lot of times on scroll
 
   if (time.current + 50 - Date.now() <= 0) {
-    const home = document.getElementById('home');
+    const main = document.getElementById('main');
     const homeHeader = document.getElementsByClassName('home-header');
-    const st = home.scrollTop;
+    const st = main.scrollTop;
+    console.log({ st });
     if (st > lastScrollTop) {
       // scroll down, so remove 'scrolled' class to hide first row
       // ? final design will probably have 2 elements with class 'home-header', one for mobile and one for desktop

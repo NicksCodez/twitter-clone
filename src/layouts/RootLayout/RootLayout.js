@@ -10,11 +10,11 @@ import './RootLayout.css';
 import Footer from '../../components/Footer/Footer';
 
 const RootLayout = () => (
-  <div id="rootLayout">
-    <Footer />
-    <main>
+  <div id="root-layout">
+    <main id="main">
       <Outlet />
     </main>
+    <Footer />
   </div>
 );
 

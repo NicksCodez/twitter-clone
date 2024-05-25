@@ -68,11 +68,18 @@ const ComposeTweet = () => {
   console.log('location state => ', location.state, '\ndata => ', data);
 
   useEffect(() => {
-    loading.current = false;
-    if (!auth.currentUser) {
-      navigate('/i/flow/login');
+    console.log({ user });
+    if (user.loaded) {
+      loading.current = false;
+      if (!auth.currentUser) {
+        navigate('/i/flow/login');
+      }
     }
-  }, []);
+  }, [user]);
+
+  useEffect(() => {
+    console.log({ viewportWidth });
+  }, [viewportWidth]);
 
   useEffect(() => {
     // style form differently based on chars left
@@ -122,7 +129,7 @@ const ComposeTweet = () => {
 
   return (
     <div>
-      {viewportWidth >= 688 ? <Home /> : null}
+      {viewportWidth >= 500 ? <Home /> : null}
       <div id="compose-tweet">
         <Form method="post" action="/compose/tweet">
           <PageHeader

@@ -1,8 +1,5 @@
-header {
-  position: fixed;
-  bottom: 0px;
-  left: 0px;
-  width: 100%;
+#root-navbar {
+  flex-shrink: 0;
 }
 
 header nav {

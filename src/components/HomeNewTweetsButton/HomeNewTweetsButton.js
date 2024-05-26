@@ -112,9 +112,9 @@ const HomeNewTweetsButton = ({ attachListenersToTweets }) => {
       // clear new tweets
       setNewTweets([]);
 
-      const home = document.getElementById('home');
+      const main = document.getElementById('main');
       // scroll to top
-      home.scroll({
+      main.scroll({
         top: 0,
         left: 0,
         behavior: 'smooth',

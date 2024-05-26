@@ -8,3 +8,9 @@
   flex-grow: 1;
   overflow-y: scroll;
 }
+
+@media only screen and (min-width: 500px) {
+  #root-layout {
+    flex-direction: row-reverse;
+  }
+}

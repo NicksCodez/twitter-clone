@@ -11,7 +11,7 @@
 }
 
 .home-header.scrolled {
-  top: -50px;
+  top: -52px;
   transition: top cubic-bezier(0, 0, 0, 1) 350ms;
 }
 
@@ -83,4 +83,10 @@
   font-weight: 700;
   visibility: visible;
   color: var(--clr-font-primary);
+}
+
+@media only screen and (min-width: 500px) {
+  .home-header .page-header {
+    display: none;
+  }
 }

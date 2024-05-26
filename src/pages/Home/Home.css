@@ -2,6 +2,7 @@
   word-wrap: break-word;
   width: 100%;
   transition: top cubic-bezier(0, 0, 0, 1) 350ms;
+  max-width: 600px;
 }
 
 #home .padded {

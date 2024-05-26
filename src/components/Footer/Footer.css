@@ -42,6 +42,8 @@ header a.active .messages-icon path {
 @media only screen and (min-width: 500px) {
   #root-navbar {
     min-width: 60px;
+    max-width: 88px;
+    flex: 1 1 0;
   }
 
   #root-navbar nav {

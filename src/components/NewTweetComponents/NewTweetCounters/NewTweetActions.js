@@ -33,8 +33,8 @@ const NewTweetActions = ({ charsLeft, progressColor, progressSecondColor }) => (
             </span>
           ) : null}
         </div>
-        <div className="vertical-separator" />
-        <div className="new-tweet-add">
+        <div className="vertical-separator" style={{ display: 'none' }} />
+        <div className="new-tweet-add" style={{ display: 'none' }}>
           <button type="button">
             <svg viewBox="0 0 24 24">
               <path d={svgs.plus} />

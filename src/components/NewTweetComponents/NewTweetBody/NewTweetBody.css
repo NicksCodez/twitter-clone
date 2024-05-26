@@ -54,6 +54,7 @@
 
 .new-tweet-img-wrp > div {
   position: relative;
+  margin-top: 16px;
 }
 
 .new-tweet-img-wrp button {

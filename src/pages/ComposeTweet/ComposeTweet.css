@@ -67,7 +67,7 @@
   margin: 0px 12px;
 }
 
-@media only screen and (min-width: 500px) {
+@media only screen and (min-width: 900px) {
   #compose-tweet {
     top: 50%;
     left: 50%;

@@ -129,7 +129,7 @@ const ComposeTweet = () => {
 
   return (
     <div>
-      {viewportWidth >= 500 ? <Home /> : null}
+      {viewportWidth >= 900 ? <Home /> : null}
       <div id="compose-tweet">
         <Form method="post" action="/compose/tweet">
           <PageHeader

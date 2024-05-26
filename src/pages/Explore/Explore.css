@@ -1,5 +1,6 @@
 #explore {
   height: 100%;
+  max-width: 600px;
 }
 
 #explore.no-scroll {
@@ -72,6 +73,10 @@
   height: 32px;
 }
 
+#explore-header .middle {
+  flex-grow: 1;
+}
+
 #explore-header .middle-element {
   display: flex;
   min-width: 0;
@@ -80,4 +85,14 @@
 
 #explore-header-settings {
   justify-content: flex-end;
+}
+
+@media only screen and (min-width: 500px) {
+  #explore-header-profile-picture {
+    display: none;
+  }
+
+  #explore .page-header .left {
+    min-width: 0;
+  }
 }

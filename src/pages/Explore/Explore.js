@@ -64,20 +64,21 @@ const Explore = () => {
     </div>
   );
 
-  const profilePictureElement = (
-    <div
-      id="explore-header-profile-picture"
-      style={{ display: searchQuery ? 'none' : 'flex' }}
-    >
-      <button type="button" onClick={clickHandlerAccount}>
-        <img
-          src={user?.profileImg || DefaultProfile}
-          alt="profile"
-          className="u-round"
-        />
-      </button>
-    </div>
-  );
+  const profilePictureElement =
+    viewportWidth <= 500 ? (
+      <div
+        id="explore-header-profile-picture"
+        style={{ display: searchQuery ? 'none' : 'flex' }}
+      >
+        <button type="button" onClick={clickHandlerAccount}>
+          <img
+            src={user?.profileImg || DefaultProfile}
+            alt="profile"
+            className="u-round"
+          />
+        </button>
+      </div>
+    ) : null;
 
   // build right elements for page header
   const rightElement = (
@@ -168,7 +169,9 @@ const clickHandlerBack = (searchQuery, navigate) => {
   const back = document.getElementById('explore-header-back');
 
   // replace back button with account picture
-  account.style.display = 'flex';
+  if (account) {
+    account.style.display = 'flex';
+  }
   back.style.display = 'none';
 
   // make clear button invisible

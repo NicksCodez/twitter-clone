@@ -18,9 +18,17 @@ import './Searchbar.css';
 import { v4 as uuidv4 } from 'uuid';
 import svgs from '../../utils/svgs';
 import { firestore } from '../../firebase';
+
+// components
 import UserCard from '../UserCard/UserCard';
 
+// context
+import { useViewportContext } from '../../contextProvider/ContextProvider';
+
 const Searchbar = ({ searchQuery }) => {
+  // viewport Width
+  const viewportWidth = useViewportContext();
+
   // state to store search input
   const [searchInput, setSearchInput] = useState('');
 
@@ -78,7 +86,7 @@ const Searchbar = ({ searchQuery }) => {
             type="text"
             placeholder="Search Twitter"
             id="search"
-            onFocus={focusHandler}
+            onFocus={() => focusHandler(viewportWidth)}
             onBlur={focusOutHandler}
             onInput={() => changeHandlerInput(setSearchInput)}
             ref={searchRef}
@@ -121,7 +129,7 @@ const Searchbar = ({ searchQuery }) => {
   );
 };
 
-const focusHandler = () => {
+const focusHandler = (viewportWidth) => {
   // stop explore page scroll
   const explore = document.getElementById('explore');
   explore.classList.add('no-scroll');
@@ -130,7 +138,9 @@ const focusHandler = () => {
   const back = document.getElementById('explore-header-back');
 
   // replace account picture with back button
-  account.style.display = 'none';
+  if (account) {
+    account.style.display = 'none';
+  }
   back.style.display = 'flex';
 
   const searchbar = document.getElementById('searchbar');
@@ -152,9 +162,11 @@ const focusHandler = () => {
   searchResultsDiv.classList.add('active');
 
   // hide feather icon
-  const featherButton = document.getElementById('feather-button');
-  if (featherButton) {
-    featherButton.style.display = 'none';
+  if (viewportWidth < 500) {
+    const featherButton = document.getElementById('feather-button');
+    if (featherButton) {
+      featherButton.style.display = 'none';
+    }
   }
 };
 

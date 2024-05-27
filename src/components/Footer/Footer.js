@@ -48,7 +48,7 @@ const Footer = () => {
               <div className="navbar-text">Explore</div>
             </NavLink>
 
-            <NavLink to="/i/bookmarks">
+            <NavLink to={user?.tag ? '/i/bookmarks' : '/i/flow/login'}>
               <svg
                 viewBox="0 0 24 24"
                 aria-hidden="true"
@@ -58,7 +58,7 @@ const Footer = () => {
               </svg>
               <div className="navbar-text">Bookmarks</div>
             </NavLink>
-            <NavLink to={user?.tag ? `${user.tag}` : '/i/flow/signin'}>
+            <NavLink to={user?.tag ? `${user.tag}` : '/i/flow/login'}>
               <svg
                 viewBox="0 0 24 24"
                 aria-hidden="true"
@@ -70,30 +70,42 @@ const Footer = () => {
             </NavLink>
             <button
               type="button"
-              onClick={() => navigate('/compose/tweet')}
+              onClick={() => {
+                if (user?.tag) {
+                  navigate('/compose/tweet');
+                } else {
+                  navigate('/i/flow/login');
+                }
+              }}
               className="tweet-button"
             >
-              <span>Tweet</span>
+              <span>{user?.tag ? 'Tweet' : 'Sign in'}</span>
             </button>
           </div>
           <FeatherButton />
         </div>
-        <div className="navbar-account">
-          <button
-            type="button"
-            className="image-wrapper"
-            onClick={clickHandlerAccount}
-          >
-            <img
-              src={user && user.profileImg ? user.profileImg : DefaultProfile}
-              alt="profile"
-              className="u-round"
-            />
-          </button>
-          <div id="navbar-account-options">
-            <Link to="/logout">Log out @{user.tag}</Link>
+        {user?.tag && (
+          <div className="navbar-account">
+            <button
+              type="button"
+              className="image-wrapper"
+              onClick={clickHandlerAccount}
+            >
+              <img
+                src={user && user.profileImg ? user.profileImg : DefaultProfile}
+                alt="profile"
+                className="u-round"
+              />
+              <div className="account-details">
+                <span className="name">{user.name}</span>
+                <span className="tag">@{user.tag}</span>
+              </div>
+            </button>
+            <div id="navbar-account-options">
+              <Link to="/logout">Log out @{user.tag}</Link>
+            </div>
           </div>
-        </div>
+        )}
       </nav>
     </header>
   );

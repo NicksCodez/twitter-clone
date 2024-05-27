@@ -2,6 +2,10 @@
   flex-shrink: 0;
 }
 
+#root-navbar .tweet-button {
+  display: none;
+}
+
 #root-navbar .navigation-wrapper {
   width: 100%;
   display: flex;
@@ -9,6 +13,10 @@
   align-items: center;
   border-top: 1px solid var(--clr-border-primary);
   height: 53.5px;
+}
+
+#root-navbar .navbar-text {
+  display: none;
 }
 
 header svg {
@@ -23,12 +31,12 @@ header a.active .explore-icon path {
   d: path(var(--explore-active));
 }
 
-header a.active .notifications-icon path {
-  d: path(var(--notifications-active));
+header a.active .bookmarks-icon path {
+  d: path(var(--bookmarks-active));
 }
 
-header a.active .messages-icon path {
-  d: path(var(--mesages-active));
+header a.active .profile-icon path {
+  d: path(var(--profile-active));
 }
 
 .navbar-account {
@@ -125,5 +133,52 @@ header a.active .messages-icon path {
     top: -12px;
     transform: translateY(-100%);
     display: flex;
+  }
+}
+
+@media only screen and (min-width: 900px) {
+  #root-navbar {
+    min-width: 259px;
+    max-width: 259px;
+  }
+
+  #root-navbar .navbar-top-wrapper {
+    align-items: flex-start;
+  }
+
+  #root-navbar .navbar-top-wrapper a {
+    display: flex;
+    align-items: center;
+    font-size: 20px;
+    font-weight: 400;
+    line-height: 24px;
+    gap: 8px;
+  }
+
+  #root-navbar .navigation-wrapper {
+    align-items: flex-start;
+  }
+
+  #root-navbar .navbar-text {
+    display: flex;
+    flex-grow: 1;
+  }
+
+  #root-navbar #feather-button {
+    display: none;
+  }
+
+  #root-navbar .tweet-button {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 9999px;
+    background-color: var(--clr-bg-blue);
+    width: 90%;
+    height: 50px;
+    font-size: 17px;
+    font-weight: 700;
+    line-height: 20px;
+    margin: 16px 0px;
   }
 }

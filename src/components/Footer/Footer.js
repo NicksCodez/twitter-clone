@@ -1,5 +1,5 @@
 import React from 'react';
-import { Link, NavLink } from 'react-router-dom';
+import { Link, NavLink, useNavigate } from 'react-router-dom';
 
 // css
 import './Footer.css';
@@ -16,6 +16,7 @@ import { useUserContext } from '../../contextProvider/ContextProvider';
 
 const Footer = () => {
   const { user } = useUserContext();
+  const navigate = useNavigate();
   return (
     <header id="root-navbar">
       <nav>
@@ -25,6 +26,7 @@ const Footer = () => {
               <svg viewBox="0 0 24 24" aria-hidden="true" className="bird-icon">
                 <path d={svgs.bird} fill="var(--clr-bg-blue)" />
               </svg>
+              <div className="navbar-text" />
             </NavLink>
           </div>
           <div className="navigation-wrapper">
@@ -32,7 +34,9 @@ const Footer = () => {
               <svg viewBox="0 0 24 24" aria-hidden="true" className="home-icon">
                 <path d={svgs.home} />
               </svg>
+              <div className="navbar-text">Home</div>
             </NavLink>
+
             <NavLink to="/explore">
               <svg
                 viewBox="0 0 24 24"
@@ -41,25 +45,36 @@ const Footer = () => {
               >
                 <path d={svgs.explore} />
               </svg>
+              <div className="navbar-text">Explore</div>
             </NavLink>
-            <NavLink to="/notifications">
+
+            <NavLink to="/i/bookmarks">
               <svg
                 viewBox="0 0 24 24"
                 aria-hidden="true"
-                className="notifications-icon"
+                className="bookmarks-icon"
               >
-                <path d={svgs.notifications} />
+                <path d={svgs.bookmarks} />
               </svg>
+              <div className="navbar-text">Bookmarks</div>
             </NavLink>
-            <NavLink to="/messages">
+            <NavLink to={user?.tag ? `${user.tag}` : '/i/flow/signin'}>
               <svg
                 viewBox="0 0 24 24"
                 aria-hidden="true"
-                className="messages-icon"
+                className="profile-icon"
               >
-                <path d={svgs.messages} />
+                <path d={svgs.profile} />
               </svg>
+              <div className="navbar-text">Profile</div>
             </NavLink>
+            <button
+              type="button"
+              onClick={() => navigate('/compose/tweet')}
+              className="tweet-button"
+            >
+              <span>Tweet</span>
+            </button>
           </div>
           <FeatherButton />
         </div>

@@ -108,7 +108,7 @@ header a.active .messages-icon path {
 
   #navbar-account-options {
     position: absolute;
-    left: -500px;
+    display: none;
     background-color: var(--clr-bg-base);
     border: 1px solid var(--clr-border-primary);
     border-radius: 16px;
@@ -121,8 +121,9 @@ header a.active .messages-icon path {
   }
 
   #navbar-account-options.active {
-    left: 0px;
+    left: 12px;
     top: -12px;
     transform: translateY(-100%);
+    display: flex;
   }
 }

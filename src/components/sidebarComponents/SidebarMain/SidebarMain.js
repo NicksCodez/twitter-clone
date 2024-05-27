@@ -62,13 +62,15 @@ const SidebarMain = () => {
         name="Profile"
         link={user && user.tag ? `/${user.tag}` : '/i/flow/signup'}
       />
-      <SidebarElement
+      {/* <SidebarElement
         svg={svgs.blue}
         name="Twitter Blue"
         link="not-implemented"
         svgColor="var(--clr-bg-blue)"
       />
-      <SidebarElement svg={svgs.lists} name="Lists" link="not-implemented" />
+      <SidebarElement svg={svgs.lists} name="Lists" link="not-implemented" /> */}
+      <SidebarElement svg={svgs.explore} name="Explore" link="/explore" />
+      <SidebarElement svg={svgs.home} name="Home" link="/home" />
       <SidebarElement
         svg={svgs.bookmarks}
         name="Bookmarks"
@@ -77,7 +79,7 @@ const SidebarMain = () => {
       <div className="separator-wrapper">
         <div className="separator" />
       </div>
-      <SidebarSubmenu name="Creator Studio" />
+      {/* <SidebarSubmenu name="Creator Studio" />
       <SidebarElement
         svg={svgs.analytics}
         name="Analytics"
@@ -106,9 +108,9 @@ const SidebarMain = () => {
         link="not-implemented"
         cls="mini"
         subCls="professional"
-      />
+      /> */}
       <SidebarSubmenu name="Settings and Support" />
-      <SidebarElement
+      {/* <SidebarElement
         svg={svgs.settings}
         name="Settings and privacy"
         link="not-implemented"
@@ -144,7 +146,7 @@ const SidebarMain = () => {
         link="not-implemented"
         cls="mini"
         subCls="settings"
-      />
+      /> */}
       <SidebarElement
         svg={svgs.logOut}
         name="Log out"

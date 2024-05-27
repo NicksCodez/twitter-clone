@@ -13,6 +13,7 @@
   #root-layout {
     flex-direction: row-reverse;
     justify-content: center;
+    flex: 1 1 0;
   }
 
   #main {

@@ -62,3 +62,13 @@
   background-color: var(--clr-font-following);
   color: var(--clr-font-follow);
 }
+
+@media only screen and (min-width: 500px) {
+  #setup-profile {
+    max-height: 600px;
+    max-width: 650px;
+    flex: 1 1 0;
+    border: 2px solid var(--clr-border-primary);
+    border-radius: 16px;
+  }
+}

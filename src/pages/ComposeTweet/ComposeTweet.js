@@ -130,40 +130,56 @@ const ComposeTweet = () => {
   return (
     <div>
       {viewportWidth >= 900 ? <Home /> : null}
-      <div id="compose-tweet">
-        <Form method="post" action="/compose/tweet">
-          <PageHeader
-            leftElements={[leftElement]}
-            middleElements={[middleElement]}
-            rightElements={[rightElement]}
-          />
-          {data.docRef && <ReplyTopTweet element={data} />}
-          {previews.length > 0 ? <div id="compose-tweet-previews" /> : null}
-          <div id="compose-tweet-body">
-            <div>
-              <div id="compose-tweet-body-profile">
-                <img src={user.profileImg} alt="profile" className="u-round" />
+      <div
+        className="compose-tweet-wrapper"
+        onClick={() => {
+          navigate('/home');
+        }}
+      >
+        <div
+          id="compose-tweet"
+          onClick={(e) => {
+            e.stopPropagation();
+          }}
+        >
+          <Form method="post" action="/compose/tweet">
+            <PageHeader
+              leftElements={[leftElement]}
+              middleElements={[middleElement]}
+              rightElements={[rightElement]}
+            />
+            {data.docRef && <ReplyTopTweet element={data} />}
+            {previews.length > 0 ? <div id="compose-tweet-previews" /> : null}
+            <div id="compose-tweet-body">
+              <div>
+                <div id="compose-tweet-body-profile">
+                  <img
+                    src={user.profileImg}
+                    alt="profile"
+                    className="u-round"
+                  />
+                </div>
+                <NewTweetBody
+                  type={data.docRef ? 'reply' : 'tweet'}
+                  setCharsLeft={setCharsLeft}
+                  files={files}
+                  setFiles={setFiles}
+                  tweetContent={tweetContent}
+                  setTweetContent={setTweetContent}
+                />
               </div>
-              <NewTweetBody
-                type={data.docRef ? 'reply' : 'tweet'}
-                setCharsLeft={setCharsLeft}
-                files={files}
-                setFiles={setFiles}
-                tweetContent={tweetContent}
-                setTweetContent={setTweetContent}
-              />
+              <div className="separator" />
+              <div>
+                <NewTweetMedia setFiles={setFiles} />
+                <NewTweetActions
+                  charsLeft={charsLeft}
+                  progressColor={progressColor}
+                  progressSecondColor={progressSecondColor}
+                />
+              </div>
             </div>
-            <div className="separator" />
-            <div>
-              <NewTweetMedia setFiles={setFiles} />
-              <NewTweetActions
-                charsLeft={charsLeft}
-                progressColor={progressColor}
-                progressSecondColor={progressSecondColor}
-              />
-            </div>
-          </div>
-        </Form>
+          </Form>
+        </div>
       </div>
     </div>
   );

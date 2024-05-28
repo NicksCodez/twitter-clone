@@ -24,7 +24,6 @@ const SetupProfileHeader = ({
   useEffect(() => {
     // when image is uploaded, create object URL for it to use as preview
     if (!profileFile) return;
-    console.log({ profileFile });
     const tmp = URL.createObjectURL(profileFile[0]);
     setProfilePreview(tmp);
 
@@ -37,7 +36,6 @@ const SetupProfileHeader = ({
   useEffect(() => {
     // when image is uploaded, create object URL for it to use as preview
     if (!file) return;
-    console.log({ file });
     const tmp = URL.createObjectURL(file[0]);
     setHeaderPreview(tmp);
 

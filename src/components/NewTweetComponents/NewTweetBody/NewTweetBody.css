@@ -29,7 +29,7 @@
   font-size: var(--fs-h2);
   line-height: var(--lh-h2);
   max-height: calc(100vh - 114px);
-  overflow-y: scroll;
+  overflow-y: auto;
   outline: none;
   color: var(--clr-font-primary);
 }

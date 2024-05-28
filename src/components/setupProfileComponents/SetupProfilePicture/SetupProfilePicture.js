@@ -21,7 +21,6 @@ const SetupProfilePicture = ({
   useEffect(() => {
     // when image is uploaded, create object URL for it to use as preview
     if (!file) return;
-    console.log({ file });
     const tmp = URL.createObjectURL(file[0]);
     setPreview(tmp);
 

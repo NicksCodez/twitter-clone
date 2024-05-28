@@ -9,6 +9,7 @@ import './UserCard.css';
 
 // utils
 import { followClickHandler } from '../../utils/functions';
+import DefaultProfile from '../../assets/images/default_profile.png';
 
 const UserCard = forwardRef(({ element }, ref) => {
   const navigate = useNavigate();
@@ -21,7 +22,7 @@ const UserCard = forwardRef(({ element }, ref) => {
     <div className="user-card" ref={ref}>
       <Link to={`/${tag}`}>
         <div className="picture">
-          <img src={profileImg} alt="profile" />
+          <img src={profileImg || DefaultProfile} alt="profile" />
         </div>
       </Link>
       <div className="content">

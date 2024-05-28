@@ -27,6 +27,7 @@ import {
   formatTimeAgo,
 } from '../../utils/functions';
 import { useUserContext } from '../../contextProvider/ContextProvider';
+import DefaultProfile from '../../assets/images/default_profile.png';
 
 const FocusedTweet = forwardRef(({ element }, ref) => {
   const {
@@ -48,10 +49,6 @@ const FocusedTweet = forwardRef(({ element }, ref) => {
     isRetweeted,
   } = element;
   const navigate = useNavigate();
-
-  useEffect(() => {
-    console.log('loaded focused tweet');
-  }, []);
 
   // logged in user tag and following, if it exists
   const loggedUserTag = useUserContext().user?.tag;
@@ -152,7 +149,7 @@ const FocusedTweet = forwardRef(({ element }, ref) => {
             <div className="focused-tweet-profile-picture">
               <div className="profile-picture-wrapper u-round">
                 <Link to={`/${tag}`}>
-                  <img src={profileImg} alt="profile" />
+                  <img src={profileImg || DefaultProfile} alt="profile" />
                 </Link>
               </div>
             </div>
@@ -411,7 +408,6 @@ const likeHandler = async (
           });
         }
       } else if (type === 'retweet') {
-        console.log('--------in retweet--------');
         // query for retweet document
         const retweetQuery = query(
           tweetsCollectionRef,
@@ -421,7 +417,6 @@ const likeHandler = async (
 
         // get retweet snapshot
         const retweetSnapshot = await getDocs(retweetQuery);
-        console.log('--------dupa snapshot--------');
         // create or delete retweet document based on whether it already exists or not and increment or decrement totalTweets counter in transaction
         if (retweetSnapshot.empty) {
           // document doesn't already exist, create it
@@ -444,7 +439,6 @@ const likeHandler = async (
               return newCounter;
             }
           );
-          console.log('--------dupa prima tranzactie--------');
           // create new tweet in tweets collection
           const retweetDocRef = doc(tweetsCollectionRef);
           const newTweetData = {

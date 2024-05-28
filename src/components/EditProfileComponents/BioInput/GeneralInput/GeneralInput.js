@@ -22,10 +22,6 @@ const GeneralInput = ({ placeholder, maxChars, text, setText }) => {
     }
   }, []);
 
-  useEffect(() => {
-    console.log({ text });
-  }, [text]);
-
   // input handler
   const inputHandler = (event) => {
     setText(event.target.value);

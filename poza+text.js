@@ -54,10 +54,10 @@ export const formAction = async ({ request }) => {
     const fileReader = new FileReader();
     fileReader.readAsDataURL(file);
     fileReader.addEventListener('load', () => {
-      console.log(fileReader.result);
+      // console.log(fileReader.result);
     });
   }
-  console.log({ score, picture });
+  // console.log({ score, picture });
 
   return redirect('/');
 };

@@ -26,6 +26,7 @@ import {
   formatTimeAgo,
 } from '../../utils/functions';
 import { useUserContext } from '../../contextProvider/ContextProvider';
+import DefaultProfile from '../../assets/images/default_profile.png';
 
 const Tweet = forwardRef(({ element }, ref) => {
   const {
@@ -140,10 +141,6 @@ const Tweet = forwardRef(({ element }, ref) => {
     setLastRetweetAction
   );
 
-  useEffect(() => {
-    console.log('loading tweet');
-  }, []);
-
   return (
     <div
       className={`tweet ${activeGrayLine ? 'no-border' : ''}`}
@@ -170,7 +167,7 @@ const Tweet = forwardRef(({ element }, ref) => {
         <div className="tweet-profile-picture">
           <div className="profile-picture-wrapper u-round">
             <Link to={`/${tag}`}>
-              <img src={profileImg} alt="profile" />
+              <img src={profileImg || DefaultProfile} alt="profile" />
             </Link>
           </div>
           <div className={`gray-line ${activeGrayLine ? 'active' : ''}`} />
@@ -431,7 +428,6 @@ const likeHandler = async (
           });
         }
       } else if (type === 'retweet') {
-        console.log('--------in retweet--------');
         // query for retweet document
         const retweetQuery = query(
           tweetsCollectionRef,
@@ -441,7 +437,6 @@ const likeHandler = async (
 
         // get retweet snapshot
         const retweetSnapshot = await getDocs(retweetQuery);
-        console.log('--------dupa snapshot--------');
         // create or delete retweet document based on whether it already exists or not and increment or decrement totalTweets counter in transaction
         if (retweetSnapshot.empty) {
           // document doesn't already exist, create it
@@ -464,7 +459,6 @@ const likeHandler = async (
               return newCounter;
             }
           );
-          console.log('--------dupa prima tranzactie--------');
           // create new tweet in tweets collection
           const retweetDocRef = doc(tweetsCollectionRef);
           const newTweetData = {

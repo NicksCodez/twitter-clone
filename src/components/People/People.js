@@ -72,8 +72,11 @@ const loadRecAccs = async (
     // found user docs
 
     if (usersSnapshot.docs.length <= 3) {
+      const newUsers = usersSnapshot.docs.filter(
+        (document) => !currentlyFollowing.includes(document.id)
+      );
       // maximum of 3 users, set rec accounts
-      usersSnapshot.docs.forEach((document) => {
+      newUsers.forEach((document) => {
         recUsers.push({
           profileDocId: document.id,
           tag: document.data().tag,

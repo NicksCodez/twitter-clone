@@ -102,7 +102,6 @@ const updateTweets = (
 
   // clone prevTweets into new array
   let updatedTweets = prevTweets.map((tweet) => tweet);
-  console.log('in update > ', { docsToDelete }, { updatedTweets });
 
   // delete tweets
   if (docsToDelete?.length > 0) {
@@ -347,7 +346,6 @@ const loadTrending = async (setTrends, setTrendsLoading, limitSize) => {
 const followClickHandler = async (loggedUser, profileVisited, navigate) => {
   if (auth.currentUser) {
     // only run if user is logged in
-    console.log('called follow click handler', { loggedUser });
     // check if loggedUser already follows profileVisited
     // if not, follow profileVisited
     // if yes, unfollowProfileVisited
@@ -375,11 +373,6 @@ const followClickHandler = async (loggedUser, profileVisited, navigate) => {
         )
       );
     } else {
-      console.log(
-        'before setDoc ',
-        { followingCollection },
-        { profileVisited }
-      );
       // to follow, create doc with same id as profileVisited uid
       setDoc(doc(followingCollection, profileVisited.docId), {
         createdAt: serverTimestamp(),

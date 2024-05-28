@@ -97,7 +97,7 @@ svg {
 .tweet .tweet-row {
   display: flex;
   justify-content: space-between;
-  overflow-x: scroll;
+  overflow-x: auto;
 }
 
 .tweet .tweet-text a {

@@ -54,14 +54,12 @@ const TweetPage = () => {
   useEffect(() => {
     // debugging
     if (targetRef.current) {
-      console.log('scrolling');
       targetRef.current.scrollIntoView();
     }
   }, [lastParentTweetRef.current]);
 
   // get post data
   useEffect(() => {
-    console.log({ id });
     // create query to get tweet
     const tweetsCollectionRef = collection(firestore, 'tweets');
     const queryRef = query(
@@ -102,7 +100,6 @@ const TweetPage = () => {
           userProfilePicture: userData.profileImg,
         };
 
-        console.log({ tweetObject });
         setCurrentTweetData(tweetObject);
       });
     });
@@ -125,7 +122,6 @@ const TweetPage = () => {
 
   useEffect(() => {
     // once tweet data is loaded, create query for ScrollableElementsLoader
-    console.log('docRef changed => ', { currentTweetData });
     if (currentTweetData?.docRef) {
       const tweetsCollectionRef = collection(firestore, 'tweets');
       const queryRef = query(
@@ -243,7 +239,6 @@ const getParentTweets = async (tweetRef) => {
   const threadTweets = [];
   let parentTweetRef = tweetRef;
   while (parentTweetRef) {
-    console.log({ parentTweetRef });
     const parentTweetDoc = doc(firestore, 'tweets', parentTweetRef);
     const parentTweet = await getDoc(parentTweetDoc);
     const parentTweetData = parentTweet.data();

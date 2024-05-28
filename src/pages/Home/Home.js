@@ -65,9 +65,6 @@ const Home = () => {
       scrollHandler(tweetsContext.scroll, tweetsContext.setScroll, time);
     };
     main.addEventListener('scroll', scrollHandlerFunc);
-
-    console.log('scroll -> ', tweetsContext.scroll);
-
     // remove event listeners
     return () => {
       main.removeEventListener('scroll', scrollHandlerFunc);
@@ -101,7 +98,6 @@ const Home = () => {
         limit(25)
       );
     } else if (user.following && user.following.length !== 0) {
-      console.log('before risky query');
       // if user has yet to follow anyone, user.following would be empty, throwing an error
       // ! if user is following more than 30 people, this will throw an error as where ... in does not accept arrays with length > 30
       // ! will need to refactor code
@@ -218,7 +214,6 @@ const scrollHandler = (lastScrollTop, setScrollTop, time) => {
     const main = document.getElementById('main');
     const homeHeader = document.getElementsByClassName('home-header');
     const st = main.scrollTop;
-    console.log({ st });
     if (st > lastScrollTop) {
       // scroll down, so remove 'scrolled' class to hide first row
       // ? final design will probably have 2 elements with class 'home-header', one for mobile and one for desktop
@@ -252,13 +247,11 @@ export const tweetsLoader = async (
 ) => {
   // variable to store unsubsribe function
   let unsubscribe = [];
-  console.log('tweetsLoader');
   // get id's of tweets, then attach listeners to them
   // this prevents tweet duplication, reordering, disappearance that would happen if querySnapshot was used directly with query
   // e.g. a query that gets the first 25 docs will return many changes if one or more of those docs is deleted or if docs are added to the beginning
   try {
     const querySnapshot = await getDocs(queryRef);
-    console.log('trecut de lin 257');
 
     // if querySnapshot has no docs, most likely last tweet was seen
     if (!querySnapshot.docs[0] && setSeenLastTweet) {
@@ -314,7 +307,6 @@ export const attachListenersToTweets = async (
     return new Promise((resolve, reject) => {
       const unsubscribe = onSnapshot(queryRef, async (querySnapshot) => {
         const logDocs = querySnapshot.docs.map((doc) => doc.data());
-        console.log({ logDocs }, { chunk });
         try {
           // build fetchedTweets array from tweet documents plus information needed from tweeter user
           const [docsToModify, docsToDelete, docsToAdd] =

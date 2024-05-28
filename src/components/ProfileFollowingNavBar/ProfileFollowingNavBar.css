@@ -6,7 +6,7 @@
   color: var(--clr-font-secondary);
   font-weight: 700;
   height: 53px;
-  overflow-x: scroll;
+  overflow-x: auto;
 }
 
 .profile-following-navbar .button-wrapper a {

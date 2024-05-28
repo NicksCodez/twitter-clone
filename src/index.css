@@ -63,6 +63,11 @@
     /* border colors */
     --clr-border-primary: rgb(47, 51, 54);
   }
+
+  html,
+  body {
+    scrollbar-color: rgb(62, 65, 68) rgb(22, 24, 28);
+  }
 }
 
 @font-face {
@@ -93,7 +98,6 @@ html,
 body {
   position: relative;
   height: 100%;
-  scrollbar-color: rgb(62, 65, 68) rgb(22, 24, 28);
   margin: 0px;
   padding: 0px;
   background-color: var(--clr-bg-base);

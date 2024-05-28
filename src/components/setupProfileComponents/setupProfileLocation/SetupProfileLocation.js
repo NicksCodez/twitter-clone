@@ -14,9 +14,6 @@ const SetupProfileLocation = ({
   setCurrentStep,
 }) => {
   const [charsWritten, setCharsWritten] = useState(0);
-  useEffect(() => {
-    console.log({ text });
-  }, [text]);
 
   // input handler
   const inputHandler = (event) => {

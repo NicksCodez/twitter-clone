@@ -83,7 +83,7 @@ const Explore = () => {
   // build right elements for page header
   const rightElement = (
     <div id="explore-header-settings">
-      <Link to="/settings/explore">
+      <Link to="/settings/explore/bogus">
         <svg viewBox="0 0 24 24">
           <path d={svgs.settings} />
         </svg>

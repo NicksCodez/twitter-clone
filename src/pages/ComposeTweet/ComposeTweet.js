@@ -65,10 +65,8 @@ const ComposeTweet = () => {
   const location = useLocation();
 
   const data = location.state || {};
-  console.log('location state => ', location.state, '\ndata => ', data);
 
   useEffect(() => {
-    console.log({ user });
     if (user.loaded) {
       loading.current = false;
       if (!auth.currentUser) {
@@ -76,10 +74,6 @@ const ComposeTweet = () => {
       }
     }
   }, [user]);
-
-  useEffect(() => {
-    console.log({ viewportWidth });
-  }, [viewportWidth]);
 
   useEffect(() => {
     // style form differently based on chars left
@@ -154,7 +148,7 @@ const ComposeTweet = () => {
               <div>
                 <div id="compose-tweet-body-profile">
                   <img
-                    src={user.profileImg}
+                    src={user.profileImg || DefaultProfile}
                     alt="profile"
                     className="u-round"
                   />
@@ -205,7 +199,6 @@ const handleTweetUpload = async (
     }
 
     // add trends and users mentioned to the tweet document
-    console.log({ tweetContent });
     const trendsMentioned = getTrendsMentioned(tweetContent);
     const usersMentioned = getUsersMentioned(tweetContent);
 
@@ -255,18 +248,20 @@ const handleTweetUpload = async (
       console.error(error);
     }
 
-    try {
-      await runTransaction(firestore, async (transaction) => {
-        // update parent tweet replies count
-        const replyTweetDoc = doc(tweetsCollectionRef, replyTweetId);
-        const replyTweetData = await transaction.get(replyTweetDoc);
-        const replyTweetReplyNum = replyTweetData.data().repliesCount;
-        transaction.update(replyTweetDoc, {
-          repliesCount: replyTweetReplyNum + 1,
+    if (replyTweetId) {
+      try {
+        await runTransaction(firestore, async (transaction) => {
+          // update parent tweet replies count
+          const replyTweetDoc = doc(tweetsCollectionRef, replyTweetId);
+          const replyTweetData = await transaction.get(replyTweetDoc);
+          const replyTweetReplyNum = replyTweetData.data().repliesCount;
+          transaction.update(replyTweetDoc, {
+            repliesCount: replyTweetReplyNum + 1,
+          });
         });
-      });
-    } catch (error) {
-      console.error(error);
+      } catch (error) {
+        console.error(error);
+      }
     }
 
     return navigate(-1);

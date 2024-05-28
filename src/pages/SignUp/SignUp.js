@@ -18,6 +18,7 @@ import {
   query,
   runTransaction,
   serverTimestamp,
+  setDoc,
   where,
 } from 'firebase/firestore';
 import svgs from '../../utils/svgs';
@@ -44,12 +45,6 @@ const SignUp = () => {
     password: false,
     confirmPassword: false,
   });
-
-  useEffect(() => {
-    console.log('Sign up mounted');
-
-    return () => console.log('Sign up unmounted');
-  }, []);
 
   useEffect(() => {
     // only make submit button clickable if all inputs are valid
@@ -312,7 +307,6 @@ export const signUpFormAction = async ({ request }) => {
       email,
       password
     );
-    console.log('got after create user');
   } catch (error) {
     console.error(error);
   }
@@ -329,13 +323,13 @@ export const signUpFormAction = async ({ request }) => {
       headerImg: '',
       location: '',
       pinnedTweetId: -1,
-      profileImg:
-        'http://localhost:9199/twitter-clone-6ebd5.appspot.com/defaults/avatar-g7ef2c1a5f_1280.png',
+      profileImg: '',
       tagLowerCase: tag.toLowerCase(),
       tweetCount: 0,
     };
-    await addDoc(usersCollectionRef, user);
-    console.log('got after email add user doc');
+    // await addDoc(usersCollectionRef, user);
+    const userDocRef = doc(usersCollectionRef, newUserCredential.user.uid);
+    await setDoc(userDocRef, user);
     // update totalUsers in counters collection
     const counterslDocRef = doc(firestore, 'counters', 'general');
     await runTransaction(firestore, async (transaction) => {
@@ -346,7 +340,6 @@ export const signUpFormAction = async ({ request }) => {
         transaction.update(counterslDocRef, { totalUsers: newTotalUsers });
       }
     });
-    console.log('got after email counters update');
     // update tagsInUse and emailsInUse
     const uniquesDocRef = doc(firestore, 'uniques', 'general');
     const tagsInUseRef = collection(uniquesDocRef, 'tagsInUse');
@@ -356,19 +349,15 @@ export const signUpFormAction = async ({ request }) => {
       addDoc(tagsInUseRef, { tag: tag.toLowerCase() }),
       addDoc(emailsInUseRef, { email: email.toLowerCase() }),
     ]);
-    console.log('got after email uniques update');
   } catch (error) {
     console.error(error);
   }
   try {
     await sendEmailVerification(newUserCredential.user);
-
-    console.log('got after email ver');
   } catch (error) {
     console.error(error);
   }
 
-  console.log('got before redirect');
   return redirect('/home');
 };
 

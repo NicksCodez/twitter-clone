@@ -55,7 +55,6 @@ const ProfileFollowing = () => {
   }, [tag]);
 
   useEffect(() => {
-    console.log('something changed -> ', { tag }, { mode });
     setRetrievedUsers([]);
     lastRetrievedUser.current = null;
     wasLastDocRetrieved.current = false;
@@ -70,20 +69,11 @@ const ProfileFollowing = () => {
     );
   }, [profileVisited, mode]);
 
-  useEffect(() => {
-    console.log({ retrievedUsers });
-  }, [retrievedUsers]);
-
   // function to handleIntersection
   const handleIntersection = (entries) => {
     const [entry] = entries;
     // if already seen last tweet no need to run
     if (entry.isIntersecting && !wasLastDocRetrieved.current) {
-      console.log(
-        'handling intersection ',
-        wasLastDocRetrieved.current,
-        lastRetrievedUser.current.id
-      );
       getUsersData(
         user,
         profileVisited,
@@ -192,7 +182,6 @@ const getUsersData = async (
   setRetrievedUsers,
   wasLastDocRetrieved
 ) => {
-  console.log('getting users data for -> ', { profileVisited }, { mode });
   // get followed or following users' data
   if (profileVisited !== null && !wasLastDocRetrieved.current) {
     // create collection reference
@@ -261,7 +250,6 @@ const getUsersData = async (
       });
       const usersData = await Promise.all(usersDataPromises);
       // set state docs
-      console.log('data retrieved -> ', { usersData });
       setRetrievedUsers((prevUsers) => {
         const newUsers = usersData.filter(
           (userData) =>
@@ -292,20 +280,16 @@ export const getCommonFollowers = async (
   setRetrievedUsers,
   wasLastDocRetrieved
 ) => {
-  console.log('ia sa videm => ', { user }, { profileVisited });
   if (user.tag) {
     // get profileVisited followers which user is following
     const collectionRef = collection(profileVisited.ref, 'followers');
     const queryRef = query(collectionRef, orderBy('createdAt', 'desc'));
 
     const followersSnpashot = await getDocs(queryRef);
-    console.log({ followersSnpashot });
 
     const followersUserFollowsPromises = followersSnpashot.docs.map(
       async (document) => {
-        console.log(document.id, { document });
         if (user.following.includes(document.id)) {
-          console.log('includes');
           // usersSnapshot document ids are references to user documents
           // ned to get the data from those user documents
           const documentRef = doc(firestore, `users/${document.id}`);
@@ -334,7 +318,6 @@ export const getCommonFollowers = async (
     const filteredFollowersUserFollows = followersUserFollows.filter(
       (value) => value.tag
     );
-    console.log({ filteredFollowersUserFollows });
     setRetrievedUsers((prevUsers) => {
       const newUsers = filteredFollowersUserFollows.filter(
         (userData) =>

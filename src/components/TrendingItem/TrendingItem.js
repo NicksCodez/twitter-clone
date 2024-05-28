@@ -9,7 +9,7 @@ import svgs from '../../utils/svgs';
 
 const TrendingItem = ({ trend, tweetsNumber }) => (
   <div className="trending-item">
-    <Link to={`/search?q="${trend}"`}>
+    <Link to={`/search?q=${trend}`}>
       <div className="secondary">
         <span>Trending</span>
         <button type="button" style={{ display: 'none' }}>

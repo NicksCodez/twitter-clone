@@ -50,7 +50,6 @@ const EditProfile = () => {
           where('uid', '==', auth?.currentUser?.uid)
         );
         const userSnapshot = await getDocs(userQuery);
-        console.log('got user => ', userSnapshot?.docs[0]?.data());
         const userData = userSnapshot?.docs[0]?.data();
         setName(userData.name);
         setBio(userData.bio);
@@ -60,16 +59,11 @@ const EditProfile = () => {
         setLoading(false);
       } catch (error) {
         setLoading(false);
-        console.log('something went wrong => ', { error });
+        console.error('something went wrong => ', { error });
       }
     };
     getUser();
   }, []);
-
-  // set states on page load
-  useEffect(() => {
-    console.log('name => ', { name });
-  }, [name]);
 
   // create previews for header and profile images on change
   useEffect(() => {

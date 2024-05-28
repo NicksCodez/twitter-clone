@@ -12,10 +12,14 @@ import FeatherButton from '../FeatherButton/FeatherButton';
 import DefaultProfile from '../../assets/images/default_profile.png';
 
 // context
-import { useUserContext } from '../../contextProvider/ContextProvider';
+import {
+  useUserContext,
+  useViewportContext,
+} from '../../contextProvider/ContextProvider';
 
 const Footer = () => {
   const { user } = useUserContext();
+  const { viewportWidth } = useViewportContext();
   const navigate = useNavigate();
   return (
     <header id="root-navbar">
@@ -82,7 +86,7 @@ const Footer = () => {
               <span>{user?.tag ? 'Tweet' : 'Sign in'}</span>
             </button>
           </div>
-          <FeatherButton />
+          {viewportWidth > 500 && <FeatherButton />}
         </div>
         {user?.tag && (
           <div className="navbar-account">

@@ -33,6 +33,7 @@ import { useUserContext } from '../../../contextProvider/ContextProvider';
 
 // utils
 import svgs from '../../../utils/svgs';
+import DefaultProfile from '../../../assets/images/default_profile.png';
 
 // utils
 import {
@@ -281,15 +282,11 @@ const ProfileContent = ({ profileVisited, isOwnProfile, isFollowed, tag }) => {
           </div>
         )}
         <div className="profile-picture-wrapper u-round">
-          {profileVisited.profileImg ? (
-            <img
-              src={profileVisited.profileImg}
-              alt="profile"
-              className="u-round"
-            />
-          ) : (
-            <div className="u-round img-placeholder" />
-          )}
+          <img
+            src={profileVisited.profileImg || DefaultProfile}
+            alt="profile"
+            className="u-round"
+          />
         </div>
       </div>
       <div className="wrapper-padded">

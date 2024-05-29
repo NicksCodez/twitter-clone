@@ -8,6 +8,8 @@ This is a Twitter clone built using React with Firebase for the    Backend. I've
  - Create account, login and logout
  - Initial account setup (profile, header images, bio and location) and as many profile edits as needed
  - Post tweets which can include pictures, trends and user mentions that act as hyperlinks to trend search or user account
+ - View all tweets or only tweets from followed users, switching between tabs returns you to where you left off when scrolling
+ - Tweets load 25 at a time, when scrolling to the last loaded tweet, another set of 25 is loaded
  - Like, bookmark or reply to tweet
  - Delete your own tweets
  - Follow accounts

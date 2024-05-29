@@ -123,6 +123,11 @@
   display: none;
 }
 
+#signup-content .error span {
+  display: block;
+  max-width: 300px;
+}
+
 #signup-content .error.active {
   display: block;
 }

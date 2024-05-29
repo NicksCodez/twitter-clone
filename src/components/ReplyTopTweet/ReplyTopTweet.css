@@ -85,7 +85,6 @@ svg {
 .reply-tweet .reply-tweet-row {
   display: flex;
   justify-content: space-between;
-  overflow-x: scroll;
 }
 
 .reply-tweet .reply-tweet-text a {

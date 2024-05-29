@@ -87,7 +87,6 @@ svg {
 .focused-tweet .focused-tweet-row {
   display: flex;
   justify-content: space-between;
-  overflow-x: scroll;
 }
 
 .focused-tweet .focused-tweet-user-row {

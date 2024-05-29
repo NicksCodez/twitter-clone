@@ -156,7 +156,7 @@ const Tweet = forwardRef(({ element }, ref) => {
             </svg>
           </div>
           <span>
-            {reposterData.uid === auth.currentUser.uid
+            {reposterData.uid === auth.currentUser?.uid
               ? 'You'
               : reposterData.name}{' '}
             retweeted

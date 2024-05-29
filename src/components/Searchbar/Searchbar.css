@@ -97,7 +97,6 @@
   justify-content: stretch;
   align-items: stretch;
   height: calc(100vh - 106px);
-  overflow-y: scroll;
 }
 
 #search-results > span {
